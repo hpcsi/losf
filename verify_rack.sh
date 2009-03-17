@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# $Id: verify_rack.sh,v 1.3 2007/12/17 12:17:31 karl Exp $
+# $Id$
 #
 #-----------------------------------------------
 # Function to verfy TACC software stack and

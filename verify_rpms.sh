@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# $Id: verify_rpms.sh,v 1.3 2007/12/17 12:28:48 karl Exp $
+# $Id$
 #
 #-----------------------------------------------
 # Function to verfy rpm installation 

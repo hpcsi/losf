@@ -1,6 +1,6 @@
 !/bin/bash
 # 
-# $Id: ib_mode.sh,v 1.19 2008/10/04 19:21:14 karl Exp $
+# $Id$
 #
 #--------------------------------------------------------------
 # Enforce/verify IPoIB settings for a Ranger compute blade.

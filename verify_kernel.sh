@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# $Id: verify_kernel.sh,v 1.3 2008/07/22 14:03:38 karl Exp $
+# $Id$
 #
 #-----------------------------------------------
 # Function to verfy kernel installation

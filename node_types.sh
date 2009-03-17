@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# $Id: node_types.sh,v 1.12 2008/07/02 22:52:17 karl Exp $
+# $Id$
 #
 #---------------------------------------------------------
 # Designation of Node Types: the current node types

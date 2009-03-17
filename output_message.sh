@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# $Id: verify_rpms.sh,v 1.2 2007/10/09 12:01:16 karl Exp $
+# $Id$
 #
 #-----------------------------------------------
 # Simple Function to wrap writes to allow
