@@ -246,8 +246,8 @@ compute_RPMS=" \
     tacc_ping:1.0-1 \
     tacc_sensors:1-16 \
     pam-sge:6.1AR3-10 \
-    lustre:1.6.6-2.6.18.8.TACC.lustre.perfctr_200812012039 \
-    lustre-modules:1.6.6-2.6.18.8.TACC.lustre.perfctr_200812012039 \
+    lustre-modules:1.6.7-2.6.18.8.TACC.lustre.perfctr_200903111440 \
+    lustre:1.6.7-2.6.18.8.TACC.lustre.perfctr_200903111440 \
     lustre-ldiskfs:3.0.4-2.6.18.8.TACC.lustre.perfctr_200810031751 \
     tacc_share_client:1.0-14 \
     tacc_work_client:1.0-11 \
@@ -280,7 +280,7 @@ compute_RPMS=" \
     zsh_tacc_test:4.3.9-1 \
     bash_tacc_test:3.2.48-1 \
     tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-3 \
+    tacc_login_scripts:2.0-4 \
     shell_startup:1.2-1 \
     "
 
@@ -302,13 +302,13 @@ login_RPMS=" \
     taccinfo:1.0-7 \
     strace:4.5.16-1.el4.2 \
     numactl:1.0.2-0 \
-    nxge:1.1-3 \
+    nxge:1.1-4 \
     tacc_share_client:1.0-15 \
     tacc_work_client:1.0-12 \
     tacc_scratch_client:1.0-12 \
-    lustre-ldiskfs:3.0.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812031101 \
-    lustre-modules:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812031100 \
-    lustre:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812031100 \
+    lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
+    lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
+    lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
     neon:0.24.7-4 \
     subversion:1.1.4-2.ent \
     apr:0.9.4-24.9 \
@@ -333,6 +333,9 @@ login_RPMS=" \
     tcsh_tacc_test:6.16-2 \
     tacc_login_scripts:2.0-3 \
     shell_startup:1.2-1 \
+    umb-scheme:3.2-36.EL4 \
+    guile:1.6.4-14 \
+    guile-devel:1.6.4-14 \
     "
 
 vis_RPMS=" \
@@ -343,9 +346,9 @@ vis_RPMS=" \
     tacc_share_client:1.0-15 \
     tacc_work_client:1.0-12 \
     tacc_scratch_client:1.0-12 \
-    lustre-ldiskfs:3.0.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020703 \
-    lustre-modules:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020702 \
-    lustre:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020702 \
+    lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
+    lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
+    lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
     neon:0.24.7-4 \
     subversion:1.1.4-2.ent \
     swig:1.3.21-6 \
@@ -368,10 +371,10 @@ vis_RPMS=" \
 gridftp_RPMS=" \
     login-scripts:1.3-25 \
     modules-base:3.1.6-14 \
-    nxge:1.1-3 \
-    lustre-ldiskfs:3.0.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020703 \
-    lustre-modules:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020702 \
-    lustre:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020702 \
+    nxge:1.1-4 \
+    lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
+    lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
+    lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
     tacc_share_client:1.0-14 \
     tacc_work_client:1.0-11 \
     tacc_scratch_client:1.0-11 \
@@ -404,17 +407,17 @@ oss_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 mds_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
 mds_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 
-login_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
-login_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
+login_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.7smp #1 SMP Mon Mar 16 15:37:03 CDT 2009"
+login_KERNEL="kernel-2.6.967.0.22.EL_lustre.1.6.7smp-1"
 
-gridftp_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
-gridftp_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
+gridftp_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.7smp #1 SMP Mon Mar 16 15:37:03 CDT 2009"
+gridftp_KERNEL="kernel-2.6.967.0.22.EL_lustre.1.6.7smp-1"
 
 sge_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
 sge_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
 
-vis_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
-vis_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
+vis_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.7smp #1 SMP Mon Mar 16 15:37:03 CDT 2009"
+vis_KERNEL="kernel-2.6.967.0.22.EL_lustre.1.6.7smp-1"
 
 master_KERNEL_DATE="2.6.9-67.0.7.EL_lustre.1.6.5.1smp #1 SMP Wed Jun 18 19:11:05 EDT 2008"
 master_KERNEL="kernel-lustre-smp-2.6.9-67.0.7.EL_lustre.1.6.5.1"
