@@ -236,7 +236,7 @@ mds_RPMS=" \
     tacc_lustre:1.0-2"
 
 compute_RPMS=" \
-    login-scripts:1.3-25 \
+    login-scripts:1.3-27 \
     modules-base:3.1.6-14 \
     gdb:6.3.0.0-1.153.el4_6.2 \
     strace:4.5.15-1.el4.1 \
@@ -280,7 +280,7 @@ compute_RPMS=" \
     zsh_tacc_test:4.3.9-1 \
     bash_tacc_test:3.2.48-1 \
     tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-4 \
+    tacc_login_scripts:2.0-5 \
     shell_startup:1.2-1 \
     "
 
@@ -297,7 +297,7 @@ if [ "$MYHOST" == "build" ];then
 fi
 
 login_RPMS=" \
-    login-scripts:1.3-25 \
+    login-scripts:1.3-27 \
     modules-base:3.1.6-14 \
     taccinfo:1.0-7 \
     strace:4.5.16-1.el4.2 \
@@ -331,7 +331,7 @@ login_RPMS=" \
     zsh_tacc_test:4.3.9-1 \
     bash_tacc_test:3.2.48-1 \
     tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-3 \
+    tacc_login_scripts:2.0-5 \
     shell_startup:1.2-1 \
     umb-scheme:3.2-36.EL4 \
     guile:1.6.4-14 \
@@ -339,7 +339,7 @@ login_RPMS=" \
     "
 
 vis_RPMS=" \
-    login-scripts:1.3-25 \
+    login-scripts:1.3-27 \
     modules-base:3.1.6-14 \
     taccinfo:1.0-3 \
     numactl:1.0.2-0 \
@@ -366,10 +366,15 @@ vis_RPMS=" \
     firefox:1.5.0.7-0.1.el4.centos4 \
     ImageMagick:6.0.7.1-20.el4 \
     compute_ssh:1.0-1 \
+    zsh_tacc_test:4.3.9-1 \
+    bash_tacc_test:3.2.48-1 \
+    tcsh_tacc_test:6.16-2 \
+    tacc_login_scripts:2.0-5 \
+    shell_startup:1.2-1 \
     "
 
 gridftp_RPMS=" \
-    login-scripts:1.3-25 \
+    login-scripts:1.3-27 \
     modules-base:3.1.6-14 \
     nxge:1.1-4 \
     lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
@@ -381,6 +386,11 @@ gridftp_RPMS=" \
     sge-execd:6.1AR3-21 \
     tcsh:6.16-1 \
     zsh:4.3.6-1 \
+    zsh_tacc_test:4.3.9-1 \
+    bash_tacc_test:3.2.48-1 \
+    tcsh_tacc_test:6.16-2 \
+    tacc_login_scripts:2.0-5 \
+    shell_startup:1.2-1 \
     "
 
 sge_RPMS=" \
