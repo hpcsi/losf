@@ -76,6 +76,14 @@ GLOBAL_UNINSTALL_RPMS="\
     sun-compilers:12-2 \
     exim:4.43-1.RHEL4.5 \
     tacc_work1_client:1.0-1 \
+
+    tcsh:6.16-2 \
+    zsh:4.3.9-1 \
+    bash:3.2.48-1 \
+    login-scripts:1.3-28 \
+    tacc_login_scripts:2.0-10 \
+    shell_startup:1.2-1 \
+    tacc_login_scripts:2.0-5 \
     "
 
 #------------------------------------------------------------------------
@@ -165,7 +173,7 @@ SHARED_RPMS=" \
     metis-intel9_1:4.0-4 \
     metis-pgi7_1:4.0-4 \
     lua:5.1.4-2 \
-    lmod:2.5-3 \
+    lmod:2.8.8-2 \
     scalapack-intel10_1-mvapich1_1_0:1.8.0-3 \
     scalapack-pgi7_1-mvapich1_1_0:1.8.0-3 \
     scalapack-intel10_1-mvapich2_1_0_1:1.8.0-3 \
@@ -201,7 +209,7 @@ SHARED_RPMS=" \
 # from SHARED_RPMS
 
 master_RPMS=" \
-    login-scripts:1.3-13 \
+    login-scripts:1.3-28 \
     numactl:1.0.2-0 \
     lustre-ldiskfs:3.0.4-2.6.9_67.0.7.EL_lustre.1.6.5.1smp_200808031159 \
     lustre-modules:1.6.5.1-2.6.9_67.0.7.EL_lustre.1.6.5.1smp_200808031159 \
@@ -217,7 +225,7 @@ master_RPMS=" \
     $SHARED_RPMS"
 
 oss_RPMS=" \
-    login-scripts:1.3-13 \
+    login-scripts:1.3-28 \
     hd:1.04-1 \
     lustre-ldiskfs:3.0.2-2.6.9_55.0.9.EL_lustre.1.6.3smp \
     lustre:1.6.3-2.6.9_55.0.9.EL_lustre.1.6.3smp \
@@ -236,8 +244,13 @@ mds_RPMS=" \
     tacc_lustre:1.0-2"
 
 compute_RPMS=" \
+
+    tcsh:6.16-1 \
+    zsh:4.3.6-1 \
+    bash:3.0-19.6 \
     login-scripts:1.3-27 \
-    modules-base:3.1.6-14 \
+
+    modules-base:3.1.6-15 \
     gdb:6.3.0.0-1.153.el4_6.2 \
     strace:4.5.15-1.el4.1 \
     sge-execd:6.1AR3-23 \
@@ -273,16 +286,20 @@ compute_RPMS=" \
     perftest:1.2-0 \
     tvflash:0.9.0-0 \
     compute_ssh:1.0-1 \
-    tcsh:6.16-1 \
-    zsh:4.3.6-1 \
+
     setup:2.5.37-1.7 \
     MySQL-python:1.2.1_p2-1.el4.1 \
-    zsh_tacc_test:4.3.9-1 \
-    bash_tacc_test:3.2.48-1 \
-    tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-5 \
-    shell_startup:1.2-1 \
+
+    bash_tacc_test:3.2.48-2 \
+    tcsh_tacc_test:6.16-3 \
+    zsh_tacc_test:4.3.9-3 \
+    tacc_login_scripts-compute:2.0-15 \
     "
+
+#    tcsh:6.16-1 \
+#    zsh:4.3.6-1 \
+#    tacc_login_scripts:2.0-5 \
+
 
 # Special check for the build node.  Note that for testing, /share/apps
 # on the build node maps to a local file system on build.  Otherwise, build
@@ -297,8 +314,7 @@ if [ "$MYHOST" == "build" ];then
 fi
 
 login_RPMS=" \
-    login-scripts:1.3-27 \
-    modules-base:3.1.6-14 \
+    modules-base:3.1.6-15 \
     taccinfo:1.0-7 \
     strace:4.5.16-1.el4.2 \
     numactl:1.0.2-0 \
@@ -323,24 +339,34 @@ login_RPMS=" \
     readline-devel:4.3-13 \
     pygtk2-devel:2.4.0-2.el4 \
     tk-devel:8.4.7-3.el4_6.1 \
+
     tcsh:6.16-1 \
     zsh:4.3.6-1 \
+    bash:3.0-19.6 \
+    tacc_login_scripts:2.0-5 \
+    login-scripts:1.3-27 \
+
     ploticus:2.33-1.el4.rf \
     scons:1.1.0-1 \
     ctags:5.5.4-1 \
-    zsh_tacc_test:4.3.9-1 \
-    bash_tacc_test:3.2.48-1 \
-    tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-5 \
-    shell_startup:1.2-1 \
+
     umb-scheme:3.2-36.EL4 \
     guile:1.6.4-14 \
     guile-devel:1.6.4-14 \
     "
 
+#    zsh_tacc_test:4.3.9-1 \
+#    bash_tacc_test:3.2.48-1 \
+#    tcsh_tacc_test:6.16-2 \
+
 vis_RPMS=" \
+    tcsh:6.16-1 \
+    zsh:4.3.6-1 \
+    bash:3.0-19.6 \
+    tacc_login_scripts:2.0-5 \
     login-scripts:1.3-27 \
-    modules-base:3.1.6-14 \
+
+    modules-base:3.1.6-15 \
     taccinfo:1.0-3 \
     numactl:1.0.2-0 \
     tacc_share_client:1.0-15 \
@@ -359,23 +385,21 @@ vis_RPMS=" \
     perl-Error:0.17012-1.el4.rf \
     git-core:1.5.2.1-2.el4 \
     openmotif:2.2.3-10.1.el4 \
-    tcsh:6.16-1 \
-    zsh:4.3.6-1 \
     tacc_outage:1.0-19 \
     pam-sge:6.1AR3-10 \
     firefox:1.5.0.7-0.1.el4.centos4 \
     ImageMagick:6.0.7.1-20.el4 \
     compute_ssh:1.0-1 \
-    zsh_tacc_test:4.3.9-1 \
-    bash_tacc_test:3.2.48-1 \
-    tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-5 \
-    shell_startup:1.2-1 \
     "
 
 gridftp_RPMS=" \
+    tcsh:6.16-1 \
+    zsh:4.3.6-1 \
+    bash:3.0-19.6 \
+    tacc_login_scripts:2.0-5 \
     login-scripts:1.3-27 \
-    modules-base:3.1.6-14 \
+
+    modules-base:3.1.6-15 \
     nxge:1.1-4 \
     lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
     lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
@@ -384,13 +408,9 @@ gridftp_RPMS=" \
     tacc_work_client:1.0-11 \
     tacc_scratch_client:1.0-11 \
     sge-execd:6.1AR3-21 \
-    tcsh:6.16-1 \
-    zsh:4.3.6-1 \
     zsh_tacc_test:4.3.9-1 \
     bash_tacc_test:3.2.48-1 \
     tcsh_tacc_test:6.16-2 \
-    tacc_login_scripts:2.0-5 \
-    shell_startup:1.2-1 \
     "
 
 sge_RPMS=" \
