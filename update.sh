@@ -344,7 +344,7 @@ login_RPMS=" \
     tcsh:6.16-1 \
     zsh:4.3.6-1 \
     bash:3.0-19.6 \
-    tacc_login_scripts:2.0-5 \
+    tacc_login_scripts-login:2.0-16 \
     login-scripts:1.3-27 \
 
     ploticus:2.33-1.el4.rf \
