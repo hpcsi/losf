@@ -256,6 +256,7 @@ compute_RPMS=" \
     sge-execd:6.1AR3-23 \
     numactl:1.0.2-0 \
     tacc_outage:1.0-20 \
+    tacc_outage2:2.0-1 \
     tacc_ping:1.0-1 \
     tacc_sensors:1-16 \
     pam-sge:6.1AR3-10 \
