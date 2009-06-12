@@ -294,7 +294,9 @@ compute_RPMS=" \
     bash_tacc_test:3.2.48-2 \
     tcsh_tacc_test:6.16-3 \
     zsh_tacc_test:4.3.9-3 \
-    tacc_login_scripts-compute:2.0-15 \
+    tacc_login_scripts-compute:2.0-16 \
+
+    xorg-x11-deprecated-libs:6.8.2-1.EL.13.37.2 \
     "
 
 #    tcsh:6.16-1 \
