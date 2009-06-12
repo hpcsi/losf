@@ -323,6 +323,7 @@ login_RPMS=" \
     tacc_share_client:1.0-15 \
     tacc_work_client:1.0-12 \
     tacc_scratch_client:1.0-12 \
+    tacc_corral:1.0-2 \
     lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
     lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
     lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
@@ -343,7 +344,6 @@ login_RPMS=" \
 
     tcsh:6.16-1 \
     zsh:4.3.6-1 \
-    bash:3.0-19.6 \
     tacc_login_scripts-login:2.0-16 \
     login-scripts:1.3-27 \
 
@@ -397,7 +397,7 @@ gridftp_RPMS=" \
     tcsh:6.16-1 \
     zsh:4.3.6-1 \
     bash:3.0-19.6 \
-    tacc_login_scripts:2.0-5 \
+    tacc_login_scripts-login:2.0-16 \
     login-scripts:1.3-27 \
 
     modules-base:3.1.6-15 \
@@ -408,6 +408,7 @@ gridftp_RPMS=" \
     tacc_share_client:1.0-14 \
     tacc_work_client:1.0-11 \
     tacc_scratch_client:1.0-11 \
+    tacc_corral:1.0-2 \
     sge-execd:6.1AR3-21 \
     zsh_tacc_test:4.3.9-1 \
     bash_tacc_test:3.2.48-1 \
