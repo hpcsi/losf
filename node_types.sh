@@ -17,7 +17,7 @@
 #---------------------------------------------------------
 
 
-export PRODUCTION_DATE_login="2008-12-02"    # "2008-10-04" "2008-10-04" "2008-07-01,2008-05-06,2008-02-04"
+export PRODUCTION_DATE_login="2009-06-02"   # 2009-05-11,2009-03-17,2008-12-02,2008-10-04,2008-10-04,2008-07-01,2008-05-06,2008-02-04"
 export PRODUCTION_DATE_gridftp="2008-07-01"
 export PRODUCTION_DATE_master="2007-12-01"
 export PRODUCTION_DATE_oss="2007-06-21"
@@ -27,9 +27,9 @@ export PRODUCTION_DATE_mds="2007-06-21"
 export PRODUCTION_DATE_compute="2009-01-16"  # "2007-06-21"      
 export PRODUCTION_DATE_vis="2008-09-03"	     #  new Ranger vis sub-system
 
-NODE_TYPES=( login:"login[1-4]|spur" oss:"oss[1-9]+" mds:mds[1-6] \
+NODE_TYPES=( login:"login[2-4]|spur" oss:"oss[1-9]+" mds:mds[1-6] \
              compute:"\bcompute-*-*|\bc-*-*|\bamd|\bi-*-*|build|localhost" \
-             master:master gridftp:gridftp[1-4] sge:sge[1-2] \
+             master:"master|login1" gridftp:gridftp[1-4] sge:sge[1-2] \
              vis:"visbig|vis[1-7]")
 
 # End Inputs -------------------
