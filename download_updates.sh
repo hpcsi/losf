@@ -14,7 +14,7 @@
 export SRC_DIR=/share/home/0000/build/admin/os-updates/
 export NODE_QUERY=/share/home/0000/build/admin/hpc_stack/node_types.sh
 export RHN_DIR=/etc/sysconfig/rhn
-export IGNORE_PKGS="kernel*;libibcm*;libibcommon*;libibverbs*;libipathverbs*;libmthca*;libopensm*;libosmcomp*;libosmvendor*;librdmacm*;mstflint*;opensm*;libibumad*;openib*;ibutils*;libsdp*;iscsi-initiator-utils;libcxgb3;bash*"
+export IGNORE_PKGS="kernel*;libibcm*;libibcommon*;libibverbs*;libipathverbs*;libmthca*;libopensm*;libosmcomp*;libosmvendor*;librdmacm*;mstflint*;opensm*;libibumad*;openib*;ibutils*;libsdp*;iscsi-initiator-utils;infiniband-diags*;libcxgb3;bash*"
 
 # End Inputs -------------------
 
