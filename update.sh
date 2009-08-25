@@ -77,14 +77,15 @@ GLOBAL_UNINSTALL_RPMS="\
     exim:4.43-1.RHEL4.5 \
     tacc_work1_client:1.0-1 \
 
-    tcsh:6.16-2 \
-    zsh:4.3.9-1 \
-    bash:3.2.48-1 \
     login-scripts:1.3-28 \
     tacc_login_scripts:2.0-10 \
     shell_startup:1.2-1 \
     tacc_login_scripts:2.0-5 \
     "
+
+#    tcsh:6.16-2 \
+#    zsh:4.3.9-1 \
+#    bash:3.2.48-1 \
 
 #------------------------------------------------------------------------
 # Note: Master is tasked with keeping the programs in /share in check.
@@ -253,13 +254,13 @@ compute_RPMS=" \
     modules-base:3.1.6-15 \
     gdb:6.3.0.0-1.153.el4_6.2 \
     strace:4.5.15-1.el4.1 \
-    sge-execd:6.1AR3-23 \
+    sge-execd:6.2-6.2u3-4 \
     numactl:1.0.2-0 \
     tacc_outage:1.0-20 \
-    tacc_outage2:2.0-1 \
+    tacc_outage2:2.0-2 \
     tacc_ping:1.0-1 \
     tacc_sensors:1-16 \
-    pam-sge:6.1AR3-10 \
+    pam-sge:6.2u3-2 \
     lustre-modules:1.6.7-2.6.18.8.TACC.lustre.perfctr_200903111440 \
     lustre:1.6.7-2.6.18.8.TACC.lustre.perfctr_200903111440 \
     lustre-ldiskfs:3.0.4-2.6.18.8.TACC.lustre.perfctr_200810031751 \
@@ -296,7 +297,7 @@ compute_RPMS=" \
     zsh_tacc_test:4.3.9-3 \
     tacc_login_scripts-compute:2.0-16 \
 
-    xorg-x11-deprecated-libs:6.8.2-1.EL.13.37.2 \
+    xorg-x11-deprecated-libs:6.8.2-1.EL.52 \
     "
 
 #    tcsh:6.16-1 \
@@ -318,8 +319,7 @@ fi
 
 login_RPMS=" \
     modules-base:3.1.6-15 \
-    taccinfo:1.0-7 \
-    strace:4.5.16-1.el4.2 \
+    taccinfo:1.0-8 \
     numactl:1.0.2-0 \
     nxge:1.1-4 \
     tacc_share_client:1.0-15 \
@@ -331,11 +331,9 @@ login_RPMS=" \
     lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
     neon:0.24.7-4 \
     subversion:1.1.4-2.ent \
-    apr:0.9.4-24.9 \
     swig:1.3.21-6 \
     sge-execd:6.1AR3-22 \
     screen:4.0.2-5 \
-    gnuplot:4.0.0-4 \
     flex:2.5.4a-33 \
     perl-Error:0.17012-1.el4.rf \
     git-core:1.5.2.1-2.el4 \
@@ -344,11 +342,6 @@ login_RPMS=" \
     pygtk2-devel:2.4.0-2.el4 \
     tk-devel:8.4.7-3.el4_6.1 \
 
-    tcsh:6.16-1 \
-    zsh:4.3.6-1 \
-    tacc_login_scripts-login:2.0-16 \
-    login-scripts:1.3-27 \
-
     ploticus:2.33-1.el4.rf \
     scons:1.1.0-1 \
     ctags:5.5.4-1 \
@@ -356,6 +349,10 @@ login_RPMS=" \
     umb-scheme:3.2-36.EL4 \
     guile:1.6.4-14 \
     guile-devel:1.6.4-14 \
+    bash:3.2.48-1 \
+    tcsh:6.16-2 \
+    zsh:4.3.9-1 \
+    tacc_login_scripts-login:2.0-18 \
     "
 
 #    zsh_tacc_test:4.3.9-1 \
