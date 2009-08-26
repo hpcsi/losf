@@ -76,7 +76,6 @@ GLOBAL_UNINSTALL_RPMS="\
     sun-compilers:12-2 \
     exim:4.43-1.RHEL4.5 \
     tacc_work1_client:1.0-1 \
-
     login-scripts:1.3-28 \
     tacc_login_scripts:2.0-10 \
     shell_startup:1.2-1 \
@@ -246,12 +245,7 @@ mds_RPMS=" \
 
 compute_RPMS=" \
 
-    tcsh:6.16-1 \
-    zsh:4.3.6-1 \
-    bash:3.0-19.6 \
-    login-scripts:1.3-27 \
-
-    modules-base:3.1.6-15 \
+    modules-base:3.1.6-17 \
     gdb:6.3.0.0-1.153.el4_6.2 \
     strace:4.5.15-1.el4.1 \
     sge-execd:6.2-6.2u3-4 \
@@ -295,7 +289,11 @@ compute_RPMS=" \
     bash_tacc_test:3.2.48-2 \
     tcsh_tacc_test:6.16-3 \
     zsh_tacc_test:4.3.9-3 \
-    tacc_login_scripts-compute:2.0-16 \
+
+    bash:3.2.48-1 \
+    tcsh:6.16-2 \
+    zsh:4.3.9-1 \
+    tacc_login_scripts-compute:2.0-19 \
 
     xorg-x11-deprecated-libs:6.8.2-1.EL.52 \
     "
@@ -303,6 +301,11 @@ compute_RPMS=" \
 #    tcsh:6.16-1 \
 #    zsh:4.3.6-1 \
 #    tacc_login_scripts:2.0-5 \
+
+#    tcsh:6.16-1 \
+#    zsh:4.3.6-1 \
+#    bash:3.0-19.6 \
+#    login-scripts:1.3-27 \
 
 
 # Special check for the build node.  Note that for testing, /share/apps
@@ -318,8 +321,8 @@ if [ "$MYHOST" == "build" ];then
 fi
 
 login_RPMS=" \
-    modules-base:3.1.6-15 \
-    taccinfo:1.0-8 \
+    modules-base:3.1.6-17 \
+    taccinfo:1.0-9 \
     numactl:1.0.2-0 \
     nxge:1.1-4 \
     tacc_share_client:1.0-15 \
@@ -332,7 +335,7 @@ login_RPMS=" \
     neon:0.24.7-4 \
     subversion:1.1.4-2.ent \
     swig:1.3.21-6 \
-    sge-execd:6.1AR3-22 \
+    sge-execd:6.2-6.2u3-4 \
     screen:4.0.2-5 \
     flex:2.5.4a-33 \
     perl-Error:0.17012-1.el4.rf \
