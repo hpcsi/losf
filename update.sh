@@ -63,7 +63,7 @@ export NODE_TYPE_SILENT=1
 #-----------------------------
 
 GLOBAL_RPMS=" \
-    tacc_ib:1.0-26 \
+    tacc_ib:1.0-27 \
     tacc_sysctl:1.0-5"
 
 GLOBAL_UNINSTALL_RPMS="\
@@ -80,6 +80,8 @@ GLOBAL_UNINSTALL_RPMS="\
     tacc_login_scripts:2.0-10 \
     shell_startup:1.2-1 \
     tacc_login_scripts:2.0-5 \
+    tacc_login_scripts-compute:2.0-19 \
+    tacc_login_scripts-login:2.0-18 \
     "
 
 #    tcsh:6.16-2 \
@@ -245,13 +247,18 @@ mds_RPMS=" \
 
 compute_RPMS=" \
 
+    tcsh:6.16-1 \
+    zsh:4.3.6-1 \
+    bash:3.0-19.6 \
+    login-scripts:1.3-27 \
+
     modules-base:3.1.6-17 \
     gdb:6.3.0.0-1.153.el4_6.2 \
     strace:4.5.15-1.el4.1 \
     sge-execd:6.2-6.2u3-4 \
     numactl:1.0.2-0 \
     tacc_outage:1.0-20 \
-    tacc_outage2:2.0-2 \
+    tacc_outage2:2.0-4 \
     tacc_ping:1.0-1 \
     tacc_sensors:1-16 \
     pam-sge:6.2u3-2 \
@@ -290,11 +297,8 @@ compute_RPMS=" \
     tcsh_tacc_test:6.16-3 \
     zsh_tacc_test:4.3.9-3 \
 
-    bash:3.2.48-1 \
-    tcsh:6.16-2 \
-    zsh:4.3.9-1 \
-    tacc_login_scripts-compute:2.0-19 \
-
+    tacc_411:1.0-1 \
+    tacc_login_scripts-compute:2.0-23 \
     xorg-x11-deprecated-libs:6.8.2-1.EL.52 \
     "
 
@@ -302,10 +306,21 @@ compute_RPMS=" \
 #    zsh:4.3.6-1 \
 #    tacc_login_scripts:2.0-5 \
 
+# the 4 below work ok with old modules...
 #    tcsh:6.16-1 \
 #    zsh:4.3.6-1 \
 #    bash:3.0-19.6 \
 #    login-scripts:1.3-27 \
+
+# 8/09 - second verse, same as the first; 
+# backing out new shell stuff for scalability issues on 
+# shared fs.
+
+###    bash:3.2.48-1 \
+###    tcsh:6.16-2 \
+###    zsh:4.3.9-1 \
+###    tacc_login_scripts-compute:2.0-19 \
+
 
 
 # Special check for the build node.  Note that for testing, /share/apps
@@ -324,14 +339,14 @@ login_RPMS=" \
     modules-base:3.1.6-17 \
     taccinfo:1.0-9 \
     numactl:1.0.2-0 \
-    nxge:1.1-4 \
-    tacc_share_client:1.0-15 \
-    tacc_work_client:1.0-12 \
-    tacc_scratch_client:1.0-12 \
+    nxge:1.1-5 \
+    tacc_share_client:1.0-16 \
+    tacc_work_client:1.0-14 \
+    tacc_scratch_client:1.0-14 \
     tacc_corral:1.0-2 \
-    lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
-    lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
-    lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
+    lustre-ldiskfs:3.0.7.1-2.6.9_78.0.22.EL_lustre_TACC_200909211449 \
+    lustre:1.6.7.2-2.6.9_78.0.22.EL_lustre_TACC_200909211439 \
+    lustre-modules:1.6.7.2-2.6.9_78.0.22.EL_lustre_TACC_200909211439 \
     neon:0.24.7-4 \
     subversion:1.1.4-2.ent \
     swig:1.3.21-6 \
@@ -352,25 +367,32 @@ login_RPMS=" \
     umb-scheme:3.2-36.EL4 \
     guile:1.6.4-14 \
     guile-devel:1.6.4-14 \
-    bash:3.2.48-1 \
-    tcsh:6.16-2 \
-    zsh:4.3.9-1 \
-    tacc_login_scripts-login:2.0-18 \
+
+    tcsh:6.16-1 \
+    zsh:4.3.6-1 \
+    tacc_login_scripts-login:2.0-16 \
+    login-scripts:1.3-27 \
     "
+
+#    bash:3.2.48-1 \
+#    tcsh:6.16-2 \
+#    zsh:4.3.9-1 \
+#    tacc_login_scripts-login:2.0-18 \
 
 #    zsh_tacc_test:4.3.9-1 \
 #    bash_tacc_test:3.2.48-1 \
 #    tcsh_tacc_test:6.16-2 \
 
 vis_RPMS=" \
+
     tcsh:6.16-1 \
     zsh:4.3.6-1 \
     bash:3.0-19.6 \
-    tacc_login_scripts:2.0-5 \
     login-scripts:1.3-27 \
+    tacc_login_scripts-compute:2.0-16 \
 
-    modules-base:3.1.6-15 \
-    taccinfo:1.0-3 \
+
+    modules-base:3.1.6-17 \
     numactl:1.0.2-0 \
     tacc_share_client:1.0-15 \
     tacc_work_client:1.0-12 \
@@ -381,19 +403,32 @@ vis_RPMS=" \
     neon:0.24.7-4 \
     subversion:1.1.4-2.ent \
     swig:1.3.21-6 \
-    sge-execd:6.1AR3-22 \
+    sge-execd:6.2-6.2u3-4 \
     screen:4.0.2-5 \
     gnuplot:4.0.0-4 \
     flex:2.5.4a-33 \
     perl-Error:0.17012-1.el4.rf \
     git-core:1.5.2.1-2.el4 \
     openmotif:2.2.3-10.1.el4 \
-    tacc_outage:1.0-19 \
-    pam-sge:6.1AR3-10 \
+    tacc_outage:1.0-20 \
+    tacc_outage2:2.0-3 \
+    pam-sge:6.2u3-2 \
     firefox:1.5.0.7-0.1.el4.centos4 \
     ImageMagick:6.0.7.1-20.el4 \
     compute_ssh:1.0-1 \
     "
+
+#    bash:3.2.48-1 \
+#    tcsh:6.16-2 \
+#    zsh:4.3.9-1 \
+#    tacc_login_scripts-compute:2.0-19 \
+#    tacc_login_scripts-login:2.0-16 \
+
+#     tacc_login_scripts:2.0-5 \
+#    login-scripts:1.3-27 \
+#    tcsh:6.16-1 \
+#    zsh:4.3.6-1 \
+#    bash:3.0-19.6 \
 
 gridftp_RPMS=" \
     tcsh:6.16-1 \
@@ -403,10 +438,10 @@ gridftp_RPMS=" \
     login-scripts:1.3-27 \
 
     modules-base:3.1.6-15 \
-    nxge:1.1-4 \
-    lustre-ldiskfs:3.0.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161648 \
-    lustre:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
-    lustre-modules:1.6.7-2.6.9_67.0.22.EL_lustre.1.6.7smp_200903161647 \
+    nxge:1.1-5 \
+    lustre-ldiskfs:3.0.7.1-2.6.9_78.0.22.EL_lustre_TACC_200909211449 \
+    lustre:1.6.7.2-2.6.9_78.0.22.EL_lustre_TACC_200909211439 \
+    lustre-modules:1.6.7.2-2.6.9_78.0.22.EL_lustre_TACC_200909211439 \
     tacc_share_client:1.0-14 \
     tacc_work_client:1.0-11 \
     tacc_scratch_client:1.0-11 \
@@ -441,11 +476,11 @@ oss_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 mds_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
 mds_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 
-login_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.7smp #1 SMP Mon Mar 16 15:37:03 CDT 2009"
-login_KERNEL="kernel-2.6.967.0.22.EL_lustre.1.6.7smp-1"
+login_KERNEL_DATE="2.6.9-78.0.22.EL_lustre_TACC #2 SMP Mon Sep 21 15:12:44 CDT 2009"
+login_KERNEL="kernel-2.6.978.0.22.EL_lustre_TACC-1"
 
-gridftp_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.7smp #1 SMP Mon Mar 16 15:37:03 CDT 2009"
-gridftp_KERNEL="kernel-2.6.967.0.22.EL_lustre.1.6.7smp-1"
+gridftp_KERNEL_DATE="2.6.9-78.0.22.EL_lustre_TACC #2 SMP Mon Sep 21 15:12:44 CDT 2009"
+gridftp_KERNEL="kernel-2.6.978.0.22.EL_lustre_TACC-1"
 
 sge_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
 sge_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
@@ -453,8 +488,8 @@ sge_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
 vis_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.7smp #1 SMP Mon Mar 16 15:37:03 CDT 2009"
 vis_KERNEL="kernel-2.6.967.0.22.EL_lustre.1.6.7smp-1"
 
-master_KERNEL_DATE="2.6.9-67.0.7.EL_lustre.1.6.5.1smp #1 SMP Wed Jun 18 19:11:05 EDT 2008"
-master_KERNEL="kernel-lustre-smp-2.6.9-67.0.7.EL_lustre.1.6.5.1"
+master_KERNEL_DATE="2.6.9-78.0.22.EL_lustre_TACC #2 SMP Mon Sep 21 15:12:44 CDT 2009"
+master_KERNEL="kernel-2.6.978.0.22.EL_lustre_TACC-1"
 
 #-------------------------
 # Function initializtion
