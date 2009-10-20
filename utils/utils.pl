@@ -34,7 +34,7 @@ sub verify_log4perl_availability {
     } else {
 	no warnings;
 	use Log::Log4perl qw(:easy);
-	Log::Log4perl->easy_init({level  => $INFO,
+	Log::Log4perl->easy_init({level  => $DEBUG,
 				  layout => "%m"});
 	my $logr = get_logger();
 	DEBUG("Log4perl is available\n");
@@ -68,7 +68,10 @@ sub begin_routine {
     my $routine  = (caller(1))[3];
     my $filename = (caller(1))[1];
 
-    DEBUG("\n<<Starting>> $routine ($filename)\n");
+    DEBUG("\n");
+    DEBUG("--------------------- Routine START ---------------------\n");
+    DEBUG("$routine ($filename)\n");
+    DEBUG("\n");
 }
 
 
@@ -78,7 +81,10 @@ sub end_routine {
     my $routine  = (caller(1))[3];
     my $filename = (caller(1))[1];
 
-    DEBUG("<<Completed>> $routine ($filename)\n\n");
+    DEBUG("\n");
+    DEBUG("$routine ($filename)\n");
+    DEBUG("---------------------- Routine END ----------------------\n");
+    DEBUG("\n");
 }
 
 1;

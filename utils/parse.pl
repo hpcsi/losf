@@ -8,42 +8,56 @@
 # $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
 #-------------------------------------------------------------------
 
-#use strict;
-#use lib './dependencies/mschilli-log4perl-d124229/lib';
-#use lib './dependencies/Config-IniFiles-2.52/lib';
+use Config::IniFiles;
 
-# Global Variables
+sub query_global_config_host {
 
-#my @Clusters;			# Cluster names 
-#my $num_clusters;		# Number of clusters to be managed
+    begin_routine();
 
-# BEGIN {
+    my $host = shift;
+    my $logr   = get_logger();
 
-#     eval { require Log::Log4perl; };
+    INFO("   --> Looking for host match...($host)\n");
+
+    foreach(@Clusters) {
+
+	my $loc_cluster = $_;
+
+	if ( ! $global_cfg->SectionExists($loc_cluster) ) {
+	    DEBUG("No Input section found for cluster $loc_cluster\n");
+	} else {
+	    DEBUG("   --> Scanning $loc_cluster \n");
+	    my @params = $global_cfg->Parameters($loc_cluster);
+	    my $num_params = @params;
+
+	    if ($num_params <= 0 ) {
+		DEBUG("No node types defined for cluster $loc_cluster\n");
+	    } else {
+		foreach(@params) {
+		    my $loc_name = $global_cfg->val($loc_cluster,$_);
+		    DEBUG("      --> Read $_ = $loc_name\n");
+		    if("$host" eq "$loc_name") {
+			DEBUG("      --> Found exact match\n");
+			$node_cluster = $loc_name;
+			$node_type    = $_;
+		    }
+		    elsif ($host =~ m/$loc_name/ ) {
+			DEBUG("      --> Found regex match\n");
+			$node_cluster = $loc_name;
+			$node_type    = $_;
+		    }
+		}
+
+	    }
+	}
     
-#     if($@) {
-# 	print "\n[Error] The Log4perl module is not available in your local installation.\n";
-# 	print   "[Error] Please verify that it built and was installed correctly during the\n";
-# 	print   "[Error] configuration process.\n\n";
-# 	exit(1);
-#     } else {
-# 	no warnings;
-# 	use Log::Log4perl qw(:easy);
-# 	Log::Log4perl->easy_init({level  => $INFO,
-# 				  layout => "%m",
-# 				  });
+    }
 
-# 	my $logr = get_logger();
-# 	DEBUG("Log4perl is available\n");
-#     }
-# }
+    end_routine();
 
-
-#init_config_file_parsing("config.machines");
+}
 
 sub init_config_file_parsing {
-
-    use Config::IniFiles;
 
     begin_routine();
 
@@ -54,8 +68,7 @@ sub init_config_file_parsing {
     
     verify_file_exists($infile);
     
-    my $global_cfg = new Config::IniFiles( -file => "$infile" );
-#    $global_cfg->OutputConfig;
+    $global_cfg = new Config::IniFiles( -file => "$infile" );
 
     #--------------------------------
     # Global cluster name definitions
@@ -85,42 +98,6 @@ sub init_config_file_parsing {
     end_routine();
 };
 
-sub verify_file_exists {
-    my $filename = shift;
 
-    if ( ! -e $filename ) {
-	MYERROR("The following file is not accessible: $filename",
-		"Please verify availability.\n");
-    }
-}
-
-sub MYERROR {
-
-    ERROR("\n");
-    foreach (@_) {
-	ERROR("[ERROR]: $_\n");
-    }
-    ERROR("\n");
-    exit(1);
-}
-
-sub begin_routine {
-
-    my $logr     = get_logger();
-    my $routine  = (caller(1))[3];
-    my $filename = (caller(1))[1];
-
-    DEBUG("\n<<Starting>> $routine ($filename)\n");
-}
-
-
-sub end_routine {
-
-    my $logr     = get_logger();
-    my $routine  = (caller(1))[3];
-    my $filename = (caller(1))[1];
-
-    DEBUG("<<Completed>> $routine ($filename)\n\n");
-}
 
 1;

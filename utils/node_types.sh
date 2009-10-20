@@ -13,9 +13,9 @@
 # Syntax for the designation is "node_type:hostname". For convenience, 
 # the hostname designation can be replaced by a regular expression.
 #
-# Originally: 04-15-2007 -> Lonestar version
-#             06-21-2007 -> Ranger  version
-#             10-19-2009 -> Longhorn version (with more generality)
+# Originally: 04-15-2007 -> Lonestar3 version
+#             06-21-2007 -> Ranger    version
+#             10-19-2009 -> Longhorn2 version (with more generality)
 #
 # Questions/Problems?: karl@tacc.utexas.edu
 # Texas Advanced Computing Center 
