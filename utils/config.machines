@@ -1,0 +1,32 @@
+# -*-sh-*-
+
+#--------------------------------------------
+# Cluster Definitions
+# 
+# Define a name for each cluster you
+# wish to manage.
+#--------------------------------------------
+
+[Cluster-Names]
+
+clusters = Longhorn Ranger 
+
+#--------------------------------------------
+# Node Types
+#
+# Delineate the different types of nodes in 
+# each cluster.  The software on each node
+# type can be managed separately.
+# 
+#--------------------------------------------
+
+[Longhorn]
+
+domainname = longhorn.tacc.utexas.edu
+
+master  = master
+login   = login[1-4]
+compute = c0-0
+
+#master  = maste\w
+
