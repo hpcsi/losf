@@ -2,38 +2,35 @@
 #
 # $Id$
 #
-#---------------------------------------------------------
-# Designation of Node Types: the current node types
-# for Ranger are as follows:
-# master, login, lustre, and compute.
-# 
-# The compute type is the catch-all for nodes that do not
-# correspond to one of the other types.  Syntax for the
-# designation is "node_type:hostname"
+#-----------------------------------------------------------------------
+# Designation of cluster node types and software production dates for
+# any general OS revisions.
+
+# Typical node types for an HPC cluster are:
 #
-# Originally: 4-15-2007 - ks
-#             6-21-2007 -> Ranger version
+# master, login, Lustre oss/mds, and compute.
+# 
+# Syntax for the designation is "node_type:hostname". For convenience, 
+# the hostname designation can be replaced by a regular expression.
+#
+# Originally: 04-15-2007 -> Lonestar version
+#             06-21-2007 -> Ranger  version
+#             10-19-2009 -> Longhorn version (with more generality)
+#
+# Questions/Problems?: karl@tacc.utexas.edu
 # Texas Advanced Computing Center 
-#---------------------------------------------------------
+#-----------------------------------------------------------------------
 
-
-export PRODUCTION_DATE_login="2009-08-24"  # 2009-06-02,2009-05-11,2009-03-17,2008-12-02,2008-10-04,2008-07-01,2008-05-06,2008-02-04
-
-###export PRODUCTION_DATE_login="2009-08-24"
-
-export PRODUCTION_DATE_gridftp="2008-07-01"
+export PRODUCTION_DATE_login="2009-10-19"
 export PRODUCTION_DATE_master="2007-12-01"
 export PRODUCTION_DATE_oss="2007-06-21"
-export PRODUCTION_DATE_sge="2007-06-21"
 export PRODUCTION_DATE_mds="2007-06-21"
-#export PRODUCTION_DATE_compute="2007-12-16"
-export PRODUCTION_DATE_compute="2009-01-16"  # "2007-06-21"      
-export PRODUCTION_DATE_vis="2008-09-03"	     #  new Ranger vis sub-system
+export PRODUCTION_DATE_sge="2007-06-21"
+export PRODUCTION_DATE_compute="2009-01-16" 
 
-NODE_TYPES=( login:"login[1-6]|spur" oss:"oss[1-9]+" mds:mds[1-6] \
+NODE_TYPES=( login:"login[1-2]" oss:"oss[1-9]+" mds:mds[1-6] \
              compute:"\bcompute-*-*|\bc-*-*|\bamd|\bi-*-*|build|localhost" \
-             master:"master" gridftp:gridftp[1-4] sge:sge[1-2] \
-             vis:"visbig|vis[1-7]")
+             master:"master.longhorn" )
 
 # End Inputs -------------------
 
