@@ -34,7 +34,7 @@ sub verify_log4perl_availability {
     } else {
 	no warnings;
 	use Log::Log4perl qw(:easy);
-	Log::Log4perl->easy_init({level  => $DEBUG,
+	Log::Log4perl->easy_init({level  => $INFO,
 				  layout => "%m"});
 	my $logr = get_logger();
 	DEBUG("Log4perl is available\n");
@@ -87,4 +87,16 @@ sub end_routine {
     DEBUG("\n");
 }
 
+sub print_var_stdout {
+    begin_routine();
+    
+    my $var = shift;
+    my $val = shift;
+
+    print "<TACC-LOSF>$var=$val\n";
+
+    end_routine();
+}
+
 1;
+

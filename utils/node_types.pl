@@ -5,9 +5,9 @@
 #-----------------------------------------------------------------------
 # Routines for determining cluster node types and software production
 # dates for any general OS revisions.  Definitions are based on inputs
-# provided in global configuration file
+# provided in global configuration file(s).
 # 
-# See config.global for input variables.
+# See config.global for top-level input variables.
 
 # Typical node types for an HPC cluster are:
 #
@@ -25,20 +25,23 @@
 #-----------------------------------------------------------------------
 
 use strict;
-use lib './dependencies/mschilli-log4perl-d124229/lib';
-use lib './dependencies/Config-IniFiles-2.52/lib';
+use lib '/home/build/admin/hpc_stack/utils/dependencies/mschilli-log4perl-d124229/lib';
+use lib '/home/build/admin/hpc_stack/utils/dependencies/Config-IniFiles-2.52/lib';
 
 # Global Variables
 
 my @Clusters;			# Cluster names/definitions
 my $num_clusters;		# Number of clusters to be managed
 my $host_name;			# Local running hostname
+my $domain_name;		# Local domainname
 my $global_cfg;			# Global input configuration
 my $node_cluster;		# Cluster ownership for local host
 my $node_type;			# Node type for local host
 
-require 'utils.pl';
-require 'parse.pl';
+my $top_dir="/home/build/admin/hpc_stack";
+
+require "$top_dir/utils/utils.pl";
+require "$top_dir/utils/parse.pl";
 
 #---------------
 # Initialization
@@ -46,20 +49,19 @@ require 'parse.pl';
 
 verify_sw_dependencies();
 
-my $logr = get_logger();
-
 INFO("\n-----------------------------\n");
 INFO("   Node Type Determination   \n");
 INFO("-----------------------------\n");
 
-chomp($host_name=`hostname -f`);
+chomp($host_name=`hostname -s`);
+chomp($domain_name=`dnsdomainname`);
 
 #---------------
 # Global Parsing
 #---------------
 
-init_config_file_parsing("config.machines");
-query_global_config_host($host_name);
+init_config_file_parsing("$top_dir/utils/config.machines");
+query_global_config_host($host_name,$domain_name);
 
 # All Done.
 
