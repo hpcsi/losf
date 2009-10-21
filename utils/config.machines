@@ -22,8 +22,8 @@ clusters = Longhorn Ranger
 
 [Longhorn]
 
-#domainname = longhorn.tacc.utexas.edu
-domainname = longhorn
+domainname = longhorn.tacc.utexas.edu
+#domainname = longhorn
 
 master  = mas[e|t]er
 login   = login[1-2]
