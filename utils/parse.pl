@@ -83,9 +83,10 @@ sub query_global_config_host {
 	print "Cluster   = $node_cluster\n";
 	print "Node_Type = $node_type\n";
 	print "\n";
-
+pn
     }
 
+    return ($node_cluster,$node_type);
     end_routine();
 }
 

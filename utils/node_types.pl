@@ -24,12 +24,15 @@
 # Texas Advanced Computing Center 
 #-----------------------------------------------------------------------
 
+package node_types;
 use strict;
 use OSF_paths;
 
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir/";
+
+use base 'Exporter';
 
 require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
@@ -44,6 +47,10 @@ my $domain_name;		# local domainname
 my $global_cfg;			# global input configuration
 my $node_cluster;		# cluster ownership for local host
 my $node_type;			# node type for local host
+
+# Exported Variable
+
+our @EXPORT = qw($node_cluster $node_type);
 
 #---------------
 # Initialization
@@ -67,7 +74,7 @@ chomp($domain_name=`dnsdomainname`);
 #---------------
 
 init_config_file_parsing("$osf_utils_dir/config.machines");
-query_global_config_host($host_name,$domain_name);
+(our $node_cluster, our $node_type) = query_global_config_host($host_name,$domain_name);
 
 # All Done.
 
