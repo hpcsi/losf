@@ -1,24 +1,27 @@
 # -*-sh-*-
 
-#--------------------------------------------
+#-----------------------------------------------
 # Cluster Definitions
 # 
 # Define a name for each cluster you
 # wish to manage.
-#--------------------------------------------
+#-----------------------------------------------
 
 [Cluster-Names]
 
 clusters = Longhorn Ranger 
 
-#--------------------------------------------
+#-----------------------------------------------
 # Node Types
 #
 # Delineate the different types of nodes in 
-# each cluster.  The software on each node
-# type can be managed separately.
+# each cluster.  Note that the software on each
+# node type can be managed separately.
+#
+# Regular expression patterns can be used to
+# map individual hostnames to a give node type.
 # 
-#--------------------------------------------
+#-----------------------------------------------
 
 [Longhorn]
 
