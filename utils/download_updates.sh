@@ -1,7 +1,10 @@
 #!/bin/bash
 #
+# $Id$
+#
 #-------------------------------------------------------------
-# Utility for downloading updated OS rpms from CentOS mirror.
+# Utility for downloading updated OS rpms from a centralized
+# mirror.
 # 
 # Note: node types for os-updates are defined in node_types.sh
 # 
@@ -12,7 +15,7 @@
 # Inputs -------------------
 
 export SRC_DIR=/share/home/0000/build/admin/os-updates/
-export NODE_QUERY=/share/home/0000/build/admin/hpc_stack/node_types.sh
+export NODE_QUERY=/share/home/0000/build/admin/hpc_stack/node_types.pl
 export RHN_DIR=/etc/sysconfig/rhn
 export IGNORE_PKGS="kernel*;libibcm*;libibcommon*;libibverbs*;libipathverbs*;libmthca*;libopensm*;libosmcomp*;libosmvendor*;librdmacm*;mstflint*;opensm*;libibumad*;openib*;ibutils*;libsdp*;iscsi-initiator-utils;infiniband-diags*;libcxgb3;bash*"
 

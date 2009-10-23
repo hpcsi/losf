@@ -1,11 +1,21 @@
 #!/usr/bin/perl
 #
+# $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
+#
 #-------------------------------------------------------------------
 #
 # Utility Functions
 #
 # $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
 #-------------------------------------------------------------------
+
+#package utils;
+use OSF_paths;
+use base 'Exporter';
+use lib "$osf_log4perl_dir";
+
+#@EXPORT = qw(verify_sw_dependencies
+#	     get_logger);
 
 sub verify_sw_dependencies {
     verify_log4perl_availability();

@@ -24,9 +24,10 @@
 # Texas Advanced Computing Center 
 #-----------------------------------------------------------------------
 
-package node_types;
+#package node_types;
 use strict;
 use OSF_paths;
+use utils;
 
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
@@ -37,6 +38,11 @@ use base 'Exporter';
 require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
+
+#run_node_types();
+
+sub determine_node_membership {
+#    use utils;
 
 # Global Variables
 
@@ -56,7 +62,6 @@ our @EXPORT = qw($node_cluster $node_type);
 # Initialization
 #---------------
 
-#init_logger();
 verify_sw_dependencies();
 print_header();
 
@@ -78,6 +83,10 @@ init_config_file_parsing("$osf_utils_dir/config.machines");
 
 # All Done.
 
+return($node_cluster,$node_type);
 
+}
+
+1;
 
 
