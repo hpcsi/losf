@@ -25,33 +25,39 @@
 #-----------------------------------------------------------------------
 
 use strict;
-use lib '/home/build/admin/hpc_stack/utils/dependencies/mschilli-log4perl-d124229/lib';
-use lib '/home/build/admin/hpc_stack/utils/dependencies/Config-IniFiles-2.52/lib';
+use OSF_paths;
+
+use lib "$osf_log4perl_dir";
+use lib "$osf_ini4perl_dir";
+use lib "$osf_utils_dir/";
+
+require "$osf_utils_dir/utils.pl";
+require "$osf_utils_dir/parse.pl";
+require "$osf_utils_dir/header.pl";
 
 # Global Variables
 
-my @Clusters;			# Cluster names/definitions
-my $num_clusters;		# Number of clusters to be managed
-my $host_name;			# Local running hostname
-my $domain_name;		# Local domainname
-my $global_cfg;			# Global input configuration
-my $node_cluster;		# Cluster ownership for local host
-my $node_type;			# Node type for local host
-
-my $top_dir="/home/build/admin/hpc_stack";
-
-require "$top_dir/utils/utils.pl";
-require "$top_dir/utils/parse.pl";
+my @clusters;			# cluster names/definitions
+my $num_clusters;		# number of clusters to be managed
+my $host_name;			# local running hostname
+my $domain_name;		# local domainname
+my $global_cfg;			# global input configuration
+my $node_cluster;		# cluster ownership for local host
+my $node_type;			# node type for local host
 
 #---------------
 # Initialization
 #---------------
 
+#init_logger();
 verify_sw_dependencies();
+print_header();
 
-INFO("\n-----------------------------\n");
-INFO("   Node Type Determination   \n");
-INFO("-----------------------------\n");
+
+#INFO("\n-----------------------------\n");
+INFO("--> Mode = Node Type Determination   \n");
+INFO("-"x 50 ."\n");
+#INFO("-----------------------------\n");
 
 chomp($host_name=`hostname -s`);
 chomp($domain_name=`dnsdomainname`);
@@ -60,7 +66,7 @@ chomp($domain_name=`dnsdomainname`);
 # Global Parsing
 #---------------
 
-init_config_file_parsing("$top_dir/utils/config.machines");
+init_config_file_parsing("$osf_utils_dir/config.machines");
 query_global_config_host($host_name,$domain_name);
 
 # All Done.

@@ -90,13 +90,15 @@ sub query_global_config_host {
 }
 
 sub init_config_file_parsing {
+    use File::Basename;
 
     begin_routine();
 
-    my $infile = shift;
-    my $logr   = get_logger();
+    my $infile    = shift;
+    my $logr      = get_logger();
+    my $shortname = fileparse($infile);
 
-    INFO("\n** Initializing input config_parsing (file = $infile)\n");
+    INFO("\n** Initializing input config_parsing ($shortname)\n");
     
     verify_file_exists($infile);
     
