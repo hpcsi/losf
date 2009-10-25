@@ -25,12 +25,26 @@ clusters = Longhorn Ranger
 
 [Longhorn]
 
-domainname = longhorn.tacc.utexas.edu
+#domainname = longhorn.tacc.utexas.edu
+domainname = ahackdomain
 #domainname = longhorn
 
-master  = mas[e|t]er
+#master  = mas[e|t]er
+master   = Koomies-MacBook-Air
 login   = login[1-2]
 compute = c0-0
 
-#master  = maste\w
+#-----------------------------------------------
+# OS Updates
+#
+# Define production dates for each node type
+# to synchronize OS package revisions.
+#-----------------------------------------------
+
+[Longhorn/os_sync_dates]
+
+master = 2009-10-23
+
+
+
 
