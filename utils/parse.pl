@@ -83,7 +83,6 @@ sub query_global_config_host {
 	print "Cluster   = $node_cluster\n";
 	print "Node_Type = $node_type\n";
 	print "\n";
-pn
     }
 
     return ($node_cluster,$node_type);
@@ -133,6 +132,29 @@ sub init_config_file_parsing {
     end_routine();
 };
 
+sub query_global_config_os_sync_date {
 
+    begin_routine();
+
+    my $cluster = shift;
+    my $host    = shift;
+   
+    my $logr    = get_logger();
+    my $found   = 0;
+
+    INFO("--> Looking for OS Sync Date...($cluster->$host)\n");
+
+    if ( ! $global_cfg->SectionExists("$cluster/os_sync_dates") ) {
+	MYERROR("No Input section found for cluster $cluster/os_sync_dates\n");
+    }
+
+    if (defined ($prod_date =  $global_cfg->val("$cluster/os_sync_dates",$host)) ) {
+	DEBUG("-> Read date = $prod_date");
+    } else {
+	MYERROR("No sync_date found for host $host");
+    }
+
+    return($prod_date);
+}
 
 1;
