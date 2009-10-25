@@ -43,7 +43,6 @@ INFO("-"x 50 ."\n");
 # Determine save location for rpms
 #---------------------------------
 
-#my $DATE=`date +%F`
 chomp(my $DATE  = `date +%F`);
 chomp(my $LDATE =`date +%F-%R`);
 my $RPMDIR="$osf_osupdates_dir/$node_cluster/$node_type/$DATE";
