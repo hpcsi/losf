@@ -39,7 +39,7 @@ require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
-#run_node_types();
+determine_node_membership();
 
 sub determine_node_membership {
 #    use utils;
@@ -73,6 +73,9 @@ INFO("-"x 50 ."\n");
 
 chomp($host_name=`hostname -s`);
 chomp($domain_name=`dnsdomainname`);
+
+# HACK
+$domain_name = "ahackdomain";
 
 #---------------
 # Global Parsing
