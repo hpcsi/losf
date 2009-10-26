@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export PERL5LIB=/home/build/admin/hpc_stack/utils
+utils/node_types.pl
