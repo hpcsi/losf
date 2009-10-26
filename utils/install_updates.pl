@@ -24,7 +24,7 @@ require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
-my $DEBUG_MODE=0;      # simulated install mode (packages not actually installed)
+my $DEBUG_MODE=0;      # 1=no pkgs installed
 
 #---------------
 # Initialization
@@ -75,9 +75,17 @@ my $not_installed = 0;
 my @missing_rpms;
 
 opendir(DIR,"$RPMDIR");
-my @pkgs = grep(/\.rpm$/,readdir(DIR));
-my $avail_pkgs = @pkgs;
+my @tmp_pkgs = grep(/\.rpm$/,readdir(DIR));
+my $avail_pkgs = @tmp_pkgs;
 closedir(DIR);
+
+# Strip .rpm from file name
+
+my @pkgs;
+
+foreach my $loc_rpm  (@tmp_pkgs) {
+    push(@pkgs,substr($loc_rpm,0,-4));
+}
 
 INFO("    --> Total number of available packages = $avail_pkgs\n");
 
@@ -137,12 +145,18 @@ if ( length($VERIFY) == 0 ) {
 # Install the packages
 #---------------------
 
-my $cmd = "rpm -Uvh --ignoresize $RPM_EXTRA_OPTION @pkgs\n";
+my @final_rpm_list;
+
+foreach my $loc_rpm  (@pkgs) {
+    push(@final_rpm_list,"$RPMDIR/$loc_rpm");
+}
+
+my $cmd = "rpm -Uvh --ignoresize $RPM_EXTRA_OPTION @final_rpm_list\n";
 
 if ($DEBUG_MODE == 1) {
     INFO("--> Debug Mode: skipping rpm installs\n");
 } else {
-    INFO("cmd = $cmd\n");    
+    DEBUG("cmd = $cmd\n");    
     `$cmd`
 }
 
