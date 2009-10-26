@@ -25,12 +25,12 @@ clusters = Longhorn Ranger
 
 [Longhorn]
 
-#domainname = longhorn.tacc.utexas.edu
-domainname = ahackdomain
+domainname = longhorn.tacc.utexas.edu
+#domainname = ahackdomain
 #domainname = longhorn
 
-#master  = mas[e|t]er
-master   = Koomies-MacBook-Air
+master  = mas[e|t]er
+#master   = Koomies-MacBook-Air
 login   = login[1-2]
 compute = c0-0
 

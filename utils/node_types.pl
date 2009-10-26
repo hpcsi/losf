@@ -74,8 +74,7 @@ INFO("-"x 50 ."\n");
 chomp($host_name=`hostname -s`);
 chomp($domain_name=`dnsdomainname`);
 
-# HACK
-$domain_name = "ahackdomain";
+# HACK #$domain_name = "ahackdomain";
 
 #---------------
 # Global Parsing
