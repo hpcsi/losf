@@ -24,7 +24,7 @@ require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
-my $DEBUG_MODE=1;
+my $DEBUG_MODE=0;      # simulated install mode (packages not actually installed)
 
 #---------------
 # Initialization
@@ -36,18 +36,11 @@ print_header();
 INFO("--> Mode = Install OS Updates   \n");
 INFO("-"x 50 ."\n");
 
-# Inputs -------------------
-
-#export SRC_DIR=/share/home/0000/build/admin/os-updates/
-#export INSTALL_DIR=/share/home/0000/build/admin/hpc_stack/
-#export NODE_QUERY=/share/home/0000/build/admin/hpc_stack/node_types.sh
-#export DEBUG=1
-
-# End Inputs -------------------
-
 #---------------------
 # Determine node type
 #---------------------
+
+chomp(my $host_name=`hostname -s`);
 
 (my $node_cluster, my $node_type) = determine_node_membership();
 
@@ -77,115 +70,84 @@ INFO("    $RPMDIR\n");
 
 INFO("--> Checking if desired rpms are already installed...\n");
 
-my $NOT_UPDATED = 0;
-my $MISSING_RPMS="";
+my $not_updated   = 0;
+my $not_installed = 0;
+my @missing_rpms;
 
 opendir(DIR,"$RPMDIR");
 my @pkgs = grep(/\.rpm$/,readdir(DIR));
+my $avail_pkgs = @pkgs;
 closedir(DIR);
 
+INFO("    --> Total number of available packages = $avail_pkgs\n");
+
 foreach my $loc_rpm  (@pkgs) {
-    INFO("    --> rpm =  $loc_rpm\n");
+    DEBUG("   --> rpm =  $loc_rpm\n");
+    chomp(my $result = `rpm -q $loc_rpm 2>&1`);
+    DEBUG("   --> result = $result\n");
+
+    if ($result =~ m/\Q$loc_rpm\E is not installed/ ) {
+ 	DEBUG("   --> $loc_rpm not installed - adding to final list\n");
+ 	push(@missing_rpms,$loc_rpm);
+	$not_installed++;
+	$not_updated=1;
+    }
 }
 
-# for i in $RPMDIR/*.rpm; do
-#     export RESULT=`rpm -U --test $i 2>&1 | grep "already installed"`
+my $prev_installed = $avail_pkgs - $not_installed;
 
-#     if [ "x$RESULT" == "x" ];then
+INFO("    --> $prev_installed of $avail_pkgs packages have been previously installed\n");
 
-# 	if [ $DEBUG == 0 ];then 
-# 	    echo "   --> desired rpm not installed $RESULT $i"
-# 	fi
-# 	MISSING_RPMS="$MISSING_RPMS $i"
-# 	NOT_UPDATED=1
-# ###	break
-#     fi
-# done
+if ( $not_updated == 0) {
+    print "\n** $host_name is up to date with OS downloads...\n\n";
+    exit(0);
+} 
 
-# if [ $NOT_UPDATED == 0 ];then
-#     echo "** $MYHOST is up2date with OS downloads..."
-#     exit 0
-# fi
-    
-# #------------------
-# # Verify the rpms
-# #------------------
+#------------------
+# Verify the rpms
+#------------------
 
-# echo "Verifying rpm dependencies..."
+INFO("--> Verifying rpm dependencies...\n");
 
-# export VERIFY=`rpm -U --ignoresize --test $RPMDIR/*.rpm 2>&1`
-# PARTIAL_INSTALL=`echo $VERIFY | grep -v "is already installed"` 
-# export RPM_EXTRA_OPTION=""
-# export INCREMENTAL=0
+chomp(my $VERIFY=`rpm -U --ignoresize --test $RPMDIR/*.rpm 2>&1`);
+chomp(my $PARTIAL_INSTALL=`echo $VERIFY | grep -v "is already installed"`);
 
-# if [ "x$VERIFY" == "x" ];then
-#     echo "Dependencies verified; proceeding with installation..."
-#     echo " "
-# elif [ "x$PARTIAL_INSTALL" == "x" ];then
-#     echo " "
-#     echo "Note: Partial install detected; it looks like a previous attempt"
-#     echo "to install package updates was only partially successful."
-#     echo " "
-#     echo "Picking up from previous install...."
-#     export INCREMENTAL=1
-#     export RPM_EXTRA_OPTION="--replacepkgs"
-# else
-#     echo " "
-#     echo "** Error: rpm dependencies not verified; this may mean that the"
-#     echo "**        host node which downloaded the os updates differs from the"
-#     echo "**        current installation target"
-#     echo " "
-#     echo "$VERIFY"
-#     echo "partial = $PARTIAL_INSTALL"
-#     exit 1
-# fi
+my $RPM_EXTRA_OPTION="";
+my $INCREMENTAL=0;
 
-# ###exit 0
+if ( length($VERIFY) == 0 ) {
+    INFO("    --> Dependencies verified; proceeding with installation...\n");
+    INFO("\n");
+} elsif ( length($PARTIAL_INSTALL) == 0 ) {
+    INFO("\n");
+    INFO("Note: Partial install detected; it looks like a previous attempt\n");
+    INFO("to install package updates was only partially successful.\n");
+    INFO("\n");
+    INFO("Picking up from previous install....\n");
+    $INCREMENTAL=1;
+    $RPM_EXTRA_OPTION="--replacepkgs";
+} else {
+    MYERROR("\n","rpm dependencies not verified; this may mean that the",
+	    "host node which downloaded the os updates differes from the",
+	    "current installation target","\n",
+	    "$VERIFY","partial = $PARTIAL_INSTALL");
+}
 
-# #---------------------
-# # Install the packages
-# #---------------------
+#---------------------
+# Install the packages
+#---------------------
 
-# # if [ $INCREMENTAL ];then
-# #     echo "rpm -Uvh --ignoresize $RPM_EXTRA_OPTION $MISSING_RPMS"
-# # else
-# #     echo "rpm -Uvh --ignoresize $RPM_EXTRA_OPTION $RPMDIR/*.rpm"
-# # fi
+my $cmd = "rpm -Uvh --ignoresize $RPM_EXTRA_OPTION @pkgs\n";
 
-# rpm -Uvh --ignoresize $RPM_EXTRA_OPTION $RPMDIR/*.rpm
+if ($DEBUG_MODE == 1) {
+    INFO("--> Debug Mode: skipping rpm installs\n");
+} else {
+    INFO("cmd = $cmd\n");    
+    `$cmd`
+}
 
-# exit 1
+INFO("\nUpgrade Compete\n");
 
-# cd $RPMDIR
-
-# for i in `ls *.rpm`; do
-# #    echo $i
-
-#     pkg=`echo $i | perl -pe 's/(\S+).(noarch|x86_64|i386).rpm/$1/'`
-
-# #    pkg=`echo $i | awk -F '.x86_64.rpm' '{print $1}'`
-
-# #     if [ x"$pkg" == "x" ];then
-# # 	echo "checking for noarch"
-# # 	pkg=`echo $i | awk -F '.noarch.rpm' '{print $1}'`
-# #     fi
-
-# #     if [ x"$pkg" == "x" ];then
-# # 	echo "checking for i386"
-# # 	pkg=`echo $i | awk -F '.i386.rpm' '{print $1}'`
-# #     fi
-	
-#     igot=`rpm -q $pkg`
-
-#     if [ "$igot" != "$pkg" ];then
-# 	echo "** Installing $pkg...."
-# 	rpm -Uvh --nodeps  --ignoresize ./$i
-#     fi
-
-# done
-
-# ###rpm -Uvh --ignoresize $RPM_EXTRA_OPTION $RPMDIR/*.rpm
-# #rpm "$ROLLBACK_MACRO" --ignoresize -Uvh $RPM_EXTRA_OPTION $ROLLBACK_OPTS $RPMDIR/*.rpm
 
 
 
