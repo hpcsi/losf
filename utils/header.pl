@@ -10,8 +10,6 @@
 my $VERSION="0.30.0";
 my $PKGNAME="Linux OSF";
 
-#print_header();
-
 sub print_header {
 
     my $width = 50;

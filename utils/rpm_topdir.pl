@@ -47,3 +47,5 @@ chomp(my $host_name=`hostname -s`);
 
 $logr->level($INFO);
 INFO("\nRPM_TOPDIR = $rpm_topdir\n");
+
+exit 0;

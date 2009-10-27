@@ -12,7 +12,7 @@
 clusters = Longhorn Ranger 
 
 #-----------------------------------------------
-# Node Types
+# Node Types/Cluster Config
 #
 # Delineate the different types of nodes in 
 # each cluster.  Note that the software on each
@@ -26,13 +26,21 @@ clusters = Longhorn Ranger
 [Longhorn]
 
 domainname = longhorn.tacc.utexas.edu
-#domainname = ahackdomain
-#domainname = longhorn
 
-master  = mas[e|t]er
-#master   = Koomies-MacBook-Air
+# Node Types
+
+master  = master
 login   = login[1-2]
-compute = c0-0
+oss     = oss[1-13]
+mds     = mds[1-2]
+
+# Cluster Configuration
+
+rpm_build_dir = /home/build/rpms
+software_conf = config.sw.Longhorn
+
+#compute = c0-0
+#compute = 2??-    (201-101 thru 215-1)
 
 #-----------------------------------------------
 # OS Updates
@@ -44,6 +52,9 @@ compute = c0-0
 [Longhorn/os_sync_dates]
 
 master = 2009-10-23
+login  = 2009-10-23
+
+
 
 
 
