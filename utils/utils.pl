@@ -31,12 +31,16 @@ sub verify_log4perl_availability {
 	print   "[Error] configuration process.\n\n";
 	exit(1);
     } else {
-	no warnings;
-	use Log::Log4perl qw(:easy);
-	Log::Log4perl->easy_init({level  => $INFO,
-				  layout => "%m"});
-	my $logr = get_logger();
-	DEBUG("Log4perl is available\n");
+
+	if(! Log::Log4perl->initialized()) {
+	    no warnings;
+	    use Log::Log4perl qw(:easy);
+	    Log::Log4perl->easy_init({level  => $INFO,
+				      layout => "%m",
+				      file   =>  'STDOUT'});
+	    my $logr = get_logger();
+	    DEBUG("Log4perl is available\n");
+	}
     }
 }
 
