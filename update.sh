@@ -24,7 +24,7 @@
 # Inputs -------------------
 
 export VERBOSE=0
-export UPDATE_RPMS=0
+export UPDATE_RPMS=1
 
 # End Inputs -------------------
 
@@ -146,6 +146,7 @@ login_RPMS=" \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
     neon:0.25.5-10.el5 \
+    intel-licenses:1.0-1 \
     "
 
 sge_RPMS=" \

@@ -148,7 +148,7 @@ if ( length($VERIFY) == 0 ) {
 my @final_rpm_list;
 
 foreach my $loc_rpm  (@pkgs) {
-    push(@final_rpm_list,"$RPMDIR/$loc_rpm");
+    push(@final_rpm_list,"$RPMDIR/$loc_rpm.rpm");
 }
 
 my $cmd = "rpm -Uvh --ignoresize $RPM_EXTRA_OPTION @final_rpm_list\n";
