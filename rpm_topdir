@@ -3,4 +3,4 @@
 export TOP_DIR=/home/build/admin/hpc_stack
 export PERL5LIB=$TOP_DIR/utils
 
-$TOP_DIR/utils/node_types.pl
+$TOP_DIR/utils/rpm_topdir.pl
