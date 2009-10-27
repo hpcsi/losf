@@ -8,7 +8,7 @@
 # provided in global configuration file(s).
 # 
 # See config.global for top-level input variables.
-
+#
 # Typical node types for an HPC cluster are:
 #
 # master, login, Lustre oss/mds, and compute.
@@ -42,7 +42,6 @@ require "$osf_utils_dir/header.pl";
 determine_node_membership();
 
 sub determine_node_membership {
-#    use utils;
 
 # Global Variables
 
@@ -65,11 +64,8 @@ our @EXPORT = qw($node_cluster $node_type);
 verify_sw_dependencies();
 print_header();
 
-
-#INFO("\n-----------------------------\n");
 INFO("--> Mode = Node Type Determination   \n");
 INFO("-"x 50 ."\n");
-#INFO("-----------------------------\n");
 
 chomp($host_name=`hostname -s`);
 chomp($domain_name=`dnsdomainname`);

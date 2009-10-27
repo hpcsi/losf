@@ -79,10 +79,9 @@ sub query_global_config_host {
     } else {
 	
 	INFO("   --> Node type determination successful\n");
-	print "\n";
-	print "Cluster   = $node_cluster\n";
-	print "Node_Type = $node_type\n";
-	print "\n";
+	INFO("\n");
+	INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
+	INFO("\n");
     }
 
     return ($node_cluster,$node_type);
@@ -155,6 +154,26 @@ sub query_global_config_os_sync_date {
     }
 
     return($prod_date);
+}
+
+sub query_cluster_rpm_dir {
+
+    begin_routine();
+
+    my $cluster = shift;
+   
+    my $logr    = get_logger();
+    my $found   = 0;
+
+    INFO("--> Looking for top-level rpm dir...($cluster)\n");
+
+    if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir")) ) {
+	DEBUG("--> Read topdir = $rpm_topdir\n");
+    } else {
+	MYERROR("No rpm_build_dir defined for cluster $cluster");
+    }
+
+    return($rpm_topdir);
 }
 
 1;
