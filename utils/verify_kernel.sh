@@ -9,17 +9,14 @@
 # Texas Advanced Computing Center 
 #-----------------------------------------------
 
-###export ROCKS_DIR=/export/home/install/contrib/4.2.1/x86_64/
-#export ROCKS_DIR=/export/home/build/rpms/RPMS/x86_64/
-#export GRUB_DIR=/export/home/build/kernel/grub_entries
-
-export ROCKS_DIR=/share/home/0000/build/rpms/RPMS/x86_64/
-export GRUB_DIR=/share/home/0000/build/kernel/grub_entries
+export ROCKS_DIR=/home/build/rpms/RPMS/x86_64/
+#export GRUB_DIR=/home/build/kernel/grub_entries
 
 function verify_kernel
 {
     local KERNEL_REV=$1 
     local KERNEL_RPM=$2
+    local GRUB_DIR=$3
 
     myvalue=`uname -rv`
 
@@ -44,9 +41,9 @@ function verify_kernel
 
 	    echo " "
 	    echo "Using production grub.conf file from the following location:"
-	    echo "--> $GRUB_DIR/$BASENAME"
+	    echo "--> $GRUB_DIR"
 
-	    cp $GRUB_DIR/$BASENAME/grub.conf /boot/grub/grub.conf
+	    cp $GRUB_DIR/grub.conf /boot/grub/grub.conf
 	    echo "--> Make sure to verify grub.conf and reboot."
 
 	fi
@@ -62,9 +59,9 @@ function verify_kernel
 
 	    echo " "
 	    echo "Using production grub.conf file from the following location:"
-	    echo "--> $GRUB_DIR/$BASENAME"
+	    echo "--> $GRUB_DIR"
 
-	    cp $GRUB_DIR/$BASENAME/grub.conf /boot/grub/grub.conf
+	    cp $GRUB_DIR/grub.conf /boot/grub/grub.conf
 	    echo "--> Make sure to verify grub.conf and reboot."
 	fi
     fi
@@ -97,9 +94,9 @@ function verify_infiniband
 
 	    echo " "
 	    echo "Using production grub.conf file from the following location:"
-	    echo "--> $GRUB_DIR/$BASENAME"
+	    echo "--> $GRUB_DIR"
 
-	    cp $GRUB_DIR/$BASENAME/grub.conf /boot/grub/grub.conf
+	    cp $GRUB_DIR/grub.conf /boot/grub/grub.conf
 	    echo "--> Make sure to verify grub.conf and reboot."
 
 	fi
