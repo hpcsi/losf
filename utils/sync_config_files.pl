@@ -30,7 +30,7 @@ sub sync_const_file {
     (my $cluster, my $type) = determine_node_membership();
 
     if ( ! -s "$file" ) {
-	WARN("Warning: production file $file not found - not syncing file\n");
+	WARN("--> Warning: production file $file not found - not syncing file\n");
 	end_routine();
 	return;
     }
@@ -42,7 +42,7 @@ sub sync_const_file {
     DEBUG("--> Looking for file $sync_file\n");
 
     if ( ! -s $sync_file ) {
-	WARN("Warning: $sync_file not found - not syncing...\n");
+	WARN("--> [$basename] Warning config/const_files/$cluster/$type/$basename not found - not syncing...\n");
 	end_routine();
 	return;
     }
