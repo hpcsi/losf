@@ -17,7 +17,6 @@ sub query_global_config_host {
     my $host   = shift;
     my $domain = shift;
     my $logr   = get_logger();
-
     my $found  = 0;
 
     INFO("   --> Looking for DNS domainname match...($domain)\n");
