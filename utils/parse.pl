@@ -33,7 +33,9 @@ sub query_global_config_host {
 
 	    if( $global_cfg->exists($loc_cluster,"domainname") ) {
 		my $loc_domain = $global_cfg->val($loc_cluster,"domainname");
-		if($loc_domain eq $domain) {
+
+		if($loc_domain =~ m/$domain/ ) {
+
 		    DEBUG("      --> Found a matching domain ($loc_domain)\n");
 		    INFO ("   --> Domain found: Looking for host match...($host)\n");
 
