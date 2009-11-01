@@ -36,7 +36,7 @@ sub sync_const_file {
     }
 
     my $basename = basename($file);
-    INFO("--> Attempting to sync file: $file (base = $basename)\n");
+    INFO("--> [$basename] Attempting to sync file: $file\n");
 
     my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
     DEBUG("--> Looking for file $sync_file\n");
@@ -48,9 +48,9 @@ sub sync_const_file {
     }
 
     if ( compare($file,$sync_file) == 0 ) {
-	INFO("--> Files are the same - no sync required.\n");
+	INFO("--> [$basename] OK: Files are the same - no sync required.\n");
     } else {
-	INFO("--> Differences found: $basename requires syncing\n");
+	INFO("--> [$basename] Differences found: $basename requires syncing\n");
 
 	(my $fh, my $tmpfile) = tempfile();
 
@@ -60,7 +60,7 @@ sub sync_const_file {
 	copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
 	unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
 
-	INFO("--> Sync successful\n");
+	INFO("--> [$basename] Sync successful\n");
     }
     
     end_routine();
