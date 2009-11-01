@@ -33,7 +33,6 @@ function verify_kernel
 	    echo "  --> Kernel rpm is installed; please verify grub.conf and reboot"
 	else
 	    revision=`echo $KERNEL_REV | awk '{print $1}'`
-###	    rpm -ivh --nodeps --ignoresize $ROCKS_DIR/RPMS/$KERNEL_RPM.$MYARCH.rpm
 ###	    rpm -ivh --nodeps --ignoresize $ROCKS_DIR/$KERNEL_RPM.$MYARCH.rpm
 	    rpm -Uvh --nodeps --ignoresize $ROCKS_DIR/$KERNEL_RPM.$MYARCH.rpm
 	    mkinitrd -f /boot/initrd-$revision.img $revision
@@ -49,6 +48,7 @@ function verify_kernel
 	fi
     else
 	# Check for running, but not installed
+
 	export INSTALLED=`rpm -q $KERNEL_RPM` 
 	if [ "$INSTALLED" != "$KERNEL_RPM" ];then
 	    echo "Kernel is running, but no longer installed"
@@ -68,37 +68,3 @@ function verify_kernel
 
 }
 
-function verify_infiniband
-{
-    local KERNEL_REV=$1 
-    local KERNEL_RPM=$2
-
-    myvalue=`uname -rv`
-
-    if [ "$myvalue" != "$KERNEL_REV" ];then
-	echo "kernel is out of date: "
-	echo "  --> Running = $myvalue"
-	echo "  --> Desired = $KERNEL_REV"
-	export NEEDS_UPDATE=1
-
-	# Check if it is installed but not running.
-
-	export INSTALLED=`rpm -q $KERNEL_RPM` 
-	if [ "$INSTALLED" == "$KERNEL_RPM" ];then
-	    echo "  --> Kernel rpm is installed; please verify grub.conf and reboot"
-	else
-	    revision=`echo $KERNEL_REV | awk '{print $1}'`
-###	    rpm -ivh --nodeps --ignoresize $ROCKS_DIR/RPMS/$KERNEL_RPM.$MYARCH.rpm
-	    rpm -ivh --nodeps --ignoresize $ROCKS_DIR/$KERNEL_RPM.$MYARCH.rpm
-	    mkinitrd -f /boot/initrd-$revision.img $revision
-
-	    echo " "
-	    echo "Using production grub.conf file from the following location:"
-	    echo "--> $GRUB_DIR"
-
-	    cp $GRUB_DIR/grub.conf /boot/grub/grub.conf
-	    echo "--> Make sure to verify grub.conf and reboot."
-
-	fi
-    fi
-}
