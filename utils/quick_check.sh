@@ -10,8 +10,8 @@
 
 # Inputs -------------------
 
-export SRC_DIR=/share/home/0000/build/admin/os-updates/
-export NODE_QUERY=/share/home/0000/build/admin/hpc_stack/node_types.sh
+export SRC_DIR=/home/build/admin/os-updates/
+#export NODE_QUERY=/share/home/0000/build/admin/hpc_stack/node_types.sh
 export DEBUG=1
 
 # End Inputs -------------------
@@ -20,13 +20,36 @@ export DEBUG=1
 # Determine node type
 #---------------------
 
-. $NODE_QUERY > /dev/null
+#-------------------
+# Query type of node
+#-------------------
+
+export NODE_TYPE_SILENT=1
+
+RESULT=`$INSTALL_DIR/node_types | grep Node_Type | awk '{print $3}'`
+CLUSTER=`echo $RESULT | awk -F : '{print $1}'`
+BASENAME=`echo $RESULT | awk -F : '{print $2}'`
+
+if [ x"$BASENAME" == "x" -o x"$CLUSTER" == "x" ];then
+    echo " "
+    echo "**"
+    echo "** Error: unable to ascertain Cluster node type for host ($MYHOST)"
+    echo "**"
+    echo " "
+    exit 1
+else
+    echo " "
+    echo "Performing Updates for $CLUSTER -> $BASENAME node type"
+    echo " "
+fi
+
+#. $NODE_QUERY > /dev/null
 
 #---------------------------------
 # Determine read location for rpms
 #---------------------------------
 
-export RPMDIR=$SRC_DIR$BASENAME/$PROD_DATE
+export RPMDIR=$SRC_DIR/$CLUSTER/$BASENAME/$PROD_DATE
 
 if [ ! -d $RPMDIR ]; then
     echo "** Error: Unable to find up2date rpms for the current date!"

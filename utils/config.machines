@@ -25,7 +25,8 @@ clusters = Longhorn Ranger
 
 [Longhorn]
 
-domainname = longhorn.tacc.utexas.edu
+domainname = longhorn|longhorn.tacc.utexas.edu
+#domainname = longhorn.tacc.utexas.edu
 
 # Node Types
 
@@ -33,6 +34,7 @@ master  = master
 login   = login[1-2]
 oss     = oss[1-13]
 mds     = mds[1-2]
+compute = c20[1-9]-1[0-1][1-9]
 
 # Cluster Configuration
 

@@ -5,7 +5,7 @@
 # Utility to read a cluster's top-level rpm build directory from
 # global config file.
 #
-# $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
+# $Id$
 #-------------------------------------------------------------------
 
 use strict;

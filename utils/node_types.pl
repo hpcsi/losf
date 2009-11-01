@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
+# $Id$
 #
 #-----------------------------------------------------------------------
 # Routines for determining cluster node types and software production
@@ -69,8 +69,6 @@ INFO("-"x 50 ."\n");
 
 chomp($host_name=`hostname -s`);
 chomp($domain_name=`dnsdomainname`);
-
-# HACK #$domain_name = "ahackdomain";
 
 #---------------
 # Global Parsing

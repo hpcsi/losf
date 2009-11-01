@@ -5,7 +5,7 @@
 # Input File Parsing Utilities: Used to query specific variables
 # from .ini style configuration files.
 #
-# $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
+# $Id$
 #-------------------------------------------------------------------
 
 use Config::IniFiles;

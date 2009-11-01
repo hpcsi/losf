@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: node_types.sh 151 2009-10-20 02:44:48Z karl $
+# $Id$
 #
 #-----------------------------------------------------------------------
 # Utility for downloading updated OS rpms from a centralized
