@@ -54,7 +54,11 @@ software_conf = config.sw.Longhorn
 [Longhorn/os_sync_dates]
 
 master = 2009-10-23
-login  = 2009-10-27
+login  = 2009-11-01
+
+# Keep a record of previous production sync dates here
+
+# login 2009-10-27
 
 
 
