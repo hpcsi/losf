@@ -9,17 +9,52 @@
 # $Id: utils.pl 200 2009-11-01 17:48:31Z karl $
 #-------------------------------------------------------------------
 
+use strict;
 use OSF_paths;
-use base 'Exporter';
-use lib "$osf_log4perl_dir";
+
 use File::Basename;
 use File::Compare;
 use File::Copy;
 use File::Temp qw(tempfile);
 
+use lib "$osf_log4perl_dir";
+use lib "$osf_ini4perl_dir";
+use lib "$osf_utils_dir";
+
+use node_types;
+use utils;
+
+require "$osf_utils_dir/utils.pl";
+require "$osf_utils_dir/parse.pl";
+require "$osf_utils_dir/header.pl";
+
+parse_and_sync_const_files();
+
 BEGIN {
 
     my $osf_sync_const_file = 0;
+    
+    sub parse_and_sync_const_files {
+
+	verify_sw_dependencies();
+	begin_routine();
+
+	if ( $osf_sync_const_file == 0 ) {
+	    INFO("** Syncing configuration files (const)\n");
+	    $osf_sync_const_file = 1;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+
+	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
+
+	foreach(@sync_files) {
+	    sync_const_file("$_");
+	}
+	
+	end_routine();
+    }
 
     sub sync_const_file {
 
@@ -29,11 +64,6 @@ BEGIN {
 	my $logr    = get_logger();
 	my $found   = 0;
 
-	if ( $osf_sync_const_file == 0 ) {
-	    INFO("** Syncing configuration files (const)\n");
-	    $osf_sync_const_file = 1;
-	}
-	
 	(my $cluster, my $type) = determine_node_membership();
 	
 	if ( ! -s "$file" ) {

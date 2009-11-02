@@ -35,14 +35,11 @@ use lib "$osf_utils_dir/";
 
 use base 'Exporter';
 
-require "$osf_utils_dir/sync_config_files.pl";
 require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
 determine_node_membership();
-sync_const_file("/etc/motd");
-sync_const_file("/etc/security/limits.conf");
 
 BEGIN {
     my $osf_membership_init = 0;        # initialization flag 
