@@ -35,52 +35,66 @@ use lib "$osf_utils_dir/";
 
 use base 'Exporter';
 
+require "$osf_utils_dir/sync_config_files.pl";
 require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
 determine_node_membership();
+sync_const_file("/etc/motd");
+sync_const_file("/etc/security/limits.conf");
 
-sub determine_node_membership {
+BEGIN {
+    my $osf_membership_init = 0;
+    my $node_cluster;		# cluster ownership for local host
+    my $node_type;			# node type for local host
 
-# Global Variables
+    sub determine_node_membership {
 
-my @clusters;			# cluster names/definitions
-my $num_clusters;		# number of clusters to be managed
-my $host_name;			# local running hostname
-my $domain_name;		# local domainname
-my $global_cfg;			# global input configuration
-my $node_cluster;		# cluster ownership for local host
-my $node_type;			# node type for local host
+	# Global Variables
 
-# Exported Variable
+	my @clusters;			# cluster names/definitions
+	my $num_clusters;		# number of clusters to be managed
+	my $host_name;			# local running hostname
+	my $domain_name;		# local domainname
+	my $global_cfg;			# global input configuration
+#	my $node_cluster;		# cluster ownership for local host
+#	my $node_type;			# node type for local host
 
-our @EXPORT = qw($node_cluster $node_type);
 
-#---------------
-# Initialization
-#---------------
+	if ( $osf_membership_init == 1 ) {
+	    DEBUG("--> Returning from determine_node_membership\n");
+	    return($node_cluster,$node_type);
+	}
 
-verify_sw_dependencies();
-print_header();
+        #---------------
+        # Initialization
+        #---------------
 
-INFO("--> Mode = Node Type Determination   \n");
-INFO("-"x 50 ."\n");
+	verify_sw_dependencies();
+	print_header();
+	
+	INFO("--> Mode = Node Type Determination   \n");
+	INFO("-"x 50 ."\n");
+	
+	chomp($host_name=`hostname -s`);
+	chomp($domain_name=`dnsdomainname`);
+	
+        #---------------
+        # Global Parsing
+        #---------------
+	
+	init_config_file_parsing("$osf_utils_dir/config.machines");
+#	(our $node_cluster, our $node_type) = query_global_config_host($host_name,$domain_name);
+	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
+	
+       # All Done.
+	
+	$osf_membership_init = 1;
 
-chomp($host_name=`hostname -s`);
-chomp($domain_name=`dnsdomainname`);
-
-#---------------
-# Global Parsing
-#---------------
-
-init_config_file_parsing("$osf_utils_dir/config.machines");
-(our $node_cluster, our $node_type) = query_global_config_host($host_name,$domain_name);
-
-# All Done.
-
-return($node_cluster,$node_type);
-
+	return($node_cluster,$node_type);
+	
+    }
 }
 
 1;
