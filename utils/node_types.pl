@@ -45,8 +45,8 @@ sync_const_file("/etc/motd");
 sync_const_file("/etc/security/limits.conf");
 
 BEGIN {
-    my $osf_membership_init = 0;
-    my $node_cluster;		# cluster ownership for local host
+    my $osf_membership_init = 0;        # initialization flag 
+    my $node_cluster;		        # cluster ownership for local host
     my $node_type;			# node type for local host
 
     sub determine_node_membership {
@@ -58,9 +58,6 @@ BEGIN {
 	my $host_name;			# local running hostname
 	my $domain_name;		# local domainname
 	my $global_cfg;			# global input configuration
-#	my $node_cluster;		# cluster ownership for local host
-#	my $node_type;			# node type for local host
-
 
 	if ( $osf_membership_init == 1 ) {
 	    DEBUG("--> Returning from determine_node_membership\n");
@@ -84,8 +81,7 @@ BEGIN {
         # Global Parsing
         #---------------
 	
-	init_config_file_parsing("$osf_utils_dir/config.machines");
-#	(our $node_cluster, our $node_type) = query_global_config_host($host_name,$domain_name);
+	init_config_file_parsing("$osf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
 	
        # All Done.
