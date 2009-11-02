@@ -160,8 +160,8 @@ compute_RPMS=" \
     tvflash:0.9.0-1.ofed1.4.2 \
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    cuda:2.3-0 \
-    cuda_SDK:2.3-0 \
+    cuda:2.2-0 \
+    cuda_SDK:2.2-0 \
     mkl:10.2.2.025-0 \
     turbojpeg:1.11-20081028 \
     mvapich2-intel11_1:1.4-1 \
