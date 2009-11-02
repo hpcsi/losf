@@ -40,7 +40,7 @@ BEGIN {
 	begin_routine();
 
 	if ( $osf_sync_const_file == 0 ) {
-	    INFO("** Syncing configuration files (const)\n");
+	    INFO("** Syncing configuration files (const)\n\n");
 	    $osf_sync_const_file = 1;
 	}
 

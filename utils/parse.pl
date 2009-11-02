@@ -86,7 +86,7 @@ BEGIN {
 	    
 	    INFO("   --> Node type determination successful\n");
 	    INFO("\n");
-	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
+	    INFO("   Cluster:Node_Type   = $node_cluster:$node_type\n");
 	    INFO("\n");
 	}
 
@@ -107,7 +107,7 @@ BEGIN {
 	my $logr      = get_logger();
 	my $shortname = fileparse($infile);
 
-	INFO("\n** Initializing input config_parsing ($shortname)\n");
+	INFO("   --> Initializing input config_parsing ($shortname)\n");
 	
 	verify_file_exists($infile);
 	
@@ -156,7 +156,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    INFO("\n** Initializing input config_parsing ($shortname)\n");
+	    INFO("   --> Initializing input config_parsing ($shortname)\n");
 	    
 	    verify_file_exists($infile);
 	    

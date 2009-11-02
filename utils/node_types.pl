@@ -67,9 +67,8 @@ BEGIN {
 
 	verify_sw_dependencies();
 	print_header();
-	
-	INFO("--> Mode = Node Type Determination   \n");
-	INFO("-"x 50 ."\n");
+
+	INFO("** Node Type Determination\n\n");
 	
 	chomp($host_name=`hostname -s`);
 	chomp($domain_name=`dnsdomainname`);

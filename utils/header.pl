@@ -18,8 +18,8 @@ sub print_header {
     INFO("\n");
     INFO("-"x $width . "\n");
     INFO("TACC $PKGNAME: Version = $VERSION\n");
-
-#    print "-"x $width . "\n";
+    INFO("-"x $width . "\n");
+    INFO("\n");
 }
 
 1;
