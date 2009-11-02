@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export TOP_DIR=/home/build/admin/hpc_stack
+export PERL5LIB=$TOP_DIR/utils
+
+$TOP_DIR/utils/sync_config_files.pl
+
