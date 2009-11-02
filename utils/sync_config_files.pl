@@ -73,22 +73,22 @@ BEGIN {
 	}
 	
 	my $basename = basename($file);
-	INFO("   --> [$basename] Attempting to sync file: $file\n");
+	DEBUG("   --> [$basename] Attempting to sync file: $file\n");
 	
 	my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
 	DEBUG("   --> Looking for file $sync_file\n");
 	
 	if ( ! -s $sync_file ) {
-	    WARN("   --> [$basename] Warning config/const_files/$cluster/$type/$basename not " .
+	    ERROR("   --> Warning: config/const_files/$cluster/$type/$basename not " .
 		 "found - not syncing...\n");
 	    end_routine();
 	    return;
 	}
 	
 	if ( compare($file,$sync_file) == 0 ) {
-	    INFO("   --> [$basename] OK: Files are the same - no sync required.\n");
+	    print "   --> OK: $file in sync\n";
 	} else {
-	    INFO("   --> [$basename] Differences found: $basename requires syncing\n");
+	    ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
 	    
 	    (my $fh, my $tmpfile) = tempfile();
 	    
@@ -100,7 +100,7 @@ BEGIN {
 	    
 	    INFO("   --> [$basename] Sync successful\n");
 	}
-	
+
 	end_routine();
     }
 

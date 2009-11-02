@@ -39,6 +39,8 @@ require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
+my $output_mode = $ENV{'OSF_ECHO_MODE'};
+
 determine_node_membership();
 
 BEGIN {
@@ -56,6 +58,16 @@ BEGIN {
 	my $domain_name;		# local domainname
 	my $global_cfg;			# global input configuration
 
+	verify_sw_dependencies();
+	my $logr = get_logger();
+
+	if ( "$output_mode" eq "INFO"  || 
+	     "$output_mode" eq "ERROR" ||
+	     "$output_mode" eq "WARN"  ||
+	     "$output_mode" eq "ERROR" ) {
+	    $logr->level($output_mode);
+	}
+
 	if ( $osf_membership_init == 1 ) {
 	    DEBUG("--> Returning from determine_node_membership\n");
 	    return($node_cluster,$node_type);
@@ -65,9 +77,7 @@ BEGIN {
         # Initialization
         #---------------
 
-	verify_sw_dependencies();
 	print_header();
-
 	INFO("** Node Type Determination\n\n");
 	
 	chomp($host_name=`hostname -s`);

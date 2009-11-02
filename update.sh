@@ -188,7 +188,6 @@ login_RPMS=" \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
-    neon:0.25.5-10.el5 \
     mvapich2-intel11_1:1.4-1 \
     intel-licenses:1.0-1 \
     tightvnc:1.3.10-1 \
@@ -301,6 +300,13 @@ else
 fi
 
 
+#------------------------------------------------
+# Sync desired configuration files
+#------------------------------------------------
+
+export OSF_ECHO_MODE="ERROR"
+
+$INSTALL_DIR/sync_config_files
 
 #------------------------------------------------------------
 # Verify os distribution is up2date with a quick sanity check.
