@@ -42,7 +42,8 @@ export REMOTE_INSTALL_DIR=/home/build/admin/hpc_stack/
 NUM_ARGS=$#
 if [ $# -gt 1 -a "$1" = "ROCKS" ];then
     export SRC_DIR=$2
-    export INSTALL_DIR=/tacc/tacc-sw-update
+###    export INSTALL_DIR=/tacc/tacc-sw-update
+    export INSTALL_DIR=/home/build/admin/hpc_stack
     export MODE="ROCKS"
 
     echo " "
@@ -84,12 +85,15 @@ fi
 GLOBAL_RPMS=" \
     lua:5.1.4-7 \
     lmod:2.9.4-1 \
-    base-modules:2.0-1 \
-    compat-libstdc++-33-3.2.3-61 \
+    base-modules:2.0-3 \
+    tacc_sysctl:1.0-6 \
+    compat-libstdc++-33:3.2.3-61 \
     intel11-compilers:11.1-0 \
 "
 
 GLOBAL_UNINSTALL_RPMS="\
+    vnc-server:4.1.2-14.el5_3.1 \
+    openmpi-intel11_1:1.3.3-1 \
     "
 
 #------------------------------------------------------------------------
@@ -115,6 +119,13 @@ master_RPMS=" \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
     neon:0.25.5-10.el5 \
+
+    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    mkl:10.2.2.025-0 \
+    mvapich2-intel11_1:1.4-1 \
+    tightvnc:1.3.10-1 \
+
     $SHARED_RPMS"
 
 oss_RPMS=" \
@@ -124,6 +135,38 @@ mds_RPMS=" \
     "
 
 compute_RPMS=" \
+    bash:3.2.48-1 \
+    tacc_login_scripts-compute:2.0-26 \
+
+    ibutils:1.2-1.ofed1.4.2 \
+    infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
+    kernel-ib:1.4.2-2.6.18_128.7.1_lustre_perfctr_TACC \
+    libibcm:1.0.4-1.ofed1.4.2 \
+    libibcommon:1.1.2_20090314-1.ofed1.4.2 \
+    libibmad:1.2.3_20090314-1.ofed1.4.2 \
+    libibumad:1.2.3_20090314-1.ofed1.4.2 \
+    libibverbs:1.1.2-1.ofed1.4.2 \
+    libibverbs-utils:1.1.2-1.ofed1.4.2 \
+    libmlx4:1.0-1.ofed1.4.2 \
+    libmthca:1.0.5-1.ofed1.4.2 \
+    librdmacm:1.0.8-1.ofed1.4.2 \
+    librdmacm-utils:1.0.8-1.ofed1.4.2 \
+    mstflint:1.4-1.ofed1.4.2 \
+    ofed-docs:1.4.2-0 \
+    ofed-scripts:1.4.2-0 \
+    opensm-libs:3.2.6_20090317-1.ofed1.4.2 \
+    perftest:1.2-1.ofed1.4.2 \
+    qperf:0.4.6-1.ofed1.4.2 \
+    tvflash:0.9.0-1.ofed1.4.2 \
+    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    cuda:2.3-0 \
+    cuda_SDK:2.3-0 \
+    mkl:10.2.2.025-0 \
+    turbojpeg:1.11-20081028 \
+    mvapich2-intel11_1:1.4-1 \
+
+    tightvnc:1.3.10-1 \
     "
 
 # Special check for the build node.  Note that for testing, /share/apps
@@ -146,7 +189,9 @@ login_RPMS=" \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
     neon:0.25.5-10.el5 \
+    mvapich2-intel11_1:1.4-1 \
     intel-licenses:1.0-1 \
+    tightvnc:1.3.10-1 \
     "
 
 sge_RPMS=" \
@@ -159,8 +204,9 @@ sge_RPMS=" \
 # Kernel Definitions
 #-------------------
 
-compute_KERNEL_DATE="2.6.18.8.TACC.lustre.perfctr #4 SMP Tue Jul 22 07:16:12 CDT 2008"
-compute_KERNEL="tacc-kernel-2.6.18.8.TACC.lustre.perfctr-9"
+compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+compute_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+
 compute_IB_DATE="Mon 20 Aug 2007 06:14:19 PM CDT"
 
 build_KERNEL_DATE="2.6.18.8.TACC.lustre.perfctr #2 SMP Mon Dec 10 17:14:07 CST 2007"
@@ -172,14 +218,14 @@ oss_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 mds_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
 mds_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 
-login_KERNEL_DATE="2.6.9-78.0.22.EL_lustre_TACC #2 SMP Mon Sep 21 15:12:44 CDT 2009"
-login_KERNEL="kernel-2.6.978.0.22.EL_lustre_TACC-1"
+login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #1 SMP Sat Oct 24 21:33:18 CDT 2009"
+login_KERNEL="kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
 sge_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
 sge_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
 
-master_KERNEL_DATE="2.6.9-78.0.22.EL_lustre_TACC #2 SMP Mon Sep 21 15:12:44 CDT 2009"
-master_KERNEL="kernel-2.6.978.0.22.EL_lustre_TACC-1"
+master_KERNEL_DATE="2.6.18-164_lustre_perfctr_TACC #5 SMP Mon Oct 19 19:13:04 CDT 2009"
+master_KERNEL="kernel-2.6.18164_lustre_perfctr_TACC-1"
 
 #-------------------------
 # Function initializtion
@@ -192,22 +238,33 @@ master_KERNEL="kernel-2.6.978.0.22.EL_lustre_TACC-1"
 # Verify the Kernel Installation
 #--------------------------------
 
-# export NEEDS_UPDATE=0
+export NEEDS_UPDATE=0
 
-# rpms_list=$BASENAME"_KERNEL_DATE"
-# eval local_date=\$$rpms_list
+rpms_list=$BASENAME"_KERNEL_DATE"
+eval local_date=\$$rpms_list
 
-# rpms_list=$BASENAME"_KERNEL"
-# eval local_kernel=\$$rpms_list
+rpms_list=$BASENAME"_KERNEL"
+eval local_kernel=\$$rpms_list
+GRUB_DIR=$REMOTE_INSTALL_DIR/grub_files/$CLUSTER/$BASENAME
 
-# verify_kernel "$local_date" "$local_kernel" 
+verify_kernel "$local_date" "$local_kernel" "$GRUB_DIR"
 
-# if [ "$NEEDS_UPDATE" == 1 ]; then
-#     echo " "
-#     echo "** $MYHOST needs kernel update..."
-# else
-#     echo "$MYHOST kernel is up to date (type=$BASENAME)"
-# fi
+if [ "$NEEDS_UPDATE" == 1 ]; then
+    echo " "
+    echo "** $MYHOST needs kernel update..."
+else
+    echo "$MYHOST kernel is up to date (type=$BASENAME)"
+fi
+
+#-----------------------------------------------
+# Verify the *non*-existence of certain key rpms
+#-----------------------------------------------
+
+if [ "$BASENAME" != "master" ];then
+    rpms_list="GLOBAL_UNINSTALL_RPMS"
+    eval local_rpms=\$$rpms_list
+    verify_rpms "$local_rpms" REMOVE
+fi
 
 #--------------------------------------
 # Install software common to all nodes.
@@ -243,19 +300,14 @@ else
     printf "$MYHOST is up to date with %3i packages (type=$BASENAME)\n" $count 
 fi
 
-#-----------------------------------------------
-# Verify the *non*-existence of certain key rpms
-#-----------------------------------------------
 
-##### rpms_list="GLOBAL_UNINSTALL_RPMS"
-##### eval local_rpms=\$$rpms_list
-##### verify_rpms "$local_rpms" REMOVE
 
 #------------------------------------------------------------
 # Verify os distribution is up2date with a quick sanity check.
 #------------------------------------------------------------
 
-##### $INSTALL_DIR/quick_check.sh
+# TODO: need to update...
+####$INSTALL_DIR/utils/quick_check.sh
 
 
 
