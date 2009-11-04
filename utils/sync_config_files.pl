@@ -33,6 +33,7 @@ parse_and_sync_const_files();
 BEGIN {
 
     my $osf_sync_const_file = 0;
+    my $osf_sync_softlinks  = 0;
     
     sub parse_and_sync_const_files {
 
@@ -66,7 +67,7 @@ BEGIN {
 
 	(my $cluster, my $type) = determine_node_membership();
 	
-	if ( ! -s "$file" ) {
+	if ( ! -s "$file" && ! -l "$file" ) {
 	    WARN("   --> Warning: production file $file not found - not syncing file\n");
 	    end_routine();
 	    return;
@@ -84,21 +85,57 @@ BEGIN {
 	    end_routine();
 	    return;
 	}
-	
-	if ( compare($file,$sync_file) == 0 ) {
-	    print "   --> OK: $file in sync\n";
+
+	#--------------------------------------
+	# Look for file differences and fix 'em
+	#--------------------------------------
+
+	if ( -l $sync_file ) {
+
+	    INFO("   --> Checking symbolic link\n");
+
+	    my $resolved_sync_file = readlink("$sync_file");
+
+	    # Is the target a symlink?
+
+	    if ( ! -l $file ) {
+		MYERROR("   --> Target file is not a symlink, aborting...\n");
+	    } else {
+		my $resolved_file = readlink("$file");
+	    
+		INFO("   --> Resolved sync file   = $resolved_sync_file\n");
+		INFO("   --> Resolved target file = $resolved_file\n");
+
+		if ( "$resolved_sync_file" ne "$resolved_file" ) {
+		    ERROR("   --> [$basename] Soft link difference found: updating...\n");
+		    unlink("$file") || MYERROR("[$basename] Unable to remove $file");
+		    symlink("$resolved_sync_file","$file") || MYERROR("[$basename] Unable to create symlink for $file");
+		} else {
+		    print "   --> OK: $file softlink in sync\n";
+		}
+		    
+	    }
+
 	} else {
-	    ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
-	    
-	    (my $fh, my $tmpfile) = tempfile();
-	    
-	    DEBUG("   --> Copying contents to $tmpfile\n");
-	    
-	    copy("$sync_file","$tmpfile") || MYERROR("Unable to copy $sync_file to $tmpfile");
-	    copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
-	    unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
-	    
-	    INFO("   --> [$basename] Sync successful\n");
+
+	    # Deal with non-symbolic link and diff directly.
+	
+	    if ( compare($file,$sync_file) == 0 ) {
+		print "   --> OK: $file in sync\n";
+	    } else {
+		ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
+		
+		(my $fh, my $tmpfile) = tempfile();
+		
+		DEBUG("   --> Copying contents to $tmpfile\n");
+		
+		copy("$sync_file","$tmpfile") || MYERROR("Unable to copy $sync_file to $tmpfile");
+		copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
+		unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
+		
+		INFO("   --> [$basename] Sync successful\n");
+	    }
+
 	}
 
 	end_routine();
