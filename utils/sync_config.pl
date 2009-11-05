@@ -93,9 +93,9 @@ BEGIN {
 	(my $cluster, my $type) = determine_node_membership();
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
-	    WARN("   --> Warning: production file $file not found - not syncing file\n");
-	    end_routine();
-	    return;
+	    WARN("   --> Warning: production file $file not found - adding new sync file\n");
+#	    end_routine();
+#	    return;
 	}
 	
 	my $basename = basename($file);
