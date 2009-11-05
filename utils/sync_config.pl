@@ -94,8 +94,6 @@ BEGIN {
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
 	    WARN("   --> Warning: production file $file not found - adding new sync file\n");
-#	    end_routine();
-#	    return;
 	}
 	
 	my $basename = basename($file);
