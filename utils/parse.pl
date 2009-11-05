@@ -232,6 +232,50 @@ BEGIN {
 	return(@sync_files);
     }
 
+    sub query_cluster_config_services {
+
+	begin_routine();
+
+	my $cluster = shift;
+	my $host    = shift;
+	
+	my $logr    = get_logger();
+
+	my %inputs  = ();
+
+#	my @keys    = ();
+#	my @values  = ();
+
+	INFO("   --> Looking for defined files to sync...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("Services") ) {
+	    MYERROR("No Input section found for cluster $cluster [Services]\n");
+	}
+
+	my @defined_services = $local_cfg->Parameters("Services");
+
+	my $num_entries = @defined_services;
+
+	INFO("   --> \# of services defined = $num_entries\n");
+
+	foreach(@defined_services) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("Services",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		$inputs{$_} = $myval;
+#		push(@keys,$_);
+#		push(@values,$myval);
+	    } else {
+		MYERROR("Services defined with no value ($_)");
+	    }
+	}
+
+	end_routine();
+
+#	return(@keys,@values);
+	return(%inputs);
+    }
+
     sub query_cluster_rpm_dir {
 
 	begin_routine();

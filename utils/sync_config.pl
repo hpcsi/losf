@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------------------------
 #
-# Utility Functions for Syncing Small Configuration Files
+# Utility Functions for syncing small configuration files, 
+# symbolic links, and other chkconfig services.
 #
 # $Id: utils.pl 200 2009-11-01 17:48:31Z karl $
 #-------------------------------------------------------------------
@@ -29,11 +30,12 @@ require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
 parse_and_sync_const_files();
+parse_and_sync_services();
 
 BEGIN {
 
     my $osf_sync_const_file = 0;
-    my $osf_sync_softlinks  = 0;
+    my $osf_sync_services   = 0;
     
     sub parse_and_sync_const_files {
 
@@ -52,6 +54,29 @@ BEGIN {
 
 	foreach(@sync_files) {
 	    sync_const_file("$_");
+	}
+	
+	end_routine();
+    }
+
+    sub parse_and_sync_services {
+
+	verify_sw_dependencies();
+	begin_routine();
+
+	if ( $osf_sync_services == 0 ) {
+	    INFO("\n** Syncing runlevel services\n\n");
+	    $osf_sync_services = 1;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+
+	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	my %sync_services = query_cluster_config_services($node_cluster,$node_type);
+
+	while ( my ($key,$value) = each(%sync_services) ) {
+	    DEBUG("   --> $key => $value\n");
+	    sync_chkconfig_services($key,$value);
 	}
 	
 	end_routine();
@@ -140,6 +165,60 @@ BEGIN {
 
 	end_routine();
     }
+
+    sub sync_chkconfig_services {
+
+	begin_routine();
+	
+	my $service = shift;
+	my $setting = shift;
+	my $logr    = get_logger();
+	my $found   = 0;
+
+	my $enable_service = 0;
+
+	(my $cluster, my $type) = determine_node_membership();
+
+	INFO("   --> Syncing run-level services for: $service\n");
+
+	if ( "$setting" eq "on" || "$setting" eq "ON" ) {
+	    $enable_service = 1;
+	} else {
+	    $enable_service = 0;
+	}
+
+	DEBUG("   --> Desired setting = $enable_service\n");
+
+	chomp(my $setting=`/sbin/chkconfig --list $service`);
+
+	if ( $setting =~ m/3:on/ ) {
+	    DEBUG("   --> $service is ON\n");
+	    if($enable_service) {
+		print "   --> OK: $service is ON\n";
+	    } else {
+		print "   --> FAILED: disabling $service\n";
+		`/sbin/chkconfig $service off`;
+		chomp(my $setting=`/sbin/chkconfig --list $service`);
+		if ( $setting =~ m/3:on/ ) {
+		    MYERROR("Unable to chkconfig $service off");
+		}
+	    }
+	} elsif ( $setting =~ m/3:off/ ) {
+	    DEBUG("   --> $service is OFF\n");
+	    if($enable_service) {
+		print "   --> FAILED: enabling $service\n";
+		`/sbin/chkconfig $service on`;
+		chomp(my $setting=`/sbin/chkconfig --list $service`);
+		if ( $setting =~ m/3:off/ ) {
+		    MYERROR("Unable to chkconfig $service on");
+		}
+	    } else {
+		print "   --> OK: $service is OFF\n";
+	    }
+	}
+
+    }
+
 
 }
 
