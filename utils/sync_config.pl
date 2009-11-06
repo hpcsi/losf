@@ -132,7 +132,8 @@ BEGIN {
 		if ( "$resolved_sync_file" ne "$resolved_file" ) {
 		    ERROR("   --> [$basename] Soft link difference found: updating...\n");
 		    unlink("$file") || MYERROR("[$basename] Unable to remove $file");
-		    symlink("$resolved_sync_file","$file") || MYERROR("[$basename] Unable to create symlink for $file");
+		    symlink("$resolved_sync_file","$file") || 
+			MYERROR("[$basename] Unable to create symlink for $file");
 		} else {
 		    print "   --> OK: $file softlink in sync\n";
 		}
@@ -159,9 +160,34 @@ BEGIN {
 		INFO("   --> [$basename] Sync successful\n");
 	    }
 
+	    # Ensure same permissions as original sync file.
+
+	    mirrorPermissions("$sync_file","$file");
+
 	}
 
 	end_routine();
+    }
+
+    sub mirrorPermissions {
+
+	begin_routine();
+
+	my $oldfile = shift;
+	my $newfile = shift;
+
+	MYERROR("Source and destination files must exist") unless -e $oldfile && -e $newfile;
+
+	my $mode_old = (stat($oldfile))[2] & 0777;
+	my $mode_new = (stat($newfile))[2] & 0777;
+
+	DEBUG("   --> Desired sync file permission = $mode_old\n");
+	print "   --> FAILED: updating sync file permissions..." unless $mode_old == $mode_new;
+
+	chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
+
+	end_routine();
+	return;
     }
 
     sub sync_chkconfig_services {
