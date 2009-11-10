@@ -140,6 +140,20 @@ oss_RPMS=" \
 mds_RPMS=" \
     "
 
+compute_and_login_RPMS=" \
+
+    intel11-compilers:11.1-0 \
+    mkl:10.2.2.025-0 \
+    mvapich2-intel11_1:1.4-2 \
+    openmpi-intel11_1:1.3.3-4 \
+
+    hdf5-intel11_1-mvapich2_1_4:1.8.3-9 \
+
+    cuda:2.2-0 \
+    cuda_SDK:2.2-0 \
+    "
+    
+
 compute_RPMS=" \
     bash:3.2.48-1 \
     tacc_login_scripts-compute:2.0-26 \
@@ -167,8 +181,6 @@ compute_RPMS=" \
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
 
-    cuda:2.2-0 \
-    cuda_SDK:2.2-0 \
     VirtualGL:2.1.3-20090625 \
     tightvnc:1.3.10-1 \
     turbojpeg:1.11-20081028 \
@@ -180,11 +192,7 @@ compute_RPMS=" \
     vtk:5.4.2-1 \
 
     intel-licenses:1.0-1 \
-
-    intel11-compilers:11.1-0 \
-    mkl:10.2.2.025-0 \
-    mvapich2-intel11_1:1.4-2 \
-    openmpi-intel11_1:1.3.3-4 \
+    $compute_and_login_RPMS
     "
 
 #    libX11-devel:1.0.3-9.el5 \
@@ -209,14 +217,12 @@ login_RPMS=" \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
 
-    intel11-compilers:11.1-0 \
-    mvapich2-intel11_1:1.4-1 \
-    openmpi-intel11_1:1.3.3-4
     intel-licenses:1.0-1 \
     cmake:2.6.4-1 \
     vtk:5.4.2-1 \
-
     tightvnc:1.3.10-1 \
+
+    $compute_and_login_RPMS \
     "
 
 sge_RPMS=" \
