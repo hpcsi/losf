@@ -88,12 +88,12 @@ GLOBAL_RPMS=" \
     base-modules:2.0-3 \
     tacc_sysctl:1.0-6 \
     compat-libstdc++-33:3.2.3-61 \
-    intel11-compilers:11.1-0 \
+    strace:4.5.18-5.el5 \
+
 "
 
 GLOBAL_UNINSTALL_RPMS="\
-    vnc-server:4.1.2-14.el5_3.1 \
-    openmpi-intel11_1:1.3.3-1 \
+
     "
 
 #------------------------------------------------------------------------
@@ -112,6 +112,9 @@ SHARED_RPMS=" \
 # from SHARED_RPMS
 
 master_RPMS=" \
+
+    intel11-compilers:11.1-0 \
+
     subversion:1.4.2-4.el5_3.1 \
     tacc_login_scripts-login:2.0-26 \
     apr:1.2.7-11.el5_3.1 \
@@ -123,12 +126,15 @@ master_RPMS=" \
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     mkl:10.2.2.025-0 \
-    mvapich2-intel11_1:1.4-1 \
+    mvapich2-intel11_1:1.4-2 \
     tightvnc:1.3.10-1 \
 
     $SHARED_RPMS"
 
 oss_RPMS=" \
+    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
     "
 
 mds_RPMS=" \
@@ -160,14 +166,28 @@ compute_RPMS=" \
     tvflash:0.9.0-1.ofed1.4.2 \
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+
     cuda:2.2-0 \
     cuda_SDK:2.2-0 \
-    mkl:10.2.2.025-0 \
-    turbojpeg:1.11-20081028 \
-    mvapich2-intel11_1:1.4-1 \
-
+    VirtualGL:2.1.3-20090625 \
     tightvnc:1.3.10-1 \
+    turbojpeg:1.11-20081028 \
+    tacc_visnode:1.0-1 \
+    startvnc:1.0-1 \
+    vnc-server:4.1.2-14.el5_3.1 \
+    qt:4.5.3-1 \
+    freeglut:2.4.0-7.1.el5 \
+    vtk:5.4.2-1 \
+
+    intel-licenses:1.0-1 \
+
+    intel11-compilers:11.1-0 \
+    mkl:10.2.2.025-0 \
+    mvapich2-intel11_1:1.4-2 \
+    openmpi-intel11_1:1.3.3-4 \
     "
+
+#    libX11-devel:1.0.3-9.el5 \
 
 # Special check for the build node.  Note that for testing, /share/apps
 # on the build node maps to a local file system on build.  Otherwise, build
@@ -188,16 +208,40 @@ login_RPMS=" \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
+
+    intel11-compilers:11.1-0 \
     mvapich2-intel11_1:1.4-1 \
+    openmpi-intel11_1:1.3.3-4
     intel-licenses:1.0-1 \
+    cmake:2.6.4-1 \
+    vtk:5.4.2-1 \
+
     tightvnc:1.3.10-1 \
     "
 
 sge_RPMS=" \
-    lustre-ldiskfs:3.0.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020703 \
-    lustre-modules:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020702 \
-    lustre:1.6.6-2.6.9_67.0.22.EL_lustre.1.6.6smp_200812020702 \
-    tacc_share_client:1.0-14 \
+    bash:3.2.48-1 \
+    tacc_login_scripts-compute:2.0-26 \
+
+    ibutils:1.2-1.ofed1.4.2 \
+    infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
+    kernel-ib:1.4.2-2.6.18_128.7.1_lustre_perfctr_TACC \
+    libibcm:1.0.4-1.ofed1.4.2 \
+    libibcommon:1.1.2_20090314-1.ofed1.4.2 \
+    libibmad:1.2.3_20090314-1.ofed1.4.2 \
+    libibumad:1.2.3_20090314-1.ofed1.4.2 \
+    libibverbs:1.1.2-1.ofed1.4.2 \
+    libibverbs-utils:1.1.2-1.ofed1.4.2 \
+    libmlx4:1.0-1.ofed1.4.2 \
+    libmthca:1.0.5-1.ofed1.4.2 \
+    librdmacm:1.0.8-1.ofed1.4.2 \
+    librdmacm-utils:1.0.8-1.ofed1.4.2 \
+    mstflint:1.4-1.ofed1.4.2 \
+    ofed-docs:1.4.2-0 \
+    ofed-scripts:1.4.2-0 \
+    opensm-libs:3.2.6_20090317-1.ofed1.4.2 \
+    perftest:1.2-1.ofed1.4.2 \
+    qperf:0.4.6-1.ofed1.4.2 \
     "
 #-------------------
 # Kernel Definitions
@@ -217,11 +261,11 @@ oss_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 mds_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
 mds_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
 
-login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #1 SMP Sat Oct 24 21:33:18 CDT 2009"
-login_KERNEL="kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
-sge_KERNEL_DATE="2.6.9-67.0.22.EL_lustre.1.6.6smp #1 SMP Thu Sep 11 18:59:03 EDT 2008"
-sge_KERNEL="kernel-lustre-smp-2.6.9-67.0.22.EL_lustre.1.6.6"
+sge_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+sge_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
 master_KERNEL_DATE="2.6.18-164_lustre_perfctr_TACC #5 SMP Mon Oct 19 19:13:04 CDT 2009"
 master_KERNEL="kernel-2.6.18164_lustre_perfctr_TACC-1"
