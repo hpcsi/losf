@@ -89,6 +89,7 @@ GLOBAL_RPMS=" \
     tacc_sysctl:1.0-6 \
     compat-libstdc++-33:3.2.3-61 \
     strace:4.5.18-5.el5 \
+    gdb:6.8-37.el5 \
 
 "
 
@@ -135,6 +136,7 @@ oss_RPMS=" \
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
+    tacc-udev-md1000:1-2 \
     "
 
 mds_RPMS=" \
@@ -148,15 +150,23 @@ compute_and_login_RPMS=" \
     openmpi-intel11_1:1.3.3-4 \
 
     hdf5-intel11_1-mvapich2_1_4:1.8.3-9 \
+    silo:4.6.2-1 \
 
     cuda:2.2-0 \
-    cuda_SDK:2.2-0 \
+    cuda_SDK:2.2-1 \
+    paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
+    paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
+    visit-intel11_1-openmpi_1_3_3:1.12.0-1 \
+    visit-intel11_1-mvapich2_1_4:1.12.0-1 \
+
+    sge-execd-6.2:6.2u4-1 \
     "
     
 
 compute_RPMS=" \
     bash:3.2.48-1 \
     tacc_login_scripts-compute:2.0-26 \
+    compute_ssh:1.0-3 \
 
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
@@ -216,11 +226,13 @@ login_RPMS=" \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
+    tacc_httpd_config:1.0-1 \
 
     intel-licenses:1.0-1 \
     cmake:2.6.4-1 \
     vtk:5.4.2-1 \
     tightvnc:1.3.10-1 \
+    php-gd:5.1.6-23.2.el5_3 \
 
     $compute_and_login_RPMS \
     "
@@ -261,8 +273,8 @@ compute_IB_DATE="Mon 20 Aug 2007 06:14:19 PM CDT"
 build_KERNEL_DATE="2.6.18.8.TACC.lustre.perfctr #2 SMP Mon Dec 10 17:14:07 CST 2007"
 build_KERNEL="tacc-kernel-2.6.18.8.TACC.lustre.perfctr-6"
 
-oss_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
-oss_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
+oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+oss_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
 mds_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
 mds_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
