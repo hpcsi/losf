@@ -136,10 +136,16 @@ oss_RPMS=" \
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
-    tacc-udev-md1000:1-2 \
+    tacc-udev-md1000:1-5 \
+    e2fsprogs:1.41.6.sun1-0redhat \
     "
 
 mds_RPMS=" \
+    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
+    tacc-udev-md1000:1-5 \
+    e2fsprogs:1.41.6.sun1-0redhat \
     "
 
 compute_and_login_RPMS=" \
@@ -276,8 +282,8 @@ build_KERNEL="tacc-kernel-2.6.18.8.TACC.lustre.perfctr-6"
 oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 oss_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
-mds_KERNEL_DATE="2.6.9-55.0.9.EL_lustre.1.6.3smp #1 SMP Sun Oct 7 20:08:31 EDT 2007"
-mds_KERNEL="kernel-lustre-smp-2.6.9-55.0.9.EL_lustre.1.6.3"
+mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+mds_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
 login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
