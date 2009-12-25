@@ -12,6 +12,7 @@
 #-----------------------------------------------
 
 VERBOSE=0
+DEFAULT_ARCH=x86_64
 
 function verify_rpms
 {
@@ -78,12 +79,43 @@ function verify_rpms
 	      else
 		  export PACKAGE=`echo $i | awk -F : '{print $1}'`
 		  export VERSION=`echo $i | awk -F : '{print $2}'`
+
+		  #--------------------------------------------------
+		  # Check for specification of a target architecture;
+		  # if not, assume the default arch
+		  #--------------------------------------------------
+
+		  myarch=$DEFAULT_ARCH
+		  
+		  match=`echo $VERSION | egrep ".x86_64\b"`
+		  if [ "x$match" != "x" ]; then
+		      myarch="x86_64"
+		      VERSION=`echo $VERSION | awk -F ".$myarch" '{print $1}'`
+		  fi
+
+		  match=`echo $VERSION | egrep ".i386\b"`
+		  if [ "x$match" != "x" ]; then
+		      myarch="i386"
+		      VERSION=`echo $VERSION | awk -F ".$myarch" '{print $1}'`
+		  fi
+
+		  match=`echo $VERSION | egrep ".i686\b"`
+		  if [ "x$match" != "x" ]; then
+		      myarch="i686"
+		      VERSION=`echo $VERSION | awk -F ".$myarch" '{print $1}'`
+		  fi
+
+#		  echo "myarch = $myarch"
+
 	      fi
 	      
               # New method to deal with things like "charm++"
+
+###	      echo "rpm -qi $PACKAGE-$VERSION.$myarch"
 	      
-	      my_ver=`rpm -qi $PACKAGE-$VERSION | grep "\bVersion     " | awk '{print $3}'`
-	      my_rel=`rpm -qi $PACKAGE-$VERSION | grep "\bRelease     " | awk '{print $3}'`
+#	      my_ver=`rpm -qi $PACKAGE-$VERSION | grep "\bVersion     " | awk '{print $3}'`
+	      my_ver=`rpm -qi $PACKAGE-$VERSION.$myarch | grep "\bVersion     " | awk '{print $3}'`
+	      my_rel=`rpm -qi $PACKAGE-$VERSION.$myarch | grep "\bRelease     " | awk '{print $3}'`
 	      
 	      INSTALLED="$my_ver-$my_rel"
 
