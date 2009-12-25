@@ -86,11 +86,12 @@ GLOBAL_RPMS=" \
     lua:5.1.4-7 \
     lmod:2.9.4-1 \
     base-modules:2.0-3 \
-    tacc_sysctl:1.0-6 \
-    compat-libstdc++-33:3.2.3-61 \
+    tacc_sysctl:1.0-7 \
+    compat-libstdc++-33:3.2.3-61.i386 \
+    compat-libstdc++-33:3.2.3-61.x86_64 \
     strace:4.5.18-5.el5 \
     gdb:6.8-37.el5 \
-
+    tacc_ib:1.0-0 \
 "
 
 GLOBAL_UNINSTALL_RPMS="\
@@ -133,18 +134,63 @@ master_RPMS=" \
     $SHARED_RPMS"
 
 oss_RPMS=" \
+    sysstat:7.0.2-3.el5 \
+    ibutils:1.2-1.ofed1.4.2 \
+    infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
+    kernel-ib:1.4.2-2.6.18_128.7.1_lustre_perfctr_TACC \
+    libibcm:1.0.4-1.ofed1.4.2 \
+    libibcommon:1.1.2_20090314-1.ofed1.4.2 \
+    libibmad:1.2.3_20090314-1.ofed1.4.2 \
+    libibumad:1.2.3_20090314-1.ofed1.4.2 \
+    libibverbs:1.1.2-1.ofed1.4.2 \
+    libibverbs-utils:1.1.2-1.ofed1.4.2 \
+    libmlx4:1.0-1.ofed1.4.2 \
+    libmthca:1.0.5-1.ofed1.4.2 \
+    librdmacm:1.0.8-1.ofed1.4.2 \
+    librdmacm-utils:1.0.8-1.ofed1.4.2 \
+    mstflint:1.4-1.ofed1.4.2 \
+    ofed-docs:1.4.2-0 \
+    ofed-scripts:1.4.2-0 \
+    opensm-libs:3.2.6_20090317-1.ofed1.4.2 \
+    perftest:1.2-1.ofed1.4.2 \
+    qperf:0.4.6-1.ofed1.4.2 \
+    tvflash:0.9.0-1.ofed1.4.2 \
+
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
     tacc-udev-md1000:1-5 \
     e2fsprogs:1.41.6.sun1-0redhat \
+    tacc_lustre:1.0-2 \
     "
 
 mds_RPMS=" \
+    sysstat:7.0.2-3.el5 \
+    ibutils:1.2-1.ofed1.4.2 \
+    infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
+    kernel-ib:1.4.2-2.6.18_128.7.1_lustre_perfctr_TACC \
+    libibcm:1.0.4-1.ofed1.4.2 \
+    libibcommon:1.1.2_20090314-1.ofed1.4.2 \
+    libibmad:1.2.3_20090314-1.ofed1.4.2 \
+    libibumad:1.2.3_20090314-1.ofed1.4.2 \
+    libibverbs:1.1.2-1.ofed1.4.2 \
+    libibverbs-utils:1.1.2-1.ofed1.4.2 \
+    libmlx4:1.0-1.ofed1.4.2 \
+    libmthca:1.0.5-1.ofed1.4.2 \
+    librdmacm:1.0.8-1.ofed1.4.2 \
+    librdmacm-utils:1.0.8-1.ofed1.4.2 \
+    mstflint:1.4-1.ofed1.4.2 \
+    ofed-docs:1.4.2-0 \
+    ofed-scripts:1.4.2-0 \
+    opensm-libs:3.2.6_20090317-1.ofed1.4.2 \
+    perftest:1.2-1.ofed1.4.2 \
+    qperf:0.4.6-1.ofed1.4.2 \
+    tvflash:0.9.0-1.ofed1.4.2 \
+
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
     lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
-    tacc-udev-md1000:1-5 \
+    tacc-udev-mds:1-0 \
     e2fsprogs:1.41.6.sun1-0redhat \
     "
 
@@ -166,13 +212,15 @@ compute_and_login_RPMS=" \
     visit-intel11_1-mvapich2_1_4:1.12.0-1 \
 
     sge-execd-6.2:6.2u4-1 \
+    tacc_scratch_client:1.0-3 \
+    tacc_ranger_fs:1.0-2 \
     "
     
 
 compute_RPMS=" \
     bash:3.2.48-1 \
     tacc_login_scripts-compute:2.0-26 \
-    compute_ssh:1.0-3 \
+    compute_ssh:1.0-4 \
 
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
@@ -200,7 +248,7 @@ compute_RPMS=" \
     VirtualGL:2.1.3-20090625 \
     tightvnc:1.3.10-1 \
     turbojpeg:1.11-20081028 \
-    tacc_visnode:1.0-1 \
+    tacc_visnode:1.0-2 \
     startvnc:1.0-1 \
     vnc-server:4.1.2-14.el5_3.1 \
     qt:4.5.3-1 \
@@ -211,7 +259,7 @@ compute_RPMS=" \
     $compute_and_login_RPMS
     "
 
-#    libX11-devel:1.0.3-9.el5 \
+phat_RPMS="$compute_RPMS"
 
 # Special check for the build node.  Note that for testing, /share/apps
 # on the build node maps to a local file system on build.  Otherwise, build
@@ -232,7 +280,7 @@ login_RPMS=" \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
-    tacc_httpd_config:1.0-1 \
+    tacc_httpd_config:1.0-2 \
 
     intel-licenses:1.0-1 \
     cmake:2.6.4-1 \
@@ -273,6 +321,9 @@ sge_RPMS=" \
 
 compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 compute_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+
+phat_KERNEL_DATE=$compute_KERNEL_DATE
+phat_KERNEL=$compute_KERNEL
 
 compute_IB_DATE="Mon 20 Aug 2007 06:14:19 PM CDT"
 
