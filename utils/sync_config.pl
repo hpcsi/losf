@@ -103,7 +103,7 @@ BEGIN {
 	DEBUG("   --> Looking for file $sync_file\n");
 	
 	if ( ! -s $sync_file ) {
-	    ERROR("   --> Warning: config/const_files/$cluster/$type/$basename not " .
+	    WARN("   --> Warning: config/const_files/$cluster/$type/$basename not " .
 		 "found - not syncing...\n");
 	    end_routine();
 	    return;
