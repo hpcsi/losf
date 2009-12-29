@@ -31,11 +31,13 @@ require "$osf_utils_dir/header.pl";
 
 parse_and_sync_const_files();
 parse_and_sync_services();
+parse_and_sync_permissions();
 
 BEGIN {
 
-    my $osf_sync_const_file = 0;
-    my $osf_sync_services   = 0;
+    my $osf_sync_const_file  = 0;
+    my $osf_sync_services    = 0;
+    my $osf_sync_permissions = 0;
     
     sub parse_and_sync_const_files {
 
@@ -167,6 +169,32 @@ BEGIN {
 	}
 
 	end_routine();
+    }
+
+
+    sub parse_and_sync_permissions {
+	verify_sw_dependencies();
+	begin_routine();
+
+	if ( $osf_sync_permissions == 0 ) {
+	    INFO("** Syncing file/directory permissions\n\n");
+	    $osf_sync_permissions = 1;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+
+	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
+
+	while ( my ($key,$value) = each(%perm_files) ) {
+	    DEBUG("   --> $key => $value\n");
+
+	    my $cmd_string = sprintf("chmod %i %s",$value,$key);
+	    system($cmd_string); 
+	}
+
+	end_routine();
+	return;
     }
 
     sub mirrorPermissions {

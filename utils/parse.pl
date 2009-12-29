@@ -232,6 +232,8 @@ BEGIN {
 	return(@sync_files);
     }
 
+
+
     sub query_cluster_config_services {
 
 	begin_routine();
@@ -273,6 +275,44 @@ BEGIN {
 	end_routine();
 
 #	return(@keys,@values);
+	return(%inputs);
+    }
+
+    sub query_cluster_config_sync_permissions {
+
+	begin_routine();
+
+	my $cluster = shift;
+	my $host    = shift;
+	
+	my $logr    = get_logger();
+
+	my %inputs  = ();
+
+	INFO("   --> Looking for specific permissions to sync...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("Permissions") ) {
+	    MYERROR("No Input section found for cluster $cluster [Permissions]\n");
+	}
+
+	my @perms = $local_cfg->Parameters("Permissions");
+
+	my $num_entries = @perms;
+
+	INFO("   --> \# of file permissions to sync = $num_entries\n");
+
+	foreach(@perms) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("Permissions",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		$inputs{$_} = $myval;
+	    } else {
+		MYERROR("Permissions defined with no value ($_)");
+	    }
+	}
+
+	end_routine();
+
 	return(%inputs);
     }
 

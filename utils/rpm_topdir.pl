@@ -28,6 +28,7 @@ require "$osf_utils_dir/header.pl";
 my $logr = get_logger();
 
 verify_sw_dependencies(); $logr->level($ERROR);
+#$logr->level($INFO);
 print_header();
 
 #---------------------
