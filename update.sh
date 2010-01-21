@@ -84,7 +84,14 @@ fi
 
 GLOBAL_RPMS=" \
     lua:5.1.4-7 \
-    lmod:2.9.4-1 \
+
+    shell_startup:1.4.1-1 \
+    lmod:2.9.6-1 \
+    tcsh:6.16-2 \
+    ksh:20091021-1 \
+    zsh:4.3.9-1
+    bash:3.2.48-1
+
     base-modules:2.0-3 \
     tacc_sysctl:1.0-7 \
     compat-libstdc++-33:3.2.3-61.i386 \
@@ -118,18 +125,21 @@ master_RPMS=" \
     intel11-compilers:11.1-0 \
 
     subversion:1.4.2-4.el5_3.1 \
-    tacc_login_scripts-login:2.0-26 \
+    tacc_login_scripts-login:2.0-31 \
     apr:1.2.7-11.el5_3.1 \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
     apr-util-devel:1.2.7-7.el5_3.2 \
     neon:0.25.5-10.el5 \
 
-    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+
     mkl:10.2.2.025-0 \
-    mvapich2-intel11_1:1.4-2 \
+    mvapich2-intel11_1:1.4-3 \
     tightvnc:1.3.10-1 \
+    tacc_scratch_client:1.0-5 \
+    git:1.6.5.7-1 \
 
     $SHARED_RPMS"
 
@@ -156,13 +166,22 @@ oss_RPMS=" \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
 
-    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
-    tacc-udev-md1000:1-5 \
+    lustre:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre-modules:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+
+    tacc-udev-md1000:1-6 \
     e2fsprogs:1.41.6.sun1-0redhat \
     tacc_lustre:1.0-2 \
     "
+
+#    lustre:1.8.1.59-2.6.18_128.7.1_lustre_perfctr_TACC_201001052046 \
+#    lustre-modules:1.8.1.59-2.6.18_128.7.1_lustre_perfctr_TACC_201001052046 \
+#    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_201001052047 \
+
+#    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+#    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+#    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
 
 mds_RPMS=" \
     sysstat:7.0.2-3.el5 \
@@ -187,9 +206,10 @@ mds_RPMS=" \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
 
-    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_200910242244 \
+    lustre:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre-modules:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+
     tacc-udev-mds:1-0 \
     e2fsprogs:1.41.6.sun1-0redhat \
     "
@@ -198,11 +218,13 @@ compute_and_login_RPMS=" \
 
     intel11-compilers:11.1-0 \
     mkl:10.2.2.025-0 \
-    mvapich2-intel11_1:1.4-2 \
+    mvapich2-intel11_1:1.4-4 \
+    mvapich2-debug-intel11_1:1.4-1 \
     openmpi-intel11_1:1.3.3-4 \
 
     hdf5-intel11_1-mvapich2_1_4:1.8.3-9 \
     silo:4.6.2-1 \
+    netcdf-intel11_1:4.0.1-1 \
 
     cuda:2.2-0 \
     cuda_SDK:2.2-1 \
@@ -212,14 +234,16 @@ compute_and_login_RPMS=" \
     visit-intel11_1-mvapich2_1_4:1.12.0-1 \
 
     sge-execd-6.2:6.2u4-1 \
-    tacc_scratch_client:1.0-3 \
+    tacc_scratch_client:1.0-5 \
     tacc_ranger_fs:1.0-2 \
+    ensight-gold:9.0-0 \
+    libXp:1.0.0-8.1.el5 \
+    libXp-devel:1.0.0-8.1.el5 \
     "
     
 
 compute_RPMS=" \
-    bash:3.2.48-1 \
-    tacc_login_scripts-compute:2.0-26 \
+    tacc_login_scripts-compute:2.0-31 \
     compute_ssh:1.0-4 \
 
     ibutils:1.2-1.ofed1.4.2 \
@@ -242,14 +266,15 @@ compute_RPMS=" \
     perftest:1.2-1.ofed1.4.2 \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
-    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
-    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_200910242243 \
+
+    lustre:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre-modules:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
 
     VirtualGL:2.1.3-20090625 \
     tightvnc:1.3.10-1 \
     turbojpeg:1.11-20081028 \
     tacc_visnode:1.0-2 \
-    startvnc:1.0-1 \
+    startvnc:1.0-2 \
     vnc-server:4.1.2-14.el5_3.1 \
     qt:4.5.3-1 \
     freeglut:2.4.0-7.1.el5 \
@@ -258,6 +283,15 @@ compute_RPMS=" \
     intel-licenses:1.0-1 \
     $compute_and_login_RPMS
     "
+
+#    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+#    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+
+#    lustre:1.8.1.59-2.6.18_128.7.1_lustre_perfctr_TACC_201001052046 \
+#    lustre-modules:1.8.1.59-2.6.18_128.7.1_lustre_perfctr_TACC_201001052046 \
+
+#    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+#    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
 
 phat_RPMS="$compute_RPMS"
 
@@ -275,7 +309,8 @@ fi
 
 login_RPMS=" \
     subversion:1.4.2-4.el5_3.1 \
-    tacc_login_scripts-login:2.0-26 \
+    git:1.6.5.7-1 \
+    tacc_login_scripts-login:2.0-31 \
     apr:1.2.7-11.el5_3.1 \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
@@ -287,13 +322,18 @@ login_RPMS=" \
     vtk:5.4.2-1 \
     tightvnc:1.3.10-1 \
     php-gd:5.1.6-23.2.el5_3 \
+    php-soap:5.1.6-24.el5_4.5 \
+
+    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+    
+    tacc_longhorn_port_forwarding:1.0-3 \
 
     $compute_and_login_RPMS \
     "
 
 sge_RPMS=" \
-    bash:3.2.48-1 \
-    tacc_login_scripts-compute:2.0-26 \
+    tacc_login_scripts-compute:2.0-29 \
 
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
@@ -319,8 +359,9 @@ sge_RPMS=" \
 # Kernel Definitions
 #-------------------
 
-compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-compute_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+#compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
+compute_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
 
 phat_KERNEL_DATE=$compute_KERNEL_DATE
 phat_KERNEL=$compute_KERNEL
@@ -330,11 +371,13 @@ compute_IB_DATE="Mon 20 Aug 2007 06:14:19 PM CDT"
 build_KERNEL_DATE="2.6.18.8.TACC.lustre.perfctr #2 SMP Mon Dec 10 17:14:07 CST 2007"
 build_KERNEL="tacc-kernel-2.6.18.8.TACC.lustre.perfctr-6"
 
-oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-oss_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+#oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
+oss_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
 
-mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-mds_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+#mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
+mds_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
 
 login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
@@ -342,8 +385,8 @@ login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 sge_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 sge_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
-master_KERNEL_DATE="2.6.18-164_lustre_perfctr_TACC #5 SMP Mon Oct 19 19:13:04 CDT 2009"
-master_KERNEL="kernel-2.6.18164_lustre_perfctr_TACC-1"
+master_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+master_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
 #-------------------------
 # Function initializtion
