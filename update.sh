@@ -96,7 +96,7 @@ GLOBAL_RPMS=" \
     tacc_sysctl:1.0-7 \
     compat-libstdc++-33:3.2.3-61.i386 \
     compat-libstdc++-33:3.2.3-61.x86_64 \
-    strace:4.5.18-5.el5 \
+    libsmbios:2.2.19-10.1.el5.x86_64 \
     gdb:6.8-37.el5 \
     tacc_ib:1.0-0 \
 "
@@ -225,6 +225,8 @@ compute_and_login_RPMS=" \
     hdf5-intel11_1-mvapich2_1_4:1.8.3-9 \
     silo:4.6.2-1 \
     netcdf-intel11_1:4.0.1-1 \
+    fftw2-intel11_1-openmpi_1_3_3:2.1.5-1 \
+    fftw2-intel11_1-mvapich2_1_4:2.1.5-1 \
 
     cuda:2.2-0 \
     cuda_SDK:2.2-1 \
@@ -239,6 +241,7 @@ compute_and_login_RPMS=" \
     ensight-gold:9.0-0 \
     libXp:1.0.0-8.1.el5 \
     libXp-devel:1.0.0-8.1.el5 \
+    sas:9.2-1 \
     "
     
 
@@ -279,6 +282,9 @@ compute_RPMS=" \
     qt:4.5.3-1 \
     freeglut:2.4.0-7.1.el5 \
     vtk:5.4.2-1 \
+    gimp:2.2.13-2.0.7.el5 \
+    gimp-libs:2.2.13-2.0.7.el5 \
+    gtkhtml2:2.11.0-3 \
 
     intel-licenses:1.0-1 \
     $compute_and_login_RPMS
@@ -321,7 +327,7 @@ login_RPMS=" \
     cmake:2.6.4-1 \
     vtk:5.4.2-1 \
     tightvnc:1.3.10-1 \
-    php-gd:5.1.6-23.2.el5_3 \
+    php-gd:5.1.6-24.el5_4.5 \
     php-soap:5.1.6-24.el5_4.5 \
 
     lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
