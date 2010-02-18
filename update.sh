@@ -168,7 +168,6 @@ oss_RPMS=" \
 
     lustre:1.8.2-2.6.18_164.11.1.el5_lustre.1.8.2 \
     lustre-modules:1.8.2-2.6.18_164.11.1.el5_lustre.1.8.2 \
-    lustre-ldiskfs:3.0.9-2.6.18_164.11.1.el5_lustre.1.8.2 \
 
     tacc-udev-md1000:1-6 \
     e2fsprogs:1.41.6.sun1-0redhat \
@@ -251,7 +250,7 @@ compute_RPMS=" \
 
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
-    kernel-ib:1.4.2-2.6.18_128.7.1_lustre_perfctr_TACC \
+    kernel-ib:1.4.2-2.6.18_164.11.1_lustre_perfctr_TACC \
     libibcm:1.0.4-1.ofed1.4.2 \
     libibcommon:1.1.2_20090314-1.ofed1.4.2 \
     libibmad:1.2.3_20090314-1.ofed1.4.2 \
@@ -270,8 +269,8 @@ compute_RPMS=" \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
 
-    lustre:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
-    lustre-modules:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre:1.8.2-2.6.18_164.11.1_lustre_perfctr_TACC_201002171104 \
+    lustre-modules:1.8.2-2.6.18_164.11.1_lustre_perfctr_TACC_201002171104 \
 
     VirtualGL:2.1.3-20090625 \
     tightvnc:1.3.10-1 \
@@ -366,8 +365,9 @@ sge_RPMS=" \
 #-------------------
 
 #compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
-compute_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
+#compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
+compute_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #3 SMP Wed Feb 17 09:16:18 CST 2010"
+compute_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-2"
 
 phat_KERNEL_DATE=$compute_KERNEL_DATE
 phat_KERNEL=$compute_KERNEL
