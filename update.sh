@@ -89,8 +89,10 @@ GLOBAL_RPMS=" \
     lmod:2.9.6-1 \
     tcsh:6.16-2 \
     ksh:20091021-1 \
-    zsh:4.3.9-1
-    bash:3.2.48-1
+    zsh:4.3.9-1 \
+    bash:3.2.48-1 \
+    openmotif:2.3.1-2.el5 \
+    openmotif-devel:2.3.1-2.el5 \
 
     base-modules:2.0-3 \
     tacc_sysctl:1.0-7 \
@@ -231,8 +233,8 @@ compute_and_login_RPMS=" \
     cuda_SDK:2.2-1 \
     paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
     paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
-    visit-intel11_1-openmpi_1_3_3:1.12.0-1 \
-    visit-intel11_1-mvapich2_1_4:1.12.0-1 \
+    visit-intel11_1-openmpi_1_3_3:1.12.0-3 \
+    visit-intel11_1-mvapich2_1_4:1.12.0-3 \
 
     sge-execd-6.2:6.2u4-1 \
     tacc_scratch_client:1.0-5 \
@@ -242,6 +244,8 @@ compute_and_login_RPMS=" \
     libXp-devel:1.0.0-8.1.el5 \
     sas:9.2-1 \
     ltrace:0.5-13.45svn.el5 \
+    launcher:1.3-1 \
+    vmd:1.8.7-2 \
     "
 
 compute_RPMS=" \
@@ -314,7 +318,8 @@ fi
 
 login_RPMS=" \
     subversion:1.4.2-4.el5_3.1 \
-    git:1.6.5.7-1 \
+    subversion-perl:1.4.2-4.el5_3.1 \
+    git:1.6.5.7-2 \
     tacc_login_scripts-login:2.0-31 \
     apr:1.2.7-11.el5_3.1 \
     apr-devel:1.2.7-11.el5_3.1 \
@@ -333,6 +338,7 @@ login_RPMS=" \
     lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
     
     tacc_longhorn_port_forwarding:1.0-3 \
+    swsudo:1.0-1 \
 
     $compute_and_login_RPMS \
     "
