@@ -233,8 +233,8 @@ compute_and_login_RPMS=" \
     cuda_SDK:2.2-1 \
     paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
     paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
-    visit-intel11_1-openmpi_1_3_3:1.12.0-3 \
-    visit-intel11_1-mvapich2_1_4:1.12.0-3 \
+    visit-intel11_1-openmpi_1_3_3:1.12.0-4 \
+    visit-intel11_1-mvapich2_1_4:1.12.0-4 \
 
     sge-execd-6.2:6.2u4-1 \
     tacc_scratch_client:1.0-5 \
