@@ -246,6 +246,9 @@ compute_and_login_RPMS=" \
     ltrace:0.5-13.45svn.el5 \
     launcher:1.3-1 \
     vmd:1.8.7-2 \
+    cg:2.2-2 \
+    freeglut:2.6.0-1 \
+    glew:1.5.3-1 \
     "
 
 compute_RPMS=" \
@@ -289,7 +292,7 @@ compute_RPMS=" \
     gimp-libs:2.2.13-2.0.7.el5 \
     gtkhtml2:2.11.0-3 \
 
-    intel-licenses:1.0-1 \
+    intel-licenses:1.0-5 \
     $compute_and_login_RPMS
     "
 
@@ -327,7 +330,7 @@ login_RPMS=" \
     apr-util-devel:1.2.7-7.el5_3.2 \
     tacc_httpd_config:1.0-2 \
 
-    intel-licenses:1.0-1 \
+    intel-licenses:1.0-5 \
     cmake:2.6.4-1 \
     vtk:5.4.2-1 \
     tightvnc:1.3.10-1 \
