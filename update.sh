@@ -251,6 +251,7 @@ compute_and_login_RPMS=" \
     glew:1.5.3-1 \
     opencv:2.0.0-1 \
     ddt:2.5.1-1 \
+    ghostscript-devel:8.15.2-9.11.el5 \
     "
 
 compute_RPMS=" \
