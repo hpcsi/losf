@@ -236,7 +236,7 @@ compute_and_login_RPMS=" \
     visit-intel11_1-openmpi_1_3_3:1.12.0-4 \
     visit-intel11_1-mvapich2_1_4:1.12.0-4 \
 
-    sge-execd-6.2:6.2u4-1 \
+    sge-execd-6.2:6.2u5_1-1 \
     tacc_scratch_client:1.0-5 \
     tacc_ranger_fs:1.0-2 \
     ensight-gold:9.0-0 \
@@ -249,11 +249,14 @@ compute_and_login_RPMS=" \
     cg:2.2-2 \
     freeglut:2.6.0-1 \
     glew:1.5.3-1 \
+    opencv:2.0.0-1 \
+    ddt:2.5.1-1 \
     "
 
 compute_RPMS=" \
     tacc_login_scripts-compute:2.0-31 \
     compute_ssh:1.0-4 \
+    pam-sge:6.2u5_1-2 \
 
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
