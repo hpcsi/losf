@@ -1,3 +1,4 @@
+# -*-sh-*-
 #!/bin/bash
 #
 # $Id$
@@ -252,6 +253,7 @@ compute_and_login_RPMS=" \
     opencv:2.0.0-1 \
     ddt:2.5.1-1 \
     ghostscript-devel:8.15.2-9.11.el5 \
+    boost-intel11_1:1.41.0-2 \
     "
 
 compute_RPMS=" \
