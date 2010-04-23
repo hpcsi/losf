@@ -92,8 +92,8 @@ GLOBAL_RPMS=" \
     ksh:20091021-1 \
     zsh:4.3.9-1 \
     bash:3.2.48-1 \
-    openmotif:2.3.1-2.el5 \
-    openmotif-devel:2.3.1-2.el5 \
+    openmotif:2.3.1-2.el5_4.1 \
+    openmotif-devel:2.3.1-2.el5_4.1 \
 
     base-modules:2.0-3 \
     tacc_sysctl:1.0-7 \
@@ -141,6 +141,7 @@ master_RPMS=" \
     mkl:10.2.2.025-0 \
     mvapich2-intel11_1:1.4-3 \
     tightvnc:1.3.10-1 \
+    plplot:5.9.5-1 \
     tacc_scratch_client:1.0-5 \
     git:1.6.5.7-1 \
 
@@ -150,7 +151,7 @@ oss_RPMS=" \
     sysstat:7.0.2-3.el5 \
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
-    kernel-ib:1.4.2-2.6.18_128.7.1_lustre_perfctr_TACC \
+    kernel-ib:1.4.2-2.6.18_164.11.1_lustre_perfctr_TACC \
     libibcm:1.0.4-1.ofed1.4.2 \
     libibcommon:1.1.2_20090314-1.ofed1.4.2 \
     libibmad:1.2.3_20090314-1.ofed1.4.2 \
@@ -177,6 +178,7 @@ oss_RPMS=" \
     tacc_lustre:1.0-2 \
     "
 
+#    kernel-ib-1.4.2-2.6.18_164.11.1_lustre_perfctr_TACC
 #    lustre:1.8.1.59-2.6.18_128.7.1_lustre_perfctr_TACC_201001052046 \
 #    lustre-modules:1.8.1.59-2.6.18_128.7.1_lustre_perfctr_TACC_201001052046 \
 #    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_201001052047 \
@@ -232,10 +234,13 @@ compute_and_login_RPMS=" \
 
     cuda:2.2-0 \
     cuda_SDK:2.2-1 \
+    cuda2.3:2.3-1 \
+    cuda_SDK2.3:2.3-1 \
     paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
     paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
     visit-intel11_1-openmpi_1_3_3:1.12.0-4 \
     visit-intel11_1-mvapich2_1_4:1.12.0-4 \
+    vapor:1.5.2-1 \
 
     sge-execd-6.2:6.2u5_1-1 \
     tacc_scratch_client:1.0-5 \
@@ -254,6 +259,8 @@ compute_and_login_RPMS=" \
     ddt:2.5.1-1 \
     ghostscript-devel:8.15.2-9.11.el5 \
     boost-intel11_1:1.41.0-2 \
+    namd27b2-intel11_1-mvapich2_1_4-cuda:2.7b2-1 \
+    namd27b2-intel11_1-mvapich2_1_4:2.7b2-1 \
     "
 
 compute_RPMS=" \
@@ -292,7 +299,7 @@ compute_RPMS=" \
     startvnc:1.0-2 \
     vnc-server:4.1.2-14.el5_3.1 \
     qt:4.5.3-1 \
-    freeglut:2.4.0-7.1.el5 \
+    freeglut:2.6.0-1 \
     vtk:5.4.2-1 \
     gimp:2.2.13-2.0.7.el5 \
     gimp-libs:2.2.13-2.0.7.el5 \
@@ -337,7 +344,7 @@ login_RPMS=" \
     tacc_httpd_config:1.0-2 \
 
     intel-licenses:1.0-5 \
-    cmake:2.6.4-1 \
+    cmake:2.8.1-1 \
     vtk:5.4.2-1 \
     tightvnc:1.3.10-1 \
     php-gd:5.1.6-24.el5_4.5 \
