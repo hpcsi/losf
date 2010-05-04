@@ -266,6 +266,7 @@ compute_and_login_RPMS=" \
     boost-gcc4_4:1.41.0-2 \
     R:2.10.1-1 \
     Rmpi:0.5_8-1 \
+    gotoblas130-intel11_1:1.30-1 \
     "
 
 compute_RPMS=" \
