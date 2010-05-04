@@ -261,6 +261,11 @@ compute_and_login_RPMS=" \
     boost-intel11_1:1.41.0-2 \
     namd27b2-intel11_1-mvapich2_1_4-cuda:2.7b2-1 \
     namd27b2-intel11_1-mvapich2_1_4:2.7b2-1 \
+
+    gcc_amd:4.4.1-1 \
+    boost-gcc4_4:1.41.0-2 \
+    R:2.10.1-1 \
+    Rmpi:0.5_8-1 \
     "
 
 compute_RPMS=" \
