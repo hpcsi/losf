@@ -1,5 +1,6 @@
 # -*-sh-*-
 #!/bin/bash
+#set -x
 #
 # $Id$
 #
@@ -117,6 +118,7 @@ GLOBAL_UNINSTALL_RPMS="\
 #------------------------------------------------------------------------
 
 SHARED_RPMS=" \
+    pgi-10.4-0:10.4-1 \
      "
 
 # Now we define rpms local to each appliance. Recall note above that
@@ -170,8 +172,9 @@ oss_RPMS=" \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
 
-    lustre:1.8.2-2.6.18_164.11.1.el5_lustre.1.8.2 \
-    lustre-modules:1.8.2-2.6.18_164.11.1.el5_lustre.1.8.2 \
+    lustre:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-modules:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-ldiskfs:3.0.9-2.6.18_164.11.1_lustre_perfctr_TACC_201005241614 \
 
     tacc-udev-md1000:1-6 \
     e2fsprogs:1.41.6.sun1-0redhat \
@@ -210,9 +213,9 @@ mds_RPMS=" \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
 
-    lustre:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
-    lustre-modules:1.6.7.50-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
-    lustre-ldiskfs:3.0.9-2.6.18_128.7.1_lustre_perfctr_TACC_201001061130 \
+    lustre:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-modules:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-ldiskfs:3.0.9-2.6.18_164.11.1_lustre_perfctr_TACC_201005241614 \
 
     tacc-udev-mds:1-0 \
     e2fsprogs:1.41.6.sun1-0redhat \
@@ -236,14 +239,15 @@ compute_and_login_RPMS=" \
     cuda_SDK:2.2-1 \
     cuda2.3:2.3-1 \
     cuda_SDK2.3:2.3-1 \
-    paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
-    paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
+
+    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
+    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
     visit-intel11_1-openmpi_1_3_3:1.12.0-4 \
     visit-intel11_1-mvapich2_1_4:1.12.0-4 \
     vapor:1.5.2-1 \
 
     sge-execd-6.2:6.2u5_1-1 \
-    tacc_scratch_client:1.0-5 \
+    tacc_scratch_client:1.0-7 \
     tacc_ranger_fs:1.0-2 \
     ensight-gold:9.0-0 \
     libXp:1.0.0-8.1.el5 \
@@ -266,11 +270,16 @@ compute_and_login_RPMS=" \
     boost-gcc4_4:1.41.0-2 \
     R:2.10.1-1 \
     Rmpi:0.5_8-1 \
-
+    papi:3.7.2-1 \
+    tacc_python:2.6.5-1 \
+    idl:7.0.6-1 \
     "
+#    paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
+#    paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
+#    quilt:0.48-1 \   # karl is not sure where this came from.
 
 compute_RPMS=" \
-    tacc_login_scripts-compute:2.0-31 \
+    tacc_login_scripts-compute:2.0-37 \
     compute_ssh:1.0-4 \
     pam-sge:6.2u5_1-2 \
 
@@ -295,8 +304,8 @@ compute_RPMS=" \
     qperf:0.4.6-1.ofed1.4.2 \
     tvflash:0.9.0-1.ofed1.4.2 \
 
-    lustre:1.8.2-2.6.18_164.11.1_lustre_perfctr_TACC_201002171104 \
-    lustre-modules:1.8.2-2.6.18_164.11.1_lustre_perfctr_TACC_201002171104 \
+    lustre:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-modules:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
 
     VirtualGL:2.1.3-20090625 \
     tightvnc:1.3.10-1 \
@@ -342,7 +351,7 @@ login_RPMS=" \
     subversion:1.4.2-4.el5_3.1 \
     subversion-perl:1.4.2-4.el5_3.1 \
     git:1.6.5.7-2 \
-    tacc_login_scripts-login:2.0-31 \
+    tacc_login_scripts-login:2.0-37 \
     apr:1.2.7-11.el5_3.1 \
     apr-devel:1.2.7-11.el5_3.1 \
     apr-util:1.2.7-7.el5_3.2 \
@@ -355,9 +364,11 @@ login_RPMS=" \
     tightvnc:1.3.10-1 \
     php-gd:5.1.6-24.el5_4.5 \
     php-soap:5.1.6-24.el5_4.5 \
+    php-devel:5.1.6-24.el5_4.5 \
+    php-pear:1.4.9-4.el5.1 \
 
-    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
-    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+    lustre:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-modules:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
     
     tacc_longhorn_port_forwarding:1.0-3 \
     swsudo:1.0-1 \
@@ -395,8 +406,10 @@ sge_RPMS=" \
 
 #compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 #compute_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
-compute_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #3 SMP Wed Feb 17 09:16:18 CST 2010"
-compute_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-2"
+#compute_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #3 SMP Wed Feb 17 09:16:18 CST 2010"
+#compute_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-2"
+compute_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #2 SMP Mon May 24 16:41:08 CDT 2010"
+compute_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
 
 phat_KERNEL_DATE=$compute_KERNEL_DATE
 phat_KERNEL=$compute_KERNEL
@@ -409,15 +422,19 @@ build_KERNEL="tacc-kernel-2.6.18.8.TACC.lustre.perfctr-6"
 #oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 #oss_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
 #oss_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
-oss_KERNEL_DATE="2.6.18-164.11.1.el5_lustre.1.8.2 #1 SMP Fri Jan 22 19:11:17 MST 2010"
-oss_KERNEL="kernel-2.6.18-164.11.1.el5_lustre.1.8.2"
+oss_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #2 SMP Mon May 24 16:41:08 CDT 2010"
+oss_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
 
 #mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
-mds_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
+#mds_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #4 SMP Wed Jan 6 11:52:50 CST 2010"
+#mds_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-3"
+mds_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #2 SMP Mon May 24 16:41:08 CDT 2010"
+mds_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
 
-login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+#login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
+#login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+login_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #2 SMP Mon May 24 16:41:08 CDT 2010"
+login_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
 
 sge_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 sge_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
