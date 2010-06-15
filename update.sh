@@ -96,7 +96,7 @@ GLOBAL_RPMS=" \
     openmotif:2.3.1-2.el5_4.1 \
     openmotif-devel:2.3.1-2.el5_4.1 \
 
-    base-modules:2.0-3 \
+    base-modules:2.0-5 \
     tacc_sysctl:1.0-7 \
     compat-libstdc++-33:3.2.3-61.i386 \
     compat-libstdc++-33:3.2.3-61.x86_64 \
@@ -240,8 +240,8 @@ compute_and_login_RPMS=" \
     cuda2.3:2.3-1 \
     cuda_SDK2.3:2.3-1 \
 
-    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
-    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
+    paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
+    paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
     visit-intel11_1-openmpi_1_3_3:1.12.0-4 \
     visit-intel11_1-mvapich2_1_4:1.12.0-4 \
     vapor:1.5.2-1 \
@@ -274,9 +274,9 @@ compute_and_login_RPMS=" \
     tacc_python:2.6.5-1 \
     idl:7.0.6-1 \
     "
-#    paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
-#    paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
-#    quilt:0.48-1 \   # karl is not sure where this came from.
+#    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
+#    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
+
 
 compute_RPMS=" \
     tacc_login_scripts-compute:2.0-37 \
@@ -373,6 +373,7 @@ login_RPMS=" \
     tacc_longhorn_port_forwarding:1.0-3 \
     swsudo:1.0-1 \
     gotoblas130-intel11_1:1.30-1 \
+    quilt:0.48-1 \
 
     $compute_and_login_RPMS \
     "
