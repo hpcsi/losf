@@ -118,7 +118,7 @@ GLOBAL_UNINSTALL_RPMS="\
 #------------------------------------------------------------------------
 
 SHARED_RPMS=" \
-    pgi-10.4-0:10.4-1 \
+    pgi-10.4-0:10.4-2 \
      "
 
 # Now we define rpms local to each appliance. Recall note above that
@@ -137,14 +137,34 @@ master_RPMS=" \
     apr-util-devel:1.2.7-7.el5_3.2 \
     neon:0.25.5-10.el5 \
 
-    lustre:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
-    lustre-modules:1.8.1.1-2.6.18_128.7.1_lustre_perfctr_TACC_201001041749 \
+    kernel-ib:1.4.2-2.6.18_164.11.1_lustre_perfctr_TACC \
+    libibcm:1.0.4-1.ofed1.4.2 \
+    libibcommon:1.1.2_20090314-1.ofed1.4.2 \
+    libibmad:1.2.3_20090314-1.ofed1.4.2 \
+    libibumad:1.2.3_20090314-1.ofed1.4.2 \
+    libibverbs:1.1.2-1.ofed1.4.2 \
+    libibverbs-utils:1.1.2-1.ofed1.4.2 \
+    libmlx4:1.0-1.ofed1.4.2 \
+    libmthca:1.0.5-1.ofed1.4.2 \
+    librdmacm:1.0.8-1.ofed1.4.2 \
+    librdmacm-utils:1.0.8-1.ofed1.4.2 \
+    mstflint:1.4-1.ofed1.4.2 \
+    ofed-docs:1.4.2-0 \
+    ofed-scripts:1.4.2-0 \
+    opensm-libs:3.2.6_20090317-1.ofed1.4.2 \
+    perftest:1.2-1.ofed1.4.2 \
+    qperf:0.4.6-1.ofed1.4.2 \
+    tvflash:0.9.0-1.ofed1.4.2 \
+
+    lustre:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-modules:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
+    lustre-ldiskfs:3.0.9-2.6.18_164.11.1_lustre_perfctr_TACC_201005241614 \
 
     mkl:10.2.2.025-0 \
     mvapich2-intel11_1:1.4-3 \
     tightvnc:1.3.10-1 \
     plplot:5.9.5-1 \
-    tacc_scratch_client:1.0-5 \
+    tacc_scratch_client:1.0-8 \
     git:1.6.5.7-1 \
 
     $SHARED_RPMS"
@@ -239,6 +259,8 @@ compute_and_login_RPMS=" \
     cuda_SDK:2.2-1 \
     cuda2.3:2.3-1 \
     cuda_SDK2.3:2.3-1 \
+    cuda3.0:3.0-1 \
+    cuda_SDK3.0:3.0-1 \
 
     paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
     paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
@@ -247,7 +269,7 @@ compute_and_login_RPMS=" \
     vapor:1.5.2-1 \
 
     sge-execd-6.2:6.2u5_1-1 \
-    tacc_scratch_client:1.0-7 \
+    tacc_scratch_client:1.0-8 \
     tacc_ranger_fs:1.0-2 \
     ensight-gold:9.0-0 \
     libXp:1.0.0-8.1.el5 \
@@ -273,6 +295,13 @@ compute_and_login_RPMS=" \
     papi:3.7.2-1 \
     tacc_python:2.6.5-1 \
     idl:7.0.6-1 \
+    paraview3.8-intel11_1-openmpi_1_3_3:3.8.0-1 \
+    paraview3.8-intel11_1-mvapich2_1_4:3.8.0-1 \
+    visit2.0.1-intel11_1-mvapich2_1_4:2.0.1-1 \
+    visit2.0.1-intel11_1-openmpi_1_3_3:2.0.1-1 \
+    mvapich2-pgi10_4:1.4-5 \
+    pdtoolkit-intel11_1-mvapich2_1_4:3.16-2 \
+    tau-intel11_1-mvapich2_1_4:2.19.2-4 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -282,6 +311,7 @@ compute_RPMS=" \
     tacc_login_scripts-compute:2.0-37 \
     compute_ssh:1.0-4 \
     pam-sge:6.2u5_1-2 \
+    tacc_outage2:2.2-2 \
 
     ibutils:1.2-1.ofed1.4.2 \
     infiniband-diags:1.4.4_20090314-1.ofed1.4.2 \
@@ -358,7 +388,28 @@ login_RPMS=" \
     apr-util-devel:1.2.7-7.el5_3.2 \
     tacc_httpd_config:1.0-2 \
 
+    kernel-ib:1.4.2-2.6.18_164.11.1_lustre_perfctr_TACC \
+    libibcm:1.0.4-1.ofed1.4.2 \
+    libibcommon:1.1.2_20090314-1.ofed1.4.2 \
+    libibmad:1.2.3_20090314-1.ofed1.4.2 \
+    libibumad:1.2.3_20090314-1.ofed1.4.2 \
+    libibverbs:1.1.2-1.ofed1.4.2 \
+    libibverbs-utils:1.1.2-1.ofed1.4.2 \
+    libmlx4:1.0-1.ofed1.4.2 \
+    libmthca:1.0.5-1.ofed1.4.2 \
+    librdmacm:1.0.8-1.ofed1.4.2 \
+    librdmacm-utils:1.0.8-1.ofed1.4.2 \
+    mstflint:1.4-1.ofed1.4.2 \
+    ofed-docs:1.4.2-0 \
+    ofed-scripts:1.4.2-0 \
+    opensm-libs:3.2.6_20090317-1.ofed1.4.2 \
+    perftest:1.2-1.ofed1.4.2 \
+    qperf:0.4.6-1.ofed1.4.2 \
+    tvflash:0.9.0-1.ofed1.4.2 \
+
     intel-licenses:1.0-5 \
+    pdtoolkit-intel11_1-mvapich2_1_4:3.16-2 \
+    
     cmake:2.8.1-1 \
     vtk:5.4.2-1 \
     tightvnc:1.3.10-1 \
@@ -440,8 +491,9 @@ login_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
 sge_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 sge_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
-master_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
-master_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
+master_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #2 SMP Mon May 24 16:41:08 CDT 2010"
+master_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
+#tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
 
 #-------------------------
 # Function initializtion
