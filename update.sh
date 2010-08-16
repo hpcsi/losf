@@ -301,7 +301,9 @@ compute_and_login_RPMS=" \
     visit2.0.1-intel11_1-openmpi_1_3_3:2.0.1-1 \
     mvapich2-pgi10_4:1.4-5 \
     pdtoolkit-intel11_1-mvapich2_1_4:3.16-2 \
-    tau-intel11_1-mvapich2_1_4:2.19.2-4 \
+    tau-intel11_1-mvapich2_1_4:2.19.2-5 \
+    fftw3-intel11_1:3.1.2-1 \
+    mpiP-intel11_1-mvapich2_1_4:3.2.1-1 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -408,7 +410,6 @@ login_RPMS=" \
     tvflash:0.9.0-1.ofed1.4.2 \
 
     intel-licenses:1.0-5 \
-    pdtoolkit-intel11_1-mvapich2_1_4:3.16-2 \
     
     cmake:2.8.1-1 \
     vtk:5.4.2-1 \
@@ -425,6 +426,7 @@ login_RPMS=" \
     swsudo:1.0-1 \
     gotoblas130-intel11_1:1.30-1 \
     quilt:0.48-1 \
+    screen:4.0.3-1.el5_4.1 \
 
     $compute_and_login_RPMS \
     "
