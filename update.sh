@@ -261,6 +261,8 @@ compute_and_login_RPMS=" \
     cuda_SDK2.3:2.3-1 \
     cuda3.0:3.0-1 \
     cuda_SDK3.0:3.0-1 \
+    cuda3.1:3.1-1 \
+    cuda_SDK3.1:3.1-1 \
 
     paraview-intel11_1-openmpi_1_3_3:3.6.1-1 \
     paraview-intel11_1-mvapich2_1_4:3.6.1-1 \
@@ -304,6 +306,7 @@ compute_and_login_RPMS=" \
     tau-intel11_1-mvapich2_1_4:2.19.2-5 \
     fftw3-intel11_1:3.1.2-1 \
     mpiP-intel11_1-mvapich2_1_4:3.2.1-1 \
+    mvapich2-pgi10:1.4-6 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
