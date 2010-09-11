@@ -307,6 +307,7 @@ compute_and_login_RPMS=" \
     fftw3-intel11_1:3.1.2-1 \
     mpiP-intel11_1-mvapich2_1_4:3.2.1-1 \
     mvapich2-pgi10:1.4-6 \
+    gsl:1.14-0 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -350,7 +351,7 @@ compute_RPMS=" \
     vnc-server:4.1.2-14.el5_3.1 \
     qt:4.5.3-1 \
     freeglut:2.6.0-1 \
-    vtk:5.4.2-1 \
+    vtk:5.4.2-2 \
     gimp:2.2.13-2.0.7.el5 \
     gimp-libs:2.2.13-2.0.7.el5 \
     gtkhtml2:2.11.0-3 \
