@@ -309,6 +309,8 @@ compute_and_login_RPMS=" \
     mvapich2-pgi10:1.4-6 \
     gsl:1.14-0 \
     gotoblas130-intel11_1:1.30-1 \
+    visit2.1.0-intel11_1-openmpi_1_3_3:2.1.0-1 \
+    visit2.1.0-intel11_1-mvapich2_1_4:2.1.0-1 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -493,8 +495,8 @@ mds_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
 
 #login_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 #login_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"
-login_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #2 SMP Mon May 24 16:41:08 CDT 2010"
-login_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-4"
+login_KERNEL_DATE="2.6.18-164.11.1_lustre_perfctr_TACC #6 SMP Thu Sep 16 13:23:26 CDT 2010"
+login_KERNEL="tacc-kernel2-2.6.18164.11.1_lustre_perfctr_TACC-5"
 
 sge_KERNEL_DATE="2.6.18-128.7.1_lustre_perfctr_TACC #3 SMP Wed Oct 28 10:48:56 CDT 2009"
 sge_KERNEL="tacc-kernel-2.6.18128.7.1_lustre_perfctr_TACC-1"

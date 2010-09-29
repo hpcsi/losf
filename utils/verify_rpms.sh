@@ -28,6 +28,7 @@ function verify_rpms
 	  NO_UPGRADE=0
 	  
 	  igot=`echo $i | grep ','`
+
 	  if [ "x$igot" != "x" ];then
 	      num_versions=`echo $i | tr -cd [,] | wc -c`
 	      let "num_versions=$num_versions+1"
@@ -150,6 +151,31 @@ function verify_rpms
 		      else
 			  rpm_opt="-Uvh"
 		      fi
+
+		      # Special longhorn hack for visit/paul; koomie to
+		      # appropriately flog visit developers later.....
+
+		      if [ "$PACKAGE" == "visit2.0.1-intel11_1-mvapich2_1_4" ];then
+			  rpm_opt="-ivh --force"
+			  echo "Silly Visit: --force hack enabled for $PACKAGE....(7/7/10)"
+		      fi
+
+		      if [ "$PACKAGE" == "visit2.0.1-intel11_1-mvapich2_1_4" ];then
+			  rpm_opt="-ivh --force"
+			  echo "Silly Visit: --force hack enabled for $PACKAGE....(7/7/10)"
+		      fi
+
+		      if [ "$PACKAGE" == "visit2.1.0-intel11_1-mvapich2_1_4" ];then
+			  rpm_opt="-ivh --force"
+			  echo "Silly Visit: hack enabled for $PACKAGE....(7/7/10)"
+		      fi
+
+		      if [ "$PACKAGE" == "visit2.1.0-intel11_1-openmpi_1_3_3" ];then
+			  rpm_opt="-ivh --force"
+			  echo "Silly Visit: hack enabled for $PACKAGE....(7/7/10)"
+		      fi
+
+
 
 #		      echo "rpm_opt = $rpm_opt"
 		      

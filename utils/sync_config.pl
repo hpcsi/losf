@@ -124,7 +124,7 @@ BEGIN {
 	    # Is the target a symlink?
 
 	    if ( ! -l $file ) {
-		MYERROR("   --> Target file is not a symlink, aborting...\n");
+		MYERROR("   --> Target file $file is not a symlink, aborting...\n");
 	    } else {
 		my $resolved_file = readlink("$file");
 	    
