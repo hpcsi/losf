@@ -308,6 +308,7 @@ compute_and_login_RPMS=" \
     mpiP-intel11_1-mvapich2_1_4:3.2.1-1 \
     mvapich2-pgi10:1.4-6 \
     gsl:1.14-0 \
+    gotoblas130-intel11_1:1.30-1 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -428,9 +429,10 @@ login_RPMS=" \
     
     tacc_longhorn_port_forwarding:1.0-3 \
     swsudo:1.0-1 \
-    gotoblas130-intel11_1:1.30-1 \
+
     quilt:0.48-1 \
     screen:4.0.3-1.el5_4.1 \
+    tacc-autotools:1.0-1 \
 
     $compute_and_login_RPMS \
     "
