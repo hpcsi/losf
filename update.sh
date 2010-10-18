@@ -1,6 +1,6 @@
 # -*-sh-*-
 #!/bin/bash
-#set -x
+#
 #
 # $Id$
 #
@@ -311,6 +311,7 @@ compute_and_login_RPMS=" \
     gotoblas130-intel11_1:1.30-1 \
     visit2.1.0-intel11_1-openmpi_1_3_3:2.1.0-2 \
     visit2.1.0-intel11_1-mvapich2_1_4:2.1.0-2 \
+    sip:4.4.5-3 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -360,6 +361,7 @@ compute_RPMS=" \
     gtkhtml2:2.11.0-3 \
 
     intel-licenses:1.0-5 \
+    libX11-devel:1.0.3-9.el5.x86_64 \
     $compute_and_login_RPMS
     "
 
