@@ -312,6 +312,7 @@ compute_and_login_RPMS=" \
     visit2.1.0-intel11_1-openmpi_1_3_3:2.1.0-2 \
     visit2.1.0-intel11_1-mvapich2_1_4:2.1.0-2 \
     sip:4.4.5-3 \
+    libXdmcp-devel:1.0.1-2.1.x86_64 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
@@ -426,18 +427,15 @@ login_RPMS=" \
     php-gd:5.1.6-24.el5_4.5 \
     php-soap:5.1.6-24.el5_4.5 \
     php-devel:5.1.6-24.el5_4.5 \
-    php-pear:1.4.9-4.el5.1 \
 
     lustre:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
     lustre-modules:1.8.3-2.6.18_164.11.1_lustre_perfctr_TACC_201005241613 \
-    
     tacc_longhorn_port_forwarding:1.0-3 \
     swsudo:1.0-1 \
-
     quilt:0.48-1 \
     screen:4.0.3-1.el5_4.1 \
     tacc-autotools:1.0-1 \
-
+    libX11-devel:1.0.3-11.el5.x86_64 \
     $compute_and_login_RPMS \
     "
 
