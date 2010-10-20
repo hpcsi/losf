@@ -311,8 +311,12 @@ compute_and_login_RPMS=" \
     gotoblas130-intel11_1:1.30-1 \
     visit2.1.0-intel11_1-openmpi_1_3_3:2.1.0-2 \
     visit2.1.0-intel11_1-mvapich2_1_4:2.1.0-2 \
-    sip:4.4.5-3 \
+    sip:4.11.1-1 \
+    pyqt:4.7.7-1 \
+    ffmpeg:0.6.1-1 \
+    vtk5.6.1:5.6.1-1 \
     libXdmcp-devel:1.0.1-2.1.x86_64 \
+    qt4.7.0:4.7.0-1 \
     "
 #    paraview-intel11_1-openmpi_1_3_3:3.8.0-1 \
 #    paraview-intel11_1-mvapich2_1_4:3.8.0-1 \
