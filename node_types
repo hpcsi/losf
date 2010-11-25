@@ -1,5 +1,10 @@
 #!/bin/bash
-# $Id:$
+#----------------------------------------------------------------------
+# Questions/Problems?: karl@tacc.utexas.edu
+# Texas Advanced Computing Center 
+# 
+# $Id$
+#----------------------------------------------------------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 
