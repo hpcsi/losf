@@ -1,4 +1,5 @@
 #!/bin/bash
+# $Id:$
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 
