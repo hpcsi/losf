@@ -34,8 +34,10 @@ export UPDATE_RPMS=1
 
 # End Inputs -------------------
 
+export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+
 export MYHOST=`hostname -s`
-export RPM_DIR=/home/build/rpms/RPMS/
+export RPM_DIR=`$TOP_DIR/rpm_topdir grep RPM_TOPDIR | awk '{print $3}'`
 export REMOTE_INSTALL_DIR=/home/build/admin/hpc_stack/
 
 #-------------------------------------
@@ -60,10 +62,10 @@ else
 fi
 
 #-------------------
-# Query type of node
+# Query node type
 #-------------------
 
-export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+
 
 export NODE_TYPE_SILENT=1
 
@@ -83,10 +85,11 @@ else
 	echo " "
 	echo "Performing Updates for $CLUSTER -> $BASENAME node type"
 	echo " "
+	$TOP_DIR/update.$CLUSTER $@
     else
 	echo " "
-	echo "[Error]: Unable to perform updates"
-	echo "[Error]: $TOP_DIR/update.$CLUSTER is not present or executable"
+	echo "[Warning]: Unable to perform updates"
+	echo "[Warning]: $TOP_DIR/update.$CLUSTER is not present or executable"
 	echo " "
 	echo "Please create necessary file to perform desired software updates."
 	echo " "

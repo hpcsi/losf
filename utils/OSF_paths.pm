@@ -32,7 +32,7 @@ if ($basename =~ m/(.*)\/utils\/$/) {
     our $osf_top_dir = $basename;
 }
 
-print "osf_top_dir = $osf_top_dir\n";
+#print "osf_top_dir = $osf_top_dir\n";
 
 our $osf_config_dir    = "$osf_top_dir/config";
 our $osf_utils_dir     = "$osf_top_dir/utils";

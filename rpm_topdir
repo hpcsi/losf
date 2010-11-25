@@ -1,6 +1,12 @@
 #!/bin/bash
+#----------------------------------------------------------------------
+# Questions/Problems?: karl@tacc.utexas.edu
+# Texas Advanced Computing Center 
+# 
+# $Id$
+#----------------------------------------------------------------------
 
-export TOP_DIR=/home/build/admin/hpc_stack
+export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 export PERL5LIB=$TOP_DIR/utils
 
 $TOP_DIR/utils/rpm_topdir.pl

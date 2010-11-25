@@ -37,7 +37,6 @@ print_header();
 
 chomp(my $host_name=`hostname -s`);
 
-
 (my $node_cluster, my $node_type) = determine_node_membership();
 
 #---------------------------

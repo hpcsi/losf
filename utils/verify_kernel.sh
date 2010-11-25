@@ -18,6 +18,10 @@ function verify_kernel
     local KERNEL_RPM=$2
     local GRUB_DIR=$3
 
+    if [ "$KERNEL_REV" == "current" -o "$KERNEL_RPM" == "current" ];then
+	return
+    fi
+
     myvalue=`uname -rv`
 
     if [ "$myvalue" != "$KERNEL_REV" ];then
