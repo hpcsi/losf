@@ -1,25 +1,29 @@
 # -*-sh-*-
 #!/bin/bash
-#
-#
-# $Id$
-#
-#-----------------------------------------------------------
-# TACC Software Updates
+#----------------------------------------------------------------------
+# LosF Software Updates
 # 
-# Utility to update individual Cluster node types to
-# latest production revision (or verify node is already
+# Utility to update individual cluster node types to
+# latest production revision (or verify that a node is already
 # in sync).
 #
-# See config.global for top-level input variables.
-# 
+# $Id$
+#----------------------------------------------------------------------
+#
+# Node definitions are controlled in the LosF input files located in the
+# top-level config/ director.  To customize your cluster, you will
+# want to create an update.<your-cluster-name> file to define desired
+# RPM packages for each of your node definitions.  A template file is
+# provided in update.template
 #
 # Ranger Version:   Originally 6/21/07 - ks 
-# Longhorn Version: 10-25-09
+# Longhorn Version:   10-25-09
+# Lonestar42 Updates: 11-24-10
 #
 # Questions/Problems?: karl@tacc.utexas.edu
 # Texas Advanced Computing Center 
-#-----------------------------------------------------------
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
 
 # Command-line Inputs
 
