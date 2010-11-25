@@ -9,6 +9,7 @@
 package OSF_paths;
 use strict;
 use base 'Exporter';
+use File::Basename;
 
 our @EXPORT            = qw($osf_top_dir 
 			    $osf_config_dir
@@ -17,9 +18,21 @@ our @EXPORT            = qw($osf_top_dir
 		            $osf_ini4perl_dir
 			    $osf_osupdates_dir);
 
-# TODO: snarf top_dir from input file.
+# Determine full path to LsoF install
 		       
-our $osf_top_dir       = "/home/build/admin/hpc_stack";
+our $osf_top_dir       = "";
+
+my ($filename,$basename) = fileparse($0);
+
+# Strip off utils/ dir if necessary
+
+if ($basename =~ m/(.*)\/utils\/$/) {
+    our $osf_top_dir = $1;
+} else {
+    our $osf_top_dir = $basename;
+}
+
+print "osf_top_dir = $osf_top_dir\n";
 
 our $osf_config_dir    = "$osf_top_dir/config";
 our $osf_utils_dir     = "$osf_top_dir/utils";

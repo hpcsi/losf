@@ -1,6 +1,10 @@
 #!/bin/bash
 
-export TOP_DIR=/home/build/admin/hpc_stack
+export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+
+#echo top_dir=$TOP_DIR
+#export TOP_DIR=/home/build/admin/hpc_stack
+
 export PERL5LIB=$TOP_DIR/utils
 
 $TOP_DIR/utils/node_types.pl
