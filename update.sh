@@ -3,18 +3,18 @@
 #----------------------------------------------------------------------
 # LosF Software Updates
 # 
-# Utility to update individual cluster node types to
-# latest production revision (or verify that a node is already
-# in sync).
+# Utility to update individual cluster node types to latest production
+# revision (or verify that a node is already in sync).
 #
 # $Id$
 #----------------------------------------------------------------------
 #
-# Node definitions are controlled via the LosF input files located in the
-# top-level config/ directory.  To customize your cluster, you will
-# want to create an update.<your-cluster-name> file to define desired
-# RPM packages for each of your node definitions.  A template file is
-# provided in update.template.
+#
+# Node type definitions are controlled via the LosF input files
+# located in the top-level config/ directory.  To customize your
+# cluster, you will want to create an update.<your-cluster-name> file
+# to define desired RPM packages for each of your node definitions.  A
+# template file is provided in update.template.
 #
 # Ranger Version:   Originally 6/21/07 - ks 
 # Longhorn Version:   10-25-09
