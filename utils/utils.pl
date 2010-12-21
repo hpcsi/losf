@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+ #!/usr/bin/perl
 #
 # $Id$
 #
@@ -96,6 +96,55 @@ sub print_var_stdout {
 
     print "<TACC-LOSF>$var=$val\n";
 
+    end_routine();
+}
+
+sub expand_text_macros {
+    begin_routine();
+
+    my $file_in  = shift;
+    my $file_out = shift;
+    my $cluster  = shift;
+
+    # @losf_synced_file_notice@ 
+
+    my $template = "$osf_top_dir/config/const_files/$cluster/notify_header";
+
+    if ( -s "$template" ) {
+	DEBUG( "   --> notify_header file available\n");
+	expand_individual_macro($file_in,$file_out,$template,"\@losf_synced_file_notice\@");
+    }
+
+    end_routine();
+}
+
+sub expand_individual_macro {
+    begin_routine();
+
+    my $file_in  = shift;
+    my $file_out = shift;
+    my $template = shift;
+    my $keyword  = shift;
+
+    open($TEMPLATE,"<$template") || die "Cannot open $template\n";
+    open($IN,      "<$file_in")  || die "Cannot open $file_in\n";
+    open($OUT,     ">$file_out") || die "Cannot create $file_out\n";
+
+    @expand_text = <$TEMPLATE>;
+
+    while( $line = <$IN>) {
+	if( $line =~ m/$keyword/ ) {
+	    DEBUG(   "--> found a text macro...\n");
+	    print $OUT @expand_text;
+
+	} else {
+	    print $OUT $line;
+	}
+    }
+
+    close($TEMPLATE);
+    close($IN);
+    close($OUT);
     end_routine();
 }
 

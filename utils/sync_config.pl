@@ -1,8 +1,26 @@
 #!/usr/bin/perl
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
+# 
+# LosF - a Linux operating system Framefork for HPC clusters
 #
-# $Id: utils.pl 200 2009-11-01 17:48:31Z karl $
+# Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
 #
-#-------------------------------------------------------------------
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
 #
 # Utility Functions for syncing small configuration files, 
 # symbolic links, and other chkconfig services.
@@ -144,9 +162,16 @@ BEGIN {
 
 	} else {
 
+	    # Expand any @losf@ macros
+
+	    (my $fh_tmp, my $ref_file) = tempfile();
+
+	    expand_text_macros($sync_file,$ref_file,$cluster);
+
 	    # Deal with non-symbolic link and diff directly.
 	
-	    if ( compare($file,$sync_file) == 0 ) {
+#	    if ( compare($file,$sync_file) == 0 ) {
+	    if ( compare($file,$ref_file) == 0 ) {
 		print "   --> OK: $file in sync\n";
 	    } else {
 		ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
@@ -155,10 +180,11 @@ BEGIN {
 		
 		DEBUG("   --> Copying contents to $tmpfile\n");
 		
-		copy("$sync_file","$tmpfile") || MYERROR("Unable to copy $sync_file to $tmpfile");
+		copy("$ref_file","$tmpfile")  || MYERROR("Unable to copy $sync_file to $tmpfile");
 		copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
+#		unlink("$ref_file")           || MYERROR("Unable to remove $ref_file");
 		unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
-		
+
 		INFO("   --> [$basename] Sync successful\n");
 	    }
 
