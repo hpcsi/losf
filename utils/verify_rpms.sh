@@ -87,6 +87,7 @@ function verify_rpms
 		  #--------------------------------------------------
 
 		  myarch=$DEFAULT_ARCH
+		  #echo "version = $VERSION"
 		  
 		  match=`echo $VERSION | egrep ".x86_64\b"`
 		  if [ "x$match" != "x" ]; then
@@ -109,6 +110,9 @@ function verify_rpms
 #		  echo "myarch = $myarch"
 
 	      fi
+
+#	      echo "version = $VERSION"
+#	      echo "MYARCH = $MYARCH"
 	      
               # New method to deal with things like "charm++"
 
@@ -175,19 +179,19 @@ function verify_rpms
 			  echo "Silly Visit: hack enabled for $PACKAGE....(7/7/10)"
 		      fi
 
-
-
 #		      echo "rpm_opt = $rpm_opt"
 		      
 		      if [ -s $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm ]; then
 			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm
 		      elif [ -s $SRC_DIR/noarch/$PACKAGE-$VERSION.noarch.rpm ]; then
 			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/noarch/$PACKAGE-$VERSION.noarch.rpm
+		      elif [ -s $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$myarch.rpm ]; then
+			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$myarch.rpm
 		      elif [ "$MODE" == "ROCKS" ];then
 			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm
 		      else
 			  echo "$SRC_DIR/$MYARCH"
-			  echo "Error: Unable to find rpm for $PACKAGE"
+			  echo "Error: Unable to find rpm for $PACKAGE (arch=$MYARCH)"
 			  exit 1
 		      fi
 		      
