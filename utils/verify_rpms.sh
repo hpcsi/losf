@@ -1,15 +1,33 @@
 #!/bin/bash
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
+# 
+# LosF - a Linux operating system Framework for HPC clusters
+#
+# Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
+#
+# Function to verfy rpm installation based on input rpm list provided
+# by update.sh (also has a remove mode to make sure that a particular
+# package is removed).
 #
 # $Id$
-#
-#-----------------------------------------------
-# Function to verfy rpm installation 
-# based on input rpm list provided by update.sh
-# (also has a remove mode to make sure that a
-# particular package is removed).
-#
-# Texas Advanced Computing Center 
-#-----------------------------------------------
+#--------------------------------------------------------------------------
 
 VERBOSE=0
 DEFAULT_ARCH=x86_64

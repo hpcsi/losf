@@ -2,7 +2,7 @@
 #-----------------------------------------------------------------------bl-
 #--------------------------------------------------------------------------
 # 
-# LosF - a Linux operating system Framefork for HPC clusters
+# LosF - a Linux operating system Framework for HPC clusters
 #
 # Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
 #
@@ -26,7 +26,7 @@
 # symbolic links, and other chkconfig services.
 #
 # $Id: utils.pl 200 2009-11-01 17:48:31Z karl $
-#-------------------------------------------------------------------
+#--------------------------------------------------------------------------
 
 use strict;
 use OSF_paths;
