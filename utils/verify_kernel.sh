@@ -6,11 +6,11 @@
 # Function to verfy kernel installation
 # based on input rpm list provided by update.sh
 #
+# Questions/Problems?: karl@tacc.utexas.edu
 # Texas Advanced Computing Center 
 #-----------------------------------------------
 
-export ROCKS_DIR=/home/build/rpms/RPMS/x86_64/
-#export GRUB_DIR=/home/build/kernel/grub_entries
+export RPM_DIR=$SRC_DIR/x86_64  # <- inherit rpm dir from update.sh
 
 function verify_kernel
 {
@@ -37,8 +37,8 @@ function verify_kernel
 	    echo "  --> Kernel rpm is installed; please verify grub.conf and reboot"
 	else
 	    revision=`echo $KERNEL_REV | awk '{print $1}'`
-###	    rpm -ivh --nodeps --ignoresize $ROCKS_DIR/$KERNEL_RPM.$MYARCH.rpm
-	    rpm -Uvh --nodeps --ignoresize $ROCKS_DIR/$KERNEL_RPM.$MYARCH.rpm
+###	    rpm -ivh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
+	    rpm -Uvh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
 	    mkinitrd -f /boot/initrd-$revision.img $revision
 	    depmod -a
 
@@ -58,7 +58,7 @@ function verify_kernel
 	    echo "Kernel is running, but no longer installed"
 
 	    revision=`echo $KERNEL_REV | awk '{print $1}'`
-	    rpm -ivh --nodeps --ignoresize $ROCKS_DIR/$KERNEL_RPM.$MYARCH.rpm
+	    rpm -ivh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
 	    mkinitrd -f /boot/initrd-$revision.img $revision
 
 	    echo " "
