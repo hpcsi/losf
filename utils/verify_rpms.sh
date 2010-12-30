@@ -199,8 +199,10 @@ function verify_rpms
 
 #		      echo "rpm_opt = $rpm_opt"
 		      
-		      if [ -s $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm ]; then
-			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm
+###		      if [ -s $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm ]; then
+		      if [ -s $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$myarch.rpm ]; then
+#			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$MYARCH.rpm
+			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$myarch.rpm
 		      elif [ -s $SRC_DIR/noarch/$PACKAGE-$VERSION.noarch.rpm ]; then
 			  rpm --ignoresize $rpm_opt --nodeps $SRC_DIR/noarch/$PACKAGE-$VERSION.noarch.rpm
 		      elif [ -s $SRC_DIR/$MYARCH/$PACKAGE-$VERSION.$myarch.rpm ]; then
