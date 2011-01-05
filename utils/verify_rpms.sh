@@ -105,7 +105,7 @@ function verify_rpms
 		  #--------------------------------------------------
 
 		  myarch=$DEFAULT_ARCH
-		  #echo "version = $VERSION"
+		  ###echo "version = $VERSION"
 		  
 		  match=`echo $VERSION | egrep ".x86_64\b"`
 		  if [ "x$match" != "x" ]; then
@@ -122,6 +122,12 @@ function verify_rpms
 		  match=`echo $VERSION | egrep ".i686\b"`
 		  if [ "x$match" != "x" ]; then
 		      myarch="i686"
+		      VERSION=`echo $VERSION | awk -F ".$myarch" '{print $1}'`
+		  fi
+
+		  match=`echo $VERSION | egrep ".noarch\b"`
+		  if [ "x$match" != "x" ]; then
+		      myarch="noarch"
 		      VERSION=`echo $VERSION | awk -F ".$myarch" '{print $1}'`
 		  fi
 
