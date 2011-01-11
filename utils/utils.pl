@@ -131,13 +131,18 @@ sub expand_text_macros {
     if ( -s "$template" ) {
 	DEBUG( "   --> notify_header file available\n");
 	expand_individual_macro($file_in,$file_out,$template,"\@losf_synced_file_notice\@");
+    } else {
+	copy($file_in,$file_out) || die "Copy failed: $!";
     }
+
 
     end_routine();
 }
 
 sub expand_individual_macro {
     begin_routine();
+
+    print "inside expand macro...\n";
 
     my $file_in  = shift;
     my $file_out = shift;
@@ -151,6 +156,7 @@ sub expand_individual_macro {
     @expand_text = <$TEMPLATE>;
 
     while( $line = <$IN>) {
+	print "reading a line = $line";
 	if( $line =~ m/$keyword/ ) {
 	    DEBUG(   "--> found a text macro...\n");
 	    print $OUT @expand_text;

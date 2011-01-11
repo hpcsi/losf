@@ -115,7 +115,7 @@ BEGIN {
 	if ( ! -s "$file" && ! -l "$file" ) {
 	    WARN("   --> Warning: production file $file not found - adding new sync file\n");
 	}
-	
+
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to sync file: $file\n");
 	
@@ -169,7 +169,7 @@ BEGIN {
 	    expand_text_macros($sync_file,$ref_file,$cluster);
 
 	    # Deal with non-symbolic link and diff directly.
-	
+
 #	    if ( compare($file,$sync_file) == 0 ) {
 	    if ( compare($file,$ref_file) == 0 ) {
 		print "   --> OK: $file in sync\n";
