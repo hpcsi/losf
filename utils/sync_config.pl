@@ -83,7 +83,6 @@ BEGIN {
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
 
 	foreach(@partial_files) {
-	    print "working on file $_\n";
 	    sync_partial_file("$_");
 	}
 	
@@ -205,6 +204,8 @@ BEGIN {
 		INFO("   --> [$basename] Sync successful\n");
 	    }
 
+	    unlink($ref_file);
+
 	    # Ensure same permissions as original sync file.
 
 	    mirrorPermissions("$sync_file","$file");
@@ -255,12 +256,12 @@ BEGIN {
 
 	(my $fh_tmp, my $new_file) = tempfile();
 
-	print "NOOP for now\n";
-	print "sync_file = $sync_file\n";
-	print "ref_file  = $ref_file\n";
-	print "new_File  = $new_file\n";
+#	print "sync_file = $sync_file\n";
+#	print "ref_file  = $ref_file\n";
+#	print "new_File  = $new_file\n";
 
 	open(IN,     "<$file")      || die "Cannot open $file\n";
+	open(REF,    "<$ref_file")  || die "Cannot open $ref_file\n";
 	open(TMPFILE,">$new_file")  || die "Cannot create tmp file $sync_file";
 
 	my $found_delim=0;
@@ -276,12 +277,19 @@ BEGIN {
 		    print TMPFILE "# process. Knock yourself out adding customizations to the rest of the file as \n";
 		    print TMPFILE "# anything outside of the delimited section will be preserved.\n";
 		    print TMPFILE "#\n";
+		    while (my $line=<REF>) {
+			print TMPFILE $line;
+		    }
 		    print TMPFILE "#--------------------------------------------------------------end-sync-losf-\n";
 		}
 	    } else {
 		print TMPFILE $_;
 	    }
 	}
+
+	close(TMPFILE);
+	close(REF);
+	close(IN);
 
 	if ( !$found_delim ) {
 	    print("   --> No losf delimiter present, not syncing...\n");
@@ -290,23 +298,27 @@ BEGIN {
 
 	# Check if we have any changes?
 
-	if ( compare($file,$ref_file) == 0 ) {
-	    print "   --> OK: $file in sync\n";
+	if ( compare($file,$new_file) == 0 ) {
+	    print "   --> OK: $file in (partial) sync\n";
 	} else {
 	    ERROR("   --> [$basename] Differences found: $basename requires partial syncing\n");
+
+	    # Save copy of current file
 
 	    my $orig_copy = "/tmp/$basename.orig";
 	    print("   --> Copy of original file saved at $orig_copy\n");
 	    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+
+	    # Update production file
 		
-	    #copy("$ref_file","$file")     || MYERROR("Unable to move $tmpfile to $file");
+	    copy("$new_file","$file")     || MYERROR("Unable to move $new_file to $file");
 
 	    INFO("   --> [$basename] Sync successful\n");
 	}
 
 	# Ensure same permissions as original sync file.
 
-#####	mirrorPermissions("$sync_file","$file");
+	mirrorPermissions("$sync_file","$file");
 
 	# Clean up
 
