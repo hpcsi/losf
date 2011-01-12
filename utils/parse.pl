@@ -196,11 +196,12 @@ BEGIN {
 
 	begin_routine();
 
-	my $cluster = shift;
-	my $host    = shift;
-	
-	my $logr    = get_logger();
-	my @sync_files = ();
+	my $cluster       = shift;
+	my $host          = shift;
+		          
+	my $logr          = get_logger();
+	my @sync_files    = ();
+	my @sync_partials = ();
 
 	INFO("   --> Looking for defined files to sync...($cluster->$host)\n");
 
@@ -230,6 +231,47 @@ BEGIN {
 	end_routine();
 
 	return(@sync_files);
+    }
+
+    sub query_cluster_config_partial_sync_files {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $host          = shift;
+		          
+	my $logr          = get_logger();
+	my @sync_files    = ();
+	my @sync_partials = ();
+
+	INFO("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("ConfigFiles") ) {
+	    MYERROR("No Input section found for cluster $cluster [ConfigFiles]\n");
+	}
+
+	my @defined_files = $local_cfg->Parameters("ConfigFiles");
+
+	my $num_files = @defined_files;
+
+	INFO("   --> \# of files defined = $num_files\n");
+
+	foreach(@defined_files) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		if ( "$myval" eq "partial" ) {
+		    INFO("   --> Partial sync requested for $_\n");
+		    push(@sync_partials,$_);
+		}
+	    } else {
+		MYERROR("ConfigFile defined with no value ($_)");
+	    }
+	}
+
+	end_routine();
+
+	return(@sync_partials);
     }
 
 

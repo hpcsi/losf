@@ -53,7 +53,7 @@ sub verify_log4perl_availability {
 	if(! Log::Log4perl->initialized()) {
 	    no warnings;
 	    use Log::Log4perl qw(:easy);
-	    Log::Log4perl->easy_init({level  => $INFO,
+	    Log::Log4perl->easy_init({level  => $DEBUG,
 				      layout => "%m",
 				      file   =>  'STDOUT'});
 	    my $logr = get_logger();
@@ -142,8 +142,6 @@ sub expand_text_macros {
 sub expand_individual_macro {
     begin_routine();
 
-    print "inside expand macro...\n";
-
     my $file_in  = shift;
     my $file_out = shift;
     my $template = shift;
@@ -156,7 +154,6 @@ sub expand_individual_macro {
     @expand_text = <$TEMPLATE>;
 
     while( $line = <$IN>) {
-	print "reading a line = $line";
 	if( $line =~ m/$keyword/ ) {
 	    DEBUG(   "--> found a text macro...\n");
 	    print $OUT @expand_text;

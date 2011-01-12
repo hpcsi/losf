@@ -61,7 +61,7 @@ BEGIN {
 
 	verify_sw_dependencies();
 	begin_routine();
-
+	
 	if ( $osf_sync_const_file == 0 ) {
 	    INFO("** Syncing configuration files (const)\n\n");
 	    $osf_sync_const_file = 1;
@@ -74,6 +74,17 @@ BEGIN {
 
 	foreach(@sync_files) {
 	    sync_const_file("$_");
+	}
+
+	# Now, sync partial contents...
+
+	INFO("** Syncing configuration files (partial contents))\n\n");
+
+	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
+
+	foreach(@partial_files) {
+	    print "working on file $_\n";
+	    sync_partial_file("$_");
 	}
 	
 	end_routine();
@@ -175,6 +186,13 @@ BEGIN {
 		print "   --> OK: $file in sync\n";
 	    } else {
 		ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
+
+		# Save current copy....
+
+		my $orig_copy = "/tmp/$basename.orig";
+		print("   --> Copy of original file saved at $orig_copy\n");
+
+		copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
 		
 		(my $fh, my $tmpfile) = tempfile();
 		
@@ -197,6 +215,105 @@ BEGIN {
 	end_routine();
     }
 
+
+    sub sync_partial_file {
+
+	begin_routine();
+
+	my $file    = shift;
+	my $logr    = get_logger();
+	my $found   = 0;
+
+	my $file_begin_delim='----------begin-sync-losf-$';
+	my $file_end_delim='------------end-sync-losf-$';
+
+	(my $cluster, my $type) = determine_node_membership();
+	
+	if ( ! -s "$file" && ! -l "$file" ) {
+	    WARN("   --> Warning: production file $file not found - adding new sync file\n");
+	}
+
+	my $basename = basename($file);
+	DEBUG("   --> [$basename] Attempting to partially sync file: $file\n");
+	
+	my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
+	DEBUG("   --> Looking for file $sync_file\n");
+
+	if ( ! -s $sync_file ) {
+	    WARN("   --> Warning: config/const_files/$cluster/$type/$basename not " .
+		 "found - not syncing...\n");
+	    end_routine();
+	    return;
+	}
+
+	# Expand any @losf@ macros
+
+	(my $fh_tmp, my $ref_file) = tempfile();
+
+	expand_text_macros($sync_file,$ref_file,$cluster);
+
+	# Look for delimiter to define portion of file to sync and embed sync contents
+
+	(my $fh_tmp, my $new_file) = tempfile();
+
+	print "NOOP for now\n";
+	print "sync_file = $sync_file\n";
+	print "ref_file  = $ref_file\n";
+	print "new_File  = $new_file\n";
+
+	open(IN,     "<$file")      || die "Cannot open $file\n";
+	open(TMPFILE,">$new_file")  || die "Cannot create tmp file $sync_file";
+
+	my $found_delim=0;
+
+	while (<IN>) {	
+	    if(/$file_begin_delim/../$file_end_delim/) {
+		$found_delim=1;
+		if (/--begin-sync-losf-$/) {
+		    print TMPFILE "#--------------------------------------------------------------begin-sync-losf-\n";
+		    print TMPFILE "#\n";
+		    print TMPFILE "# Partially synced file - please do not edit entries between the begin/end\n";
+		    print TMPFILE "# sync delimiters or you may lose the contents during the next synchronization \n";
+		    print TMPFILE "# process. Knock yourself out adding customizations to the rest of the file as \n";
+		    print TMPFILE "# anything outside of the delimited section will be preserved.\n";
+		    print TMPFILE "#\n";
+		    print TMPFILE "#--------------------------------------------------------------end-sync-losf-\n";
+		}
+	    } else {
+		print TMPFILE $_;
+	    }
+	}
+
+	if ( !$found_delim ) {
+	    print("   --> No losf delimiter present, not syncing...\n");
+	    return;
+	};
+
+	# Check if we have any changes?
+
+	if ( compare($file,$ref_file) == 0 ) {
+	    print "   --> OK: $file in sync\n";
+	} else {
+	    ERROR("   --> [$basename] Differences found: $basename requires partial syncing\n");
+		
+	    #copy("$ref_file","$file")     || MYERROR("Unable to move $tmpfile to $file");
+
+	    INFO("   --> [$basename] Sync successful\n");
+	}
+
+	# Ensure same permissions as original sync file.
+
+#####	mirrorPermissions("$sync_file","$file");
+
+	# Clean up
+
+	unlink $ref_file || die "Cannot clean up $ref_file";
+	unlink $new_file || die "Cannot clean up $new_file";
+
+	end_routine();
+
+	return;
+    }
 
     sub parse_and_sync_permissions {
 	verify_sw_dependencies();
