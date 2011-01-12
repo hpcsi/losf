@@ -181,7 +181,6 @@ BEGIN {
 
 	    # Deal with non-symbolic link and diff directly.
 
-#	    if ( compare($file,$sync_file) == 0 ) {
 	    if ( compare($file,$ref_file) == 0 ) {
 		print "   --> OK: $file in sync\n";
 	    } else {
@@ -295,6 +294,10 @@ BEGIN {
 	    print "   --> OK: $file in sync\n";
 	} else {
 	    ERROR("   --> [$basename] Differences found: $basename requires partial syncing\n");
+
+	    my $orig_copy = "/tmp/$basename.orig";
+	    print("   --> Copy of original file saved at $orig_copy\n");
+	    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
 		
 	    #copy("$ref_file","$file")     || MYERROR("Unable to move $tmpfile to $file");
 
