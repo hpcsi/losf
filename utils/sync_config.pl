@@ -187,10 +187,11 @@ BEGIN {
 
 		# Save current copy....
 
-		my $orig_copy = "/tmp/$basename.orig";
-		print("   --> Copy of original file saved at $orig_copy\n");
-
-		copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+		if ( -e $file ) {
+		    my $orig_copy = "/tmp/$basename.orig";
+		    print("   --> Copy of original file saved at $orig_copy\n");
+		    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+		}
 		
 		(my $fh, my $tmpfile) = tempfile();
 		
@@ -305,9 +306,11 @@ BEGIN {
 
 	    # Save copy of current file
 
-	    my $orig_copy = "/tmp/$basename.orig";
-	    print("   --> Copy of original file saved at $orig_copy\n");
-	    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+	    if ( -e $file ) {
+		my $orig_copy = "/tmp/$basename.orig";
+		print("   --> Copy of original file saved at $orig_copy\n");
+		copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+	    }
 
 	    # Update production file
 		
