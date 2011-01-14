@@ -53,7 +53,7 @@ sub verify_log4perl_availability {
 	if(! Log::Log4perl->initialized()) {
 	    no warnings;
 	    use Log::Log4perl qw(:easy);
-	    Log::Log4perl->easy_init({level  => $DEBUG,
+	    Log::Log4perl->easy_init({level  => $INFO,
 				      layout => "%m",
 				      file   =>  'STDOUT'});
 	    my $logr = get_logger();
