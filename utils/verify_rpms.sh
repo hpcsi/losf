@@ -44,7 +44,7 @@ function verify_rpms
 	  let "count = count + 1"
 	  num_versions=1
 	  NO_UPGRADE=0
-	  
+
 	  igot=`echo $i | grep ','`
 
 	  if [ "x$igot" != "x" ];then
