@@ -143,7 +143,10 @@ BEGIN {
 	# Look for file differences and fix 'em
 	#--------------------------------------
 
-	if ( -l $sync_file ) {
+	# TODO: fix me later to create soft links.
+
+#	if ( -l $sync_file ) {
+	if ( 0 ) {
 
 	    INFO("   --> Checking symbolic link\n");
 
@@ -265,7 +268,20 @@ BEGIN {
 	open(REF,    "<$ref_file")  || die "Cannot open $ref_file\n";
 	open(TMPFILE,">$new_file")  || die "Cannot create tmp file $sync_file";
 
-	my $found_delim=0;
+	# Verify that the delimter is present; add it if not.
+
+ 	my $found_delim=0;
+# 
+# 	while(<IN>) {
+# 	    if(/$file_begin_delim/../$file_end_delim/) {
+# 		$found_delim=1;
+# 	    }
+# 	}
+# 
+#	if ( !$found_delim ) {
+#	    print("   --> Adding partial sync delimiter to file $file")
+#	    return;
+#	};
 
 	while (<IN>) {	
 	    if(/$file_begin_delim/../$file_end_delim/) {
