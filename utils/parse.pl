@@ -220,7 +220,7 @@ BEGIN {
 	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		if ( "$myval" eq "yes" ) {
-		    INFO("   --> Sync requested for $_\n");
+		    INFO("   --> Sync defined for $_\n");
 		    push(@sync_files,$_);
 		}
 	    } else {
@@ -261,7 +261,7 @@ BEGIN {
 	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		if ( "$myval" eq "partial" ) {
-		    INFO("   --> Partial sync requested for $_\n");
+		    INFO("   --> Partial sync defined for $_\n");
 		    push(@sync_partials,$_);
 		}
 	    } else {

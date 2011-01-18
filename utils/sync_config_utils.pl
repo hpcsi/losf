@@ -188,8 +188,12 @@ BEGIN {
 
 		if ( -e $file ) {
 		    my $orig_copy = "/tmp/$basename.orig";
-		    print("   --> Copy of original file saved at $orig_copy\n");
-		    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+
+		    if ( "$basename" ne "shadow" ) {
+			print("   --> Copy of original file saved at $orig_copy\n");
+			copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+			mirrorPermissions("$file","/tmp/$basename.orig");
+		    }
 		}
 		
 		(my $fh, my $tmpfile) = tempfile();
