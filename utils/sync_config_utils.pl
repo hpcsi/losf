@@ -34,6 +34,7 @@ use OSF_paths;
 use File::Basename;
 use File::Compare;
 use File::Copy;
+use File::Path;
 use File::Temp qw(tempfile);
 
 use lib "$osf_log4perl_dir";
@@ -194,6 +195,15 @@ BEGIN {
 			copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
 			mirrorPermissions("$file","/tmp/$basename.orig");
 		    }
+		}
+
+		# Make sure path to file exits;
+
+		my $parent_dir = dirname($file);
+		print "parent dir = $parent_dir\n";
+
+		if ( ! -d $parent_dir ) {
+		    mkpath("$parent_dir") || MYERROR("Unable to create path $parent_dir");
 		}
 		
 		(my $fh, my $tmpfile) = tempfile();
