@@ -396,7 +396,7 @@ BEGIN {
 	my $mode_new = (stat($newfile))[2] & 0777;
 
 	DEBUG("   --> Desired sync file permission = $mode_old\n");
-	print "   --> FAILED: updating sync file permissions..." unless $mode_old == $mode_new;
+	print "   --> FAILED: updating sync file permissions...\n" unless $mode_old == $mode_new;
 
 	chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
 
