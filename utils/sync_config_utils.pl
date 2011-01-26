@@ -205,14 +205,23 @@ BEGIN {
 		    mkpath("$parent_dir") || MYERROR("Unable to create path $parent_dir");
 		}
 		
-		(my $fh, my $tmpfile) = tempfile();
-		
+#		(my $fh, my $tmpfile) = tempfile();
+
+		my $tmpfile = "$file"."__losf__new";
+
 		DEBUG("   --> Copying contents to $tmpfile\n");
 		
 		copy("$ref_file","$tmpfile")  || MYERROR("Unable to copy $sync_file to $tmpfile");
-		copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
+
+		MYERROR("Unable to copy temp file to desired volume ($tmpfile)") unless -s $tmpfile;
+
+###		copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
+
+		# Unix safe way to update
+
+		rename ($tmpfile,$file)       || MYERROR("Unable to rename $tmpfile -> $file");
 #		unlink("$ref_file")           || MYERROR("Unable to remove $ref_file");
-		unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
+#		unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
 
 		INFO("   --> [$basename] Sync successful\n");
 	    }
