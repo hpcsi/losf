@@ -278,28 +278,28 @@ BEGIN {
 
 	(my $fh_tmp, my $new_file) = tempfile();
 
-#	print "sync_file = $sync_file\n";
-#	print "ref_file  = $ref_file\n";
-#	print "new_File  = $new_file\n";
-
-	open(IN,     "<$file")      || die "Cannot open $file\n";
+	open(IN,     "+<$file")     || die "Cannot open $file\n";
 	open(REF,    "<$ref_file")  || die "Cannot open $ref_file\n";
 	open(TMPFILE,">$new_file")  || die "Cannot create tmp file $sync_file";
 
 	# Verify that the delimter is present; add it if not.
 
  	my $found_delim=0;
-# 
-# 	while(<IN>) {
-# 	    if(/$file_begin_delim/../$file_end_delim/) {
-# 		$found_delim=1;
-# 	    }
-# 	}
-# 
-#	if ( !$found_delim ) {
-#	    print("   --> Adding partial sync delimiter to file $file")
-#	    return;
-#	};
+ 
+ 	while(<IN>) {
+ 	    if(/$file_begin_delim/../$file_end_delim/) {
+ 		$found_delim=1;
+ 	    }
+ 	}
+ 
+	if ( !$found_delim ) {
+	    print("   --> INFO: Adding partial sync delimiter to file $file\n");
+	    print IN "#--------------------------------------------------------------begin-sync-losf-\n";
+	    print IN "#--------------------------------------------------------------end-sync-losf-\n";
+	};
+
+	seek(IN, 0, 0)  || MYERROR("can't rewind numfile: $!");
+	$found_delim = 0;
 
 	while (<IN>) {	
 	    if(/$file_begin_delim/../$file_end_delim/) {
@@ -307,7 +307,7 @@ BEGIN {
 		if (/--begin-sync-losf-$/) {
 		    print TMPFILE "#--------------------------------------------------------------begin-sync-losf-\n";
 		    print TMPFILE "#\n";
-		    print TMPFILE "# Partially synced file - please do not edit entries between the begin/end\n";
+		    print TMPFILE "# LosF Partially synced file - please do not edit entries between the begin/end\n";
 		    print TMPFILE "# sync delimiters or you may lose the contents during the next synchronization \n";
 		    print TMPFILE "# process. Knock yourself out adding customizations to the rest of the file as \n";
 		    print TMPFILE "# anything outside of the delimited section will be preserved.\n";
@@ -327,7 +327,7 @@ BEGIN {
 	close(IN);
 
 	if ( !$found_delim ) {
-	    print("   --> No losf delimiter present, not syncing...\n");
+	    print("   --> No losf delimiter present, appending delimiter...\n");
 	    return;
 	};
 
@@ -434,6 +434,13 @@ BEGIN {
 	    $enable_service = 0;
 	}
 
+	# NOOP if init.d script is not present
+
+	if ( ! -s "/etc/init.d/$service" ) {
+		print "   --> NOOP: $service not installed, ignoring sync request\n";
+		return;
+	    }
+
 	DEBUG("   --> Desired setting = $enable_service\n");
 
 	# make sure chkconfig is setup - have to read stderr for this one....
@@ -460,6 +467,7 @@ BEGIN {
 	    } else {
 		print "   --> FAILED: disabling $service\n";
 		`/sbin/chkconfig $service off`;
+		`/etc/init.d/$service stop`;
 		chomp(my $setting=`/sbin/chkconfig --list $service`);
 		if ( $setting =~ m/3:on/ ) {
 		    MYERROR("Unable to chkconfig $service off");
