@@ -420,7 +420,7 @@ BEGIN {
 # 
 	if ( ! -s $target ) {
 	    if ( ! -s "$link_parent_dir/$target" ) {
-		MYERROR("   --> Soft link target is not available ($link_parent_dir/$target)\n");
+		WARN("   --> Soft link target is not available ($target)\n");
 		end_routine();
 		return;
 	    }
