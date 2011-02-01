@@ -408,16 +408,24 @@ BEGIN {
 	my $link_parent_dir   = dirname($file);
 	my $target_parent_dir = dirname($target);
 
-	if( $target_parent_dir eq "." ) {
+# 	if( $target_parent_dir eq "." && ! -e ) {
+# 	    if ( ! -s "$link_parent_dir/$target" ) {
+# 		MYERROR("   --> Soft link target is not available ($link_parent_dir/$target)\n");
+# 	    }
+# 	} else {
+# 	    if ( ! -s $target ) {
+# 		MYERROR("   --> Soft link target is not available ($target)\n");
+# 	    }
+# 	}
+# 
+	if ( ! -s $target ) {
 	    if ( ! -s "$link_parent_dir/$target" ) {
 		MYERROR("   --> Soft link target is not available ($link_parent_dir/$target)\n");
-	    }
-	} else {
-	    if ( ! -s $target ) {
-		MYERROR("   --> Soft link target is not available ($target)\n");
+		end_routine();
+		return;
 	    }
 	}
-
+	
 	INFO("   --> Checking symbolic link\n");
 	my $basename = basename($file);
 
@@ -443,7 +451,7 @@ BEGIN {
 		print "   --> OK: $file softlink in sync\n";
 	    }
 	} else {
-	    print "Creating link between $file -> $target\n";
+	    print "  --> FAILED: Creating link between $file -> $target\n";
 	    symlink("$target","$file") || 
 		MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
 	}
