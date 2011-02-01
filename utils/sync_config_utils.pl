@@ -51,6 +51,7 @@ require "$osf_utils_dir/header.pl";
 BEGIN {
 
     my $osf_sync_const_file  = 0;
+    my $osf_sync_soft_links  = 0;
     my $osf_sync_services    = 0;
     my $osf_sync_permissions = 0;
     
@@ -83,6 +84,33 @@ BEGIN {
 	    sync_partial_file("$_");
 	}
 	
+	end_routine();
+    }
+
+    sub parse_and_sync_softlinks {
+
+	verify_sw_dependencies();
+	begin_routine();
+	
+	if ( $osf_sync_soft_links == 0 ) {
+	    INFO("** Syncing soft links\n\n");
+	    $osf_sync_soft_links = 1;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+
+	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
+
+	while ( my ($key,$value) = each(%sync_files) ) {
+	    DEBUG("   --> $key => $value\n");
+	    sync_soft_link_file($key,$value);
+	}
+
+#	foreach(@sync_files) {
+#	    sync_soft_link_file("$_");
+#	}
+
 	end_routine();
     }
 
@@ -365,6 +393,62 @@ BEGIN {
 	end_routine();
 
 	return;
+    }
+
+    sub sync_soft_link_file {
+
+	begin_routine();
+	
+	my $file    = shift;
+	my $target  = shift;
+	my $logr    = get_logger();
+
+	(my $cluster, my $type) = determine_node_membership();
+
+	my $link_parent_dir   = dirname($file);
+	my $target_parent_dir = dirname($target);
+
+	if( $target_parent_dir eq "." ) {
+	    if ( ! -s "$link_parent_dir/$target" ) {
+		MYERROR("   --> Soft link target is not available ($link_parent_dir/$target)\n");
+	    }
+	} else {
+	    if ( ! -s $target ) {
+		MYERROR("   --> Soft link target is not available ($target)\n");
+	    }
+	}
+
+	INFO("   --> Checking symbolic link\n");
+	my $basename = basename($file);
+
+	if( -e $file && ! -l $file ) {
+	    WARN("   --> Desired soft link exists as a file, removing existing file\n");
+	    unlink("$file") || MYERROR("[$basename] Unable to remove $file");
+	}
+
+	chdir($link_parent_dir) or die "Cannot chdir to $link_parent_dir $!";
+
+	my @ParentDir = split(/\//, $link_parent_dir);
+        my $notice_string  = $ParentDir[$#ParentDir]; pop(@ParentDir);
+	my $notice_string  = $ParentDir[$#ParentDir]."/$notice_string"; 
+
+	if ( -l $file ) {
+	    my $resolved_file = readlink("$file");
+	    if ( "$resolved_file" ne "$target" ) {
+		ERROR("   --> FAILED [...$notice_string/$basename] Soft link difference found: updating...\n");
+		unlink("$file") || MYERROR("[$basename] Unable to remove $file");
+		symlink("$target","$file") || 
+		    MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
+	    } else {
+		print "   --> OK: $file softlink in sync\n";
+	    }
+	} else {
+	    print "Creating link between $file -> $target\n";
+	    symlink("$target","$file") || 
+		MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
+	}
+
+	end_routine();
     }
 
     sub parse_and_sync_permissions {

@@ -241,7 +241,7 @@ BEGIN {
 	my $host          = shift;
 		          
 	my $logr          = get_logger();
-	my @sync_files    = ();
+#####	my @sync_files    = ();
 	my @sync_partials = ();
 
 	INFO("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
@@ -274,7 +274,41 @@ BEGIN {
 	return(@sync_partials);
     }
 
+    sub query_cluster_config_softlink_sync_files {
 
+	begin_routine();
+
+	my $cluster        = shift;
+	my $host           = shift;
+		          
+	my $logr           = get_logger();
+#	my @sync_softlinks = ();
+	my %sync_softlinks = ();
+
+	INFO("   --> Looking for defined soft links to sync...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("SoftLinks") ) {
+	    WARN("No Input section found for cluster $cluster [SoftLinks]\n");
+	}
+
+	my @defined_files = $local_cfg->Parameters("SoftLinks");
+
+	my $num_files = @defined_files;
+
+	INFO("   --> \# of soft links defined = $num_files\n");
+
+	foreach(@defined_files) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("SoftLinks",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		$sync_softlinks{$_} = $myval;
+#		push(@sync_softlinks,$_);
+	    }
+	}
+
+	end_routine();
+	return(%sync_softlinks);
+    }
 
     sub query_cluster_config_services {
 
