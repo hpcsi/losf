@@ -476,8 +476,10 @@ BEGIN {
 	while ( my ($key,$value) = each(%perm_files) ) {
 	    DEBUG("   --> $key => $value\n");
 
-	    my $cmd_string = sprintf("chmod %i %s",$value,$key);
-	    system($cmd_string); 
+	    if ( -e $key || -d $key ) {
+		my $cmd_string = sprintf("chmod %i %s",$value,$key);
+		system($cmd_string); 
+	    }
 	}
 
 	end_routine();
