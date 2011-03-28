@@ -37,10 +37,11 @@ function verify_kernel
 	    echo "  --> Kernel rpm is installed; please verify grub.conf and reboot"
 	else
 	    revision=`echo $KERNEL_REV | awk '{print $1}'`
-###	    rpm -ivh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
-	    rpm -Uvh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
+###	    rpm -Uvh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
+	    rpm -Uvh --nodeps --oldpackage --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
 	    mkinitrd -f /boot/initrd-$revision.img $revision
-	    depmod -a
+###	    depmod -a
+            depmod $revision     
 
 	    echo " "
 	    echo "Using production grub.conf file from the following location:"
@@ -58,7 +59,8 @@ function verify_kernel
 	    echo "Kernel is running, but no longer installed"
 
 	    revision=`echo $KERNEL_REV | awk '{print $1}'`
-	    rpm -ivh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
+#	    rpm -ivh --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
+	    rpm -ivh --oldpackage --nodeps --ignoresize $RPM_DIR/$KERNEL_RPM.$MYARCH.rpm
 	    mkinitrd -f /boot/initrd-$revision.img $revision
 
 	    echo " "
