@@ -202,8 +202,14 @@ BEGIN {
 		print "\n"; 
 	    }
 	} else {
-	    ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
-	    
+	    ERROR("   --> [$basename] Differences found: requires syncing ");
+
+	    if($customized) { 
+		print "(using custom config for $host_name)\n";
+	    } else { 
+		print "\n"; 
+	    }
+
 	    # Save current copy....
 	    
 	    if ( -e $file ) {
@@ -232,13 +238,9 @@ BEGIN {
 	    
 	    MYERROR("Unable to copy temp file to desired volume ($tmpfile)") unless -s $tmpfile;
 
-###		copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
-
 	    # Unix-safe way to update
 	    
 	    rename ($tmpfile,$file)       || MYERROR("Unable to rename $tmpfile -> $file");
-#		unlink("$ref_file")           || MYERROR("Unable to remove $ref_file");
-#		unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
 	    
 	    INFO("   --> [$basename] Sync successful\n");
 	}
