@@ -1,0 +1,15 @@
+Version 0.32.0  (In progress)
+
+
+Version 0.31.0 (04 November 2009)
+
+  * support to manage init.d services via chkconfig
+  * added support to synchronize soft links
+  * maintain cached copy of original file prior to synchronization 
+
+
+Version 0.30.0 (23 October 2009)
+
+  * os-update mechanism upgraded to support yum
+  * bug fix for rpm queries with arithmetic characters included
+  * infrastucture updates to support multiple machines
