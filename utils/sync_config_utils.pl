@@ -144,6 +144,10 @@ BEGIN {
 	my $file    = shift;
 	my $logr    = get_logger();
 	my $found   = 0;
+	my $host_name;                       
+	my $customized = 0;
+
+	chomp($host_name=`hostname -s`);
 
 	(my $cluster, my $type) = determine_node_membership();
 	
@@ -154,8 +158,22 @@ BEGIN {
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to sync file: $file\n");
 	
-	my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
+	# Customization - although we group hosts into specific node
+	# types (e.g. logins, computes), we allow for special
+	# customization on a host by host based for configuration
+	# files.  If a configfile.<hostname> exists, we choose this
+	# file to sync in favor of the default configfile.
+
+	my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename.$host_name";
 	DEBUG("   --> Looking for file $sync_file\n");
+
+	if ( ! -s $sync_file ) {
+	    $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
+	    DEBUG("   --> Looking for file $sync_file\n");
+	} else {
+	    $customized = 1;
+	    INFO("  --> Using host specific config file for $host_name\n");
+	}
 	
 	if ( ! -s $sync_file ) {
 	    WARN("   --> Warning: config/const_files/$cluster/$type/$basename not " .
@@ -168,99 +186,68 @@ BEGIN {
 	# Look for file differences and fix 'em
 	#--------------------------------------
 
-	# TODO: fix me later to create soft links.
+	# Expand any @losf@ macros
 
-#	if ( -l $sync_file ) {
-	if ( 0 ) {
-
-	    INFO("   --> Checking symbolic link\n");
-
-	    my $resolved_sync_file = readlink("$sync_file");
-
-	    # Is the target a symlink?
-
-	    if ( ! -l $file ) {
-		MYERROR("   --> Target file $file is not a symlink, aborting...\n");
-	    } else {
-		my $resolved_file = readlink("$file");
+	(my $fh_tmp, my $ref_file) = tempfile();
 	    
-		INFO("   --> Resolved sync file   = $resolved_sync_file\n");
-		INFO("   --> Resolved target file = $resolved_file\n");
-
-		if ( "$resolved_sync_file" ne "$resolved_file" ) {
-		    ERROR("   --> [$basename] Soft link difference found: updating...\n");
-		    unlink("$file") || MYERROR("[$basename] Unable to remove $file");
-		    symlink("$resolved_sync_file","$file") || 
-			MYERROR("[$basename] Unable to create symlink for $file");
-		} else {
-		    print "   --> OK: $file softlink in sync\n";
-		}
-		    
+	expand_text_macros($sync_file,$ref_file,$cluster);
+	    
+	# Deal with non-symbolic link and diff directly.
+	    
+	if ( compare($file,$ref_file) == 0 ) {
+	    print "   --> OK: $file in sync ";
+	    if($customized) { 
+		print "(using customized config for $host_name)\n";
+	    } else { 
+		print "\n"; 
 	    }
-
 	} else {
-
-	    # Expand any @losf@ macros
-
-	    (my $fh_tmp, my $ref_file) = tempfile();
-
-	    expand_text_macros($sync_file,$ref_file,$cluster);
-
-	    # Deal with non-symbolic link and diff directly.
-
-	    if ( compare($file,$ref_file) == 0 ) {
-		print "   --> OK: $file in sync\n";
-	    } else {
-		ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
-
-		# Save current copy....
-
-		if ( -e $file ) {
-		    my $orig_copy = "/tmp/$basename.orig";
-
-		    if ( "$basename" ne "shadow" ) {
-			print("   --> Copy of original file saved at $orig_copy\n");
-			copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
-			mirrorPermissions("$file","/tmp/$basename.orig");
-		    }
-		}
-
-		# Make sure path to file exits;
-
-		my $parent_dir = dirname($file);
-
-		if ( ! -d $parent_dir ) {
-		    mkpath("$parent_dir") || MYERROR("Unable to create path $parent_dir");
-		}
+	    ERROR("   --> [$basename] Differences found: $basename requires syncing\n");
+	    
+	    # Save current copy....
+	    
+	    if ( -e $file ) {
+		my $orig_copy = "/tmp/$basename.orig";
 		
-#		(my $fh, my $tmpfile) = tempfile();
+		if ( "$basename" ne "shadow" ) {
+		    print("   --> Copy of original file saved at $orig_copy\n");
+		    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+		    mirrorPermissions("$file","/tmp/$basename.orig");
+		}
+	    }
+	    
+	    # Make sure path to file exits;
+	    
+	    my $parent_dir = dirname($file);
+	    
+	    if ( ! -d $parent_dir ) {
+		mkpath("$parent_dir") || MYERROR("Unable to create path $parent_dir");
+	    }
+	    
+	    my $tmpfile = "$file"."__losf__new";
 
-		my $tmpfile = "$file"."__losf__new";
-
-		DEBUG("   --> Copying contents to $tmpfile\n");
-		
-		copy("$ref_file","$tmpfile")  || MYERROR("Unable to copy $sync_file to $tmpfile");
-
-		MYERROR("Unable to copy temp file to desired volume ($tmpfile)") unless -s $tmpfile;
+	    DEBUG("   --> Copying contents to $tmpfile\n");
+	    
+	    copy("$ref_file","$tmpfile")  || MYERROR("Unable to copy $sync_file to $tmpfile");
+	    
+	    MYERROR("Unable to copy temp file to desired volume ($tmpfile)") unless -s $tmpfile;
 
 ###		copy("$tmpfile","$file")      || MYERROR("Unable to move $tmpfile to $file");
 
-		# Unix safe way to update
-
-		rename ($tmpfile,$file)       || MYERROR("Unable to rename $tmpfile -> $file");
+	    # Unix-safe way to update
+	    
+	    rename ($tmpfile,$file)       || MYERROR("Unable to rename $tmpfile -> $file");
 #		unlink("$ref_file")           || MYERROR("Unable to remove $ref_file");
 #		unlink("$tmpfile")            || MYERROR("Unable to remove $tmpfile");
-
-		INFO("   --> [$basename] Sync successful\n");
-	    }
-
-	    unlink($ref_file);
-
-	    # Ensure same permissions as original sync file.
-
-	    mirrorPermissions("$sync_file","$file");
-
+	    
+	    INFO("   --> [$basename] Sync successful\n");
 	}
+
+	unlink($ref_file);
+
+	# Ensure same permissions as original sync file.
+
+	mirrorPermissions("$sync_file","$file");
 
 	end_routine();
     }
