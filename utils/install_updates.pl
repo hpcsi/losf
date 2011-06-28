@@ -118,7 +118,7 @@ if ( $not_updated == 0) {
 INFO("--> Verifying rpm dependencies...\n");
 
 chomp(my $VERIFY=`rpm -U --ignoresize --test $RPMDIR/*.rpm 2>&1`);
-chomp(my $PARTIAL_INSTALL=`echo $VERIFY | grep -v "is already installed"`);
+chomp(my $PARTIAL_INSTALL=`echo "$VERIFY" | grep -v "is already installed"`);
 
 my $RPM_EXTRA_OPTION="";
 my $INCREMENTAL=0;
