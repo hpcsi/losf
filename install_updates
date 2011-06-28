@@ -1,4 +1,6 @@
 #!/bin/bash
 
-export PERL5LIB=/home/build/admin/hpc_stack/utils
-utils/install_updates.pl
+export TOP_DIR=/home/build/admin/hpc_stack
+export PERL5LIB=$TOP_DIR/utils
+
+$TOP_DIR/utils/install_updates.pl
