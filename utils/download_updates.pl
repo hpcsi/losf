@@ -66,7 +66,7 @@ if ( $UPDATE_MODE eq "yum" ) {
     INFO("--> Prepping to download packages via yum\n");
 
     my $YUM_CONF    = "/etc/yum.conf";
-    my $IGNORE_PKGS = "kernel* libibcm* libibcommon* libibverbs* libipathverbs* libmthca* libopensm* libosmcomp* libosmvendor* librdmacm* mstflint* opensm* libibumad* openib* ibutils* libsdp* iscsi-initiator-utils infiniband-diags* libcxgb3 bash* tcsh* fipscheck-check* fipscheck*";
+    my $IGNORE_PKGS = "kernel* libibcm* libibcommon* libibverbs* libipathverbs* libmthca* libopensm* libosmcomp* libosmvendor* librdmacm* mstflint* opensm* libibumad* openib* ibutils* libsdp* iscsi-initiator-utils infiniband-diags* libcxgb3 bash* tcsh* fipscheck-check* fipscheck* libibmad* tvflash*";
 
     #---------------------------------
     # Set correct packages to ignore 
