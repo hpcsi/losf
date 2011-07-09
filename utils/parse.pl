@@ -316,13 +316,9 @@ BEGIN {
 
 	my $cluster = shift;
 	my $host    = shift;
-	
 	my $logr    = get_logger();
 
 	my %inputs  = ();
-
-#	my @keys    = ();
-#	my @values  = ();
 
 	INFO("   --> Looking for defined files to sync...($cluster->$host)\n");
 
@@ -330,7 +326,27 @@ BEGIN {
 	    MYERROR("No Input section found for cluster $cluster [Services]\n");
 	}
 
-	my @defined_services = $local_cfg->Parameters("Services");
+	my @defined_services = ();
+	my $section = ();
+
+	if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
+	    $section = "Services";
+
+	    if ( ! $local_cfg->SectionExists($section) ) {
+		MYERROR("No Input section found for cluster $cluster [Services]\n");
+	    }
+
+	    @defined_services = $local_cfg->Parameters($section);
+	} else {
+
+	    $section = "Services/$host";
+
+	    if ( ! $local_cfg->SectionExists($section) ) {
+		return(%inputs);
+	    }
+
+	    @defined_services = $local_cfg->Parameters($section);
+	}
 
 	my $num_entries = @defined_services;
 
@@ -338,11 +354,9 @@ BEGIN {
 
 	foreach(@defined_services) {
 	    DEBUG("   --> Read value for $_\n");
-	    if (defined ($myval = $local_cfg->val("Services",$_)) ) {
+	    if (defined ($myval = $local_cfg->val($section,$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		$inputs{$_} = $myval;
-#		push(@keys,$_);
-#		push(@values,$myval);
 	    } else {
 		MYERROR("Services defined with no value ($_)");
 	    }
@@ -350,7 +364,6 @@ BEGIN {
 
 	end_routine();
 
-#	return(@keys,@values);
 	return(%inputs);
     }
 

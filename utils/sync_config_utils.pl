@@ -100,16 +100,13 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
 	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%sync_files) ) {
 	    DEBUG("   --> $key => $value\n");
 	    sync_soft_link_file($key,$value);
 	}
-
-#	foreach(@sync_files) {
-#	    sync_soft_link_file("$_");
-#	}
 
 	end_routine();
     }
@@ -127,11 +124,28 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
 	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
-	my %sync_services = query_cluster_config_services($node_cluster,$node_type);
+
+	# Node type-specific settings: these take precedence over global
+	# settings; apply them first
+
+	my %sync_services_custom = query_cluster_config_services($node_cluster,$node_type);
+
+	while ( my ($key,$value) = each(%sync_services_custom) ) {
+	    DEBUG("   --> $key => $value\n");
+	    sync_chkconfig_services($key,$value);
+	}
+
+	# Global chkconfig settings: any node-specific settings
+	# applied above are skipped
+
+	my %sync_services = query_cluster_config_services($node_cluster,"LosF-GLOBAL-NODE-TYPE");
 
 	while ( my ($key,$value) = each(%sync_services) ) {
 	    DEBUG("   --> $key => $value\n");
-	    sync_chkconfig_services($key,$value);
+
+	    if ( ! exists $sync_services_custom{$key} ) {
+		sync_chkconfig_services($key,$value);
+	    }
 	}
 	
 	end_routine();
