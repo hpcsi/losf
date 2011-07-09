@@ -575,6 +575,7 @@ BEGIN {
 	    if($enable_service) {
 		print "   --> FAILED: enabling $service\n";
 		`/sbin/chkconfig $service on`;
+		`/etc/init.d/$service start`;
 		chomp(my $setting=`/sbin/chkconfig --list $service`);
 		if ( $setting =~ m/3:off/ ) {
 		    MYERROR("Unable to chkconfig $service on");
