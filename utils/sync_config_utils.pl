@@ -437,7 +437,15 @@ BEGIN {
 	    unlink("$file") || MYERROR("[$basename] Unable to remove $file");
 	}
 
-	chdir($link_parent_dir) or die "Cannot chdir to $link_parent_dir $!";
+	if ( -d $link_parent_dir) {
+	    chdir($link_parent_dir);
+	} else {
+	    WARN("   --> Parent directory for soft link is not available ($link_parent_dir)\n");
+	    end_routine();
+	    return;
+	}
+       
+#	chdir($link_parent_dir) or die "Cannot chdir to $link_parent_dir $!";
 
 	my @ParentDir = split(/\//, $link_parent_dir);
         my $notice_string  = $ParentDir[$#ParentDir]; pop(@ParentDir);
