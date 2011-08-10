@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-
 use POSIX;
 require "getopts.pl";
 
@@ -10,15 +9,25 @@ $timeout = 5*60;
 $n = @ARGV;
 if ($n == 0) {
     print <<EOF
-     Usage: koomie_cf [-w <wait> ] [-m <max_ssh>] [-r <1,2,...n>,<2-5>] [-c cr<r>-c<c> ][-t timeout] command
 
-     -c r<n>-c<c>           - Operate on a specific rack/chassis combination
-     -m <max_ssh>           - Maximum number of commands to run in parallel
-     -r <1,2,..n>|<2-5>     - A list of racks to operate on (e.g. -r 101-105); this option
-                              can also accept a special rack type (e.g. -r oss)
-     -w <wait>              - Time to wait on ssh in seconds default 5 minutes
+Usage: koomie_cf -r <1,2,...n>,<2-5> [OPTIONS] command
 
-    
+where "command" is a command to spawn in parallel across one or more
+cluster hosts using ssh. Results of the commands from each host are
+written to stdout and are prepended by the executing hostname. If a
+host is currently unavailable, it will be skipped. If a host fails to
+execute the command before the timeout window completes, the requested
+command will be terminated.
+
+OPTIONS:
+  --help                  generate help message and exit
+  -r <1,2,..n>|<2-5>      operate on a subset list of racks (e.g. -r 101-105); this option
+                          can also accept a special rack types (e.g. -r login)
+  -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
+  -m <max_ssh>            maximum number of commands to run in parallel (default = 288)
+  -t <timout>             timeout period for command completion in seconds (default = 5 minutes)
+  -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
+
 EOF
 ;
     exit(0);
@@ -27,40 +36,6 @@ EOF
 if ($opt_t) {
      $timeout = $opt_t;
 }
-
-# if ($opt_c ne "") {
-#     @c = split(/,/,$opt_c);
-#     foreach $c (@c) {
-# 	print "slag $c\n";
-# 	if ($c =~ /r(\d\d*)[-]c(\d\d*)[-]r(\d\d*)[-]c(\d\d*)/) {
-# 	    $start = $1;
-# 	    $start_c = $2;
-# 	    $end =  $3;
-# 	    $end_c = $4;
-# 	    if ($start == $end) {
-# 	        for($j=$start_c; $j<=$end_c; $j++) {
-# 		     $c{$start . "_" . $j } = 1;
-# 	        }
-# 	    } else {
-# 	        for($j=$start_c; $j<=4; $j++) {
-# 		     $c{$start . "_" . $j } = 1;
-# 	        }
-# 		$start++;
-# 		for ($i= $start; $i < $end; $i++) {
-# 	            for($j=1 ; $j<=4; $j++) {
-# 		         $c{$start . "_" . $j } = 1;
-# 	            }
-# 		}
-# 	        for($j=1; $j<=$end_c; $j++) {
-# 		     $c{$end . "_" . $j } = 1;
-# 	        }
-# 	    }
-# 	} elsif ($c =~ /r(\d\d*)[-]c(\d\d*)/) {
-# 	    $c{$1 . "_" . $2} = 1;
-# 	    print "$c $1 $2\n";
-# 	}
-#     }
-# }
 
 # if ($opt_h) {
 #     @list = split(/,/,$opt_h);
@@ -88,6 +63,16 @@ if ($opt_m) { $max_ssh = $opt_m; }
 #------------------------------------------------
 # Koomie'fied version of building up host lists:
 #------------------------------------------------
+
+# Chassis Options
+
+if ($opt_c ne "")
+{
+    if($opt_c =~ m/^(\d\d\d-\d)$/ ) {
+	$racks_desired = $1;
+    }
+
+}
 
 # Rack Options
 
@@ -127,6 +112,10 @@ if ( $opt_r ne "" ) {
 	$racks_desired = oss;
     }
 
+    if ( $opt_r == "login" ) {
+	$racks_desired = login;
+    }
+
     print "rack_desired = $racks_desired\n";
 #   exit(1);
 
@@ -137,17 +126,23 @@ if ( $opt_r ne "" ) {
 open(input, "/etc/hosts");
 while(<input>) {
 
-    if (/\bc(\d\d\d)[-](\d\d\d)\b/) {
-	$myhost    = "c$1-$2";
-	$myrack    = $1;
-	$mychassis = $2;
+    if (/\bc(\d\d\d)[-](\d)(\d\d)\b/) {
+	$myhost    = "c$1-$2"."$3"; # full hostname        (e.g. 301-105)
+	$myrack    = $1;	    # rack number          (e.g. 301)
+	$myblade   = $2.$3;	    # chassis/host number  (e.g. 105)
+	$mychassis = "$1-$2";	    # chassis number       (e.g. 301-1)
 
 #	print "Checking on host $myhost\n";
 
 	if ( $opt_r ne "" ) {
 	    if ( $myrack =~ /$racks_desired/ ) {
-		$hosts{$myhost} = $myrack*10000 + $mychassis;
+		$hosts{$myhost} = $myrack*10000 + $myblade;
 	    }
+	} elsif ( $opt_c ne "" ) {
+	    
+	    if ( $mychassis =~ /$racks_desired/ ) {
+		$hosts{$myhost} = $myrack*10000 + $myblade;
+	    }		
 
 	}
     } elsif ( /\boss(\d+?)\b/ && $opt_r eq "oss" ) {
@@ -157,7 +152,12 @@ while(<input>) {
 #	print "Checking on oss host $myhost\n";
 	$hosts{$myhost} = $rank;
 
-    }
+    } elsif ( /\blogin(\d+?)\b/ && $opt_r eq "login" ) {
+	$rank   = $1;
+	$myhost = "login$rank";
+	$hosts{$myhost} = $rank;
+    } 
+
 }
 
 @hosts = sort {$hosts{$a} <=> $hosts{$b}} keys%hosts;
