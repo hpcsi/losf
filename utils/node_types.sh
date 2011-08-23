@@ -89,8 +89,8 @@ done
 
 if [ "$BASENAME" == "undefined" ];then
     echo " "
-    echo "I'm very sorry to report that I can't determine the node type for $MYHOST"
-    echo "You should probably go yell at karl as he's a dodgy bastard"
+    echo "[Error]: Unable to determine the node type for this host ($MYHOST)."
+    echo "[Error]: Is this host and cluster defined in the global LosF config/config.machines file?"
     echo " "
     exit 1
 fi
