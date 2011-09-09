@@ -1,12 +1,15 @@
-Version 0.32.0  (In progress)
+Version 0.32.0  (07 August 2011)
 
+  * added capability to have alternate rpm repository defined when running update
+  * added mechanism to control chkconfig services on per-appliance basis
+  * bug fix for chkconfig syncing not starting service after sync change from off to on
+  * added support to override appliance flat-file syncing with host specific version
 
 Version 0.31.0 (04 November 2009)
 
   * support to manage init.d services via chkconfig
   * added support to synchronize soft links
   * maintain cached copy of original file prior to synchronization 
-
 
 Version 0.30.0 (23 October 2009)
 
