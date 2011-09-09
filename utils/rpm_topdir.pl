@@ -43,7 +43,7 @@ chomp(my $host_name=`hostname -s`);
 # Determine Local RPM TopDir
 #---------------------------
 
-(my $rpm_topdir) = query_cluster_rpm_dir($node_cluster);
+(my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
 
 $logr->level($INFO);
 INFO("\nRPM_TOPDIR = $rpm_topdir\n");

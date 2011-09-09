@@ -410,13 +410,16 @@ BEGIN {
 	begin_routine();
 
 	my $cluster = shift;
-	
+	my $type    = shift;
+
 	my $logr    = get_logger();
 	my $found   = 0;
 
 	INFO("--> Looking for top-level rpm dir...($cluster)\n");
 
-	if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir")) ) {
+	if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir_$type")) ) {
+	    DEBUG("--> Read node specific topdir = $rpm_topdir\n");
+	} elsif (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir")) ) {
 	    DEBUG("--> Read topdir = $rpm_topdir\n");
 	} else {
 	    MYERROR("No rpm_build_dir defined for cluster $cluster");
