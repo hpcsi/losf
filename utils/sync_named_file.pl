@@ -78,7 +78,7 @@ BEGIN {
 	$osf_sync_const_file = 1;
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
 
 	my $found=0;
