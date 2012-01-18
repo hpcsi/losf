@@ -67,11 +67,23 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
+	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
+
+	# Sync file permission convention: if no additional
+	# file-specific file conventions are supplied by the user via
+	# the config files, we mirror the permissions of the template
+	# config file; otherwise we enforce permissions specified in
+	# config file.
 
 	foreach(@sync_files) {
-	    sync_const_file("$_");
+	    if (defined $perm_files{"$_"}) {
+		sync_const_file("$_",0);
+	    } else {
+		sync_const_file("$_",1);
+	    }
+
 	}
 
 	# Now, sync partial contents...
@@ -99,7 +111,7 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
@@ -123,7 +135,7 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
 	# Node type-specific settings: these take precedence over global
 	# settings; apply them first
@@ -155,9 +167,10 @@ BEGIN {
 
 	begin_routine();
 	
-	my $file    = shift;
-	my $logr    = get_logger();
-	my $found   = 0;
+	my $file       = shift;	# input filename to sync
+	my $sync_perms = shift;	# input flag whether to sync with template file or not
+	my $logr       = get_logger();
+	my $found      = 0;
 	my $host_name;                       
 	my $customized = 0;
 
@@ -261,13 +274,14 @@ BEGIN {
 
 	unlink($ref_file);
 
-	# Ensure same permissions as original sync file.
+	# Sync file permissions if desired
 
-	mirrorPermissions("$sync_file","$file");
+	if ( $sync_perms == 1 ) {
+	    mirrorPermissions("$sync_file","$file");
+	}
 
 	end_routine();
     }
-
 
     sub sync_partial_file {
 
@@ -481,7 +495,7 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_config_file_parsing("$osf_config_dir/config.sw."."$node_cluster");
+	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%perm_files) ) {
