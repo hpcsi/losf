@@ -71,19 +71,8 @@ BEGIN {
 	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
 
-	# Sync file permission convention: if no additional
-	# file-specific file conventions are supplied by the user via
-	# the config files, we mirror the permissions of the template
-	# config file; otherwise we enforce permissions specified in
-	# config file.
-
 	foreach(@sync_files) {
-	    if (defined $perm_files{"$_"}) {
-		sync_const_file("$_",0);
-	    } else {
-		sync_const_file("$_",1);
-	    }
-
+	    sync_const_file("$_");
 	}
 
 	# Now, sync partial contents...
@@ -168,7 +157,6 @@ BEGIN {
 	begin_routine();
 	
 	my $file       = shift;	# input filename to sync
-	my $sync_perms = shift;	# input flag whether to sync with template file or not
 	my $logr       = get_logger();
 	my $found      = 0;
 	my $host_name;                       
@@ -177,6 +165,7 @@ BEGIN {
 	chomp($host_name=`hostname -s`);
 
 	(my $cluster, my $type) = determine_node_membership();
+	my %perm_files          = query_cluster_config_sync_permissions($cluster,$type);
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
 	    WARN("   --> Warning: production file $file not found - adding new sync file\n");
@@ -274,9 +263,18 @@ BEGIN {
 
 	unlink($ref_file);
 
-	# Sync file permissions if desired
+	# Sync file permission convention: if no additional
+	# file-specific file conventions are supplied by the user via
+	# the config files, we mirror the permissions of the template
+	# config file; otherwise we enforce permissions specified in
+	# config file.
 
-	if ( $sync_perms == 1 ) {
+	if(defined $perm_files{"$file"}) {
+	    if ( -e $file ) {
+		my $cmd_string = sprintf("chmod %i %s",$perm_files{"$file"},$file);
+		system($cmd_string); 
+	    }
+	} else {
 	    mirrorPermissions("$sync_file","$file");
 	}
 

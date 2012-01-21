@@ -12,8 +12,11 @@ use Config::IniFiles;
 
 BEGIN {
 
-    my $osf_init_global_config = 0;
-    my $osf_init_local_config  = 0; 
+    my $osf_init_global_config    = 0;
+    my $osf_init_local_config     = 0; 
+    my $osf_init_sync_permissions = 0;
+
+    my %osf_file_perms = ();
 
     sub query_global_config_host {
 
@@ -233,6 +236,8 @@ BEGIN {
 	return(@sync_files);
     }
 
+
+
     sub query_cluster_config_partial_sync_files {
 
 	begin_routine();
@@ -241,7 +246,6 @@ BEGIN {
 	my $host          = shift;
 		          
 	my $logr          = get_logger();
-#####	my @sync_files    = ();
 	my @sync_partials = ();
 
 	INFO("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
@@ -310,6 +314,51 @@ BEGIN {
 	return(%sync_softlinks);
     }
 
+    sub query_cluster_config_host_network_definitions {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $host          = shift;
+		          
+	my $logr          = get_logger();
+	my %interfaces    = ();
+
+	INFO("   --> Looking for host interface network definitions...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("HostInterfaces") ) {
+	    MYERROR("No Input section found for cluster $cluster [HostInterfaces]\n");
+	}
+
+	my @defined_hosts = $local_cfg->Parameters("HostInterfaces");
+
+	my $num_hosts = @defined_hosts;
+
+	INFO("   --> \# of hosts defined = $num_hosts\n");
+
+	foreach(@defined_hosts) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined (@myvalues = $local_cfg->val("HostInterfaces",$_)) ) {
+		print "size of array = ", @myvalues."\n";
+#		push(@interfaces,$_);
+###		push(@interfaces,@myvalues);
+		$interfaces{$_} = @myvalues[0];
+#		DEBUG("   --> Value = $myval\n");
+#		if ( "$myval" eq "yes" ) {
+#		    INFO("   --> Sync defined for $_\n");
+#		    push(@sync_files,$_);
+#		}
+		
+	    } else {
+		MYERROR("HostInterfaces defined with no value ($_)");
+	    }
+	}
+
+	end_routine();
+
+	return(%interfaces);
+    }
+
     sub query_cluster_config_services {
 
 	begin_routine();
@@ -371,38 +420,42 @@ BEGIN {
 
 	begin_routine();
 
-	my $cluster = shift;
-	my $host    = shift;
+	if($osf_init_sync_permissions == 0) {
+
+	    my $cluster = shift;
+	    my $host    = shift;
 	
-	my $logr    = get_logger();
+	    my $logr    = get_logger();
+	    
+	    %osf_file_perms  = ();
 
-	my %inputs  = ();
-
-	INFO("   --> Looking for specific permissions to sync...($cluster->$host)\n");
-
-	if ( ! $local_cfg->SectionExists("Permissions") ) {
-	    MYERROR("No Input section found for cluster $cluster [Permissions]\n");
-	}
-
-	my @perms = $local_cfg->Parameters("Permissions");
-
-	my $num_entries = @perms;
-
-	INFO("   --> \# of file permissions to sync = $num_entries\n");
-
-	foreach(@perms) {
-	    DEBUG("   --> Read value for $_\n");
-	    if (defined ($myval = $local_cfg->val("Permissions",$_)) ) {
-		DEBUG("   --> Value = $myval\n");
-		$inputs{$_} = $myval;
-	    } else {
-		MYERROR("Permissions defined with no value ($_)");
+	    INFO("   --> Looking for specific permissions to sync...($cluster->$host)\n");
+	    
+	    if ( ! $local_cfg->SectionExists("Permissions") ) {
+		MYERROR("No Input section found for cluster $cluster [Permissions]\n");
 	    }
-	}
+	    
+	    my @perms = $local_cfg->Parameters("Permissions");
+	    
+	    my $num_entries = @perms;
+	    
+	    INFO("   --> \# of file permissions to sync = $num_entries\n");
+	    
+	    foreach(@perms) {
+		DEBUG("   --> Read value for $_\n");
+		if (defined ($myval = $local_cfg->val("Permissions",$_)) ) {
+		    DEBUG("   --> Value = $myval\n");
+		    $osf_file_perms{$_} = $myval;
+		} else {
+		    MYERROR("Permissions defined with no value ($_)");
+		}
+	    }
+	    print "inside perm designation\n";
+	    $osf_init_sync_permissions=1;
+	}# end on first entry
 
 	end_routine();
-
-	return(%inputs);
+	return(%osf_file_perms);
     }
 
     sub query_cluster_rpm_dir {
