@@ -450,7 +450,6 @@ BEGIN {
 		    MYERROR("Permissions defined with no value ($_)");
 		}
 	    }
-	    print "inside perm designation\n";
 	    $osf_init_sync_permissions=1;
 	}# end on first entry
 
