@@ -218,7 +218,7 @@ BEGIN {
 		print "\n"; 
 	    }
 	} else {
-	    ERROR("   --> [$basename] Differences found: requires syncing ");
+	    ERROR("   --> FAILED: [$basename] Differences found: requires syncing ");
 
 	    if($customized) { 
 		print "(using custom config for $host_name)\n";
@@ -251,15 +251,17 @@ BEGIN {
 	    DEBUG("   --> Copying contents to $tmpfile\n");
 	    
 	    copy("$ref_file","$tmpfile")  || MYERROR("Unable to copy $sync_file to $tmpfile");
+
 	    
 	    MYERROR("Unable to copy temp file to desired volume ($tmpfile)") unless -s $tmpfile;
 
 	    # Unix-safe way to update
 	    
 	    rename ($tmpfile,$file)       || MYERROR("Unable to rename $tmpfile -> $file");
+	    mirrorPermissions("$sync_file","$file",0);
 	    
 	    INFO("   --> [$basename] Sync successful\n");
-	}
+	} # end if difference was found	
 
 	unlink($ref_file);
 
@@ -379,7 +381,7 @@ BEGIN {
 	if ( compare($file,$new_file) == 0 ) {
 	    print "   --> OK: $file in (partial) sync\n";
 	} else {
-	    ERROR("   --> [$basename] Differences found: $basename requires partial syncing\n");
+	    ERROR("   --> FAILED: [$basename] Differences found: $basename requires partial syncing\n");
 
 	    # Save copy of current file
 
@@ -392,6 +394,7 @@ BEGIN {
 	    # Update production file
 		
 	    copy("$new_file","$file")     || MYERROR("Unable to move $new_file to $file");
+	    mirrorPermissions("$sync_file","$file",0);
 
 	    INFO("   --> [$basename] Sync successful\n");
 	}
@@ -516,15 +519,32 @@ BEGIN {
 	my $oldfile = shift;
 	my $newfile = shift;
 
+	# default is to show permissions change message; in certain cases when updating a file, we know that 
+	# the perms are going to change and allow this subroutine to be called with an optional 3rd argument
+	# to override the default message display
+
+	my $display_change_message = 1; # default to perm change message
+
+	if( @_ >= 1 ) {
+	    $display_change_message = shift;
+	}
+
 	MYERROR("Source and destination files must exist") unless -e $oldfile && -e $newfile;
 
 	my $mode_old = (stat($oldfile))[2] & 0777;
 	my $mode_new = (stat($newfile))[2] & 0777;
 
 	DEBUG("   --> Desired sync file permission = $mode_old\n");
-	print "   --> FAILED: updating sync file permissions...\n" unless $mode_old == $mode_new;
 
-	chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
+	if($mode_old != $mode_new) {
+
+	    my $basename = basename($newfile);
+	    
+	    ERROR("   --> FAILED: [$basename] updating sync file permissions...\n") 
+		unless ($display_change_message == 0);
+
+	    chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
+	}
 
 	end_routine();
 	return;
