@@ -35,6 +35,7 @@ use File::Basename;
 use File::Compare;
 use File::Copy;
 use File::Path;
+use File::stat;
 use File::Temp qw(tempfile);
 
 use lib "$osf_log4perl_dir";
@@ -531,8 +532,19 @@ BEGIN {
 
 	MYERROR("Source and destination files must exist") unless -e $oldfile && -e $newfile;
 
-	my $mode_old = (stat($oldfile))[2] & 0777;
-	my $mode_new = (stat($newfile))[2] & 0777;
+#	my $mode_old = (stat($oldfile))[2] & 0777;
+#	my $mode_new = (stat($newfile))[2] & 0777;
+
+	my $st_old = stat($oldfile);
+	my $st_new = stat($newfile);
+
+	my $mode_old = $st_old->mode & 0777;
+	my $uid_old  = $st_old->uid;
+	my $gid_old  = $st_old->gid;
+
+	my $mode_new = $st_new->mode & 0777;
+	my $uid_new  = $st_new->uid;
+	my $gid_new  = $st_new->gid;
 
 	DEBUG("   --> Desired sync file permission = $mode_old\n");
 
@@ -545,6 +557,15 @@ BEGIN {
 
 	    chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
 	}
+
+	# make sure ownership is consistent as well
+
+	print "   --> FAILED: updating sync file  ownership...\n" unless $uid_old == $uid_new;
+	print "   --> FAILED: updating sync group ownership...\n" unless $gid_old == $gid_new;
+
+	my $cnt = chown $uid_old,$gid_old, $newfile;
+
+	if( $cnt != 1 ) { MYERROR("Unable to chown permissions for $newfile");}
 
 	end_routine();
 	return;
