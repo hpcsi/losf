@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id:$
+# $Id$
 
 if [ ! $IPMI_PASSWORD ]; then
     stty -echo
