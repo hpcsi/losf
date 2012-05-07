@@ -24,7 +24,7 @@
 #
 # Utility functions for syncing an individual file.
 #
-# $Id: utils.pl 200 2009-11-01 17:48:31Z karl $
+# $Id$
 #--------------------------------------------------------------------------
 
 use strict;
