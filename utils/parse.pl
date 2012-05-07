@@ -14,6 +14,7 @@ BEGIN {
 
     my $osf_init_global_config    = 0;
     my $osf_init_local_config     = 0; 
+    my $osf_init_os_local_config  = 0; 
     my $osf_init_sync_permissions = 0;
 
     my %osf_file_perms = ();
@@ -163,8 +164,38 @@ BEGIN {
 	    
 	    verify_file_exists($infile);
 	    
-	    $local_cfg = new Config::IniFiles( -file => "$infile" );
-	    $osf_init_global_config = 1;
+	    $local_cfg = new Config::IniFiles( -file => "$infile", 
+					       -allowcontinue => 1,
+		                               -nomultiline   => 1);
+	    $osf_init_local_config = 1;
+	}
+	
+	end_routine();
+    };
+
+    #----------------------------------------------------------------
+    # Init parsing of Cluster-specific OS package configuration file
+    #----------------------------------------------------------------
+
+    sub init_local_os_config_file_parsing {
+	use File::Basename;
+
+	begin_routine();
+
+	if ( $osf_init_os_local_config == 0 ) {
+
+	    my $infile    = shift;
+	    my $logr      = get_logger();
+	    my $shortname = fileparse($infile);
+	    
+	    INFO("   --> Initializing OS config_parsing ($shortname)\n");
+	    
+	    verify_file_exists($infile);
+	    
+	    $local_os_cfg = new Config::IniFiles( -file => "$infile", 
+						  -allowcontinue => 1,
+						  -nomultiline   => 1);
+	    $osf_init_os_local_config = 1;
 	}
 	
 	end_routine();
@@ -236,6 +267,42 @@ BEGIN {
 	return(@sync_files);
     }
 
+    sub query_cluster_config_os_packages {
+
+	begin_routine();
+
+	my $cluster       = shift;
+#	my $host          = shift;
+	my $node_type     = shift;
+		          
+	my $logr          = get_logger();
+	my @rpms_defined  = ();
+	my %os_rpms       = ();
+
+	INFO("   --> Looking for OS packages to sync...($cluster->$node_type)\n");
+
+	if ( ! $local_os_cfg->SectionExists("OS Packages") ) {
+	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
+	}
+
+#	my @defined_files = $local_cfg->Parameters("OS Packages");
+#	my $num_files = @defined_files;
+#	INFO("   --> \# of files defined = $num_files\n");
+
+	if($local_os_cfg->exists("OS Packages",$node_type)) {
+	    INFO("   --> OS packages defined for node type = $node_type\n");
+	    @rpms_defined = $local_os_cfg->val("OS Packages",$node_type);
+
+	    foreach $rpm (@rpms_defined) {
+		DEBUG("       --> Read $rpm from config\n");
+	    }
+
+	}
+
+	end_routine();
+
+	return(@rpms_defined);
+    }
 
 
     sub query_cluster_config_partial_sync_files {

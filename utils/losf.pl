@@ -64,19 +64,13 @@ $losf_dir="/home1/0000/build/admin/hpc_stack";
 # Usage()
 
 sub usage {
-#    print "\nUsage: losf [COMMAND] [INPUT]\n\n";
-#    print "---------------------------\n";
-#    print "Host Commands:\n";
-#    print "---------------------------\n\n";
     print "Host Command Usage: losf [COMMAND] hostname\n\n";
     print "where \"hostname\" is the desired node to edit.\n";
     print "\nCOMMANDS:\n";
     print "    add         Register a new host for provisioning\n";
     print "    del         Delete an existing host\n";
     print "\n";
-#    print "---------------------------\n";
-#    print "Distro Software Commands:\n";
-#    print "---------------------------\n\n";
+
     print "Distro Command Usage: losf [COMMAND] package-name\n\n";
     print "where \"packagename\" is the desired rpm package name.\n\n";
     print "    addpkg      Add a new package (and dependencies) from Linux distro for current node type\n";
@@ -251,15 +245,13 @@ sub add_distro_package {
 
 	print "\n";
 
-
-
-	# Read relevant configfile for OS packages
+	# (3) Read relevant configfile for OS packages
 
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
 	INFO("   Reading OS package config file -> $osf_config_dir/OS-packages."."$node_cluster\n");
-	my @os_rpms = query_cluster_config_os_packages($node_cluster,$host_name,$node_type);
+	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
 	# the version information directly from RPM header; otherwise,
@@ -275,35 +267,35 @@ sub add_distro_package {
 
 	    # Did the user give us an ARCH; if not, use default.
 
-	    my $config_arch;
-
-	    if( $rpm =~ /^\S+.x86_64$/ ) {
-		$config_arch = "x86_64"; 
-	    } elsif( $rpm =~ /^\S+.i386$/ ) {
-		$config_arch = "i386"; 
-	    } elsif( $rpm =~ /^\S+.i686$/ ) {
-		$config_arch = "i686"; 
-	    } elsif( $rpm =~ /^\S+.noarch$/ ) {
-		$config_arch = "noarch"; 
-	    } else {
-		$config_arch = "x86_64";
-	    }
-
-	    INFO("       --> Using arch = $config_arch\n");
-
-	    if ( -s "$rpm_topdir/$config_arch/$rpm.rpm" ) {
-		INFO("       --> $rpm RPM available\n");
-	    } else {
-		INFO("       --> $rpm RPM not available locally\n");
-	    }
-
+###	    my $config_arch;
+###
+###	    if( $rpm =~ /^\S+.x86_64$/ ) {
+###		$config_arch = "x86_64"; 
+###	    } elsif( $rpm =~ /^\S+.i386$/ ) {
+###		$config_arch = "i386"; 
+###	    } elsif( $rpm =~ /^\S+.i686$/ ) {
+###		$config_arch = "i686"; 
+###	    } elsif( $rpm =~ /^\S+.noarch$/ ) {
+###		$config_arch = "noarch"; 
+###	    } else {
+###		$config_arch = "x86_64";
+###	    }
+###
+###	    INFO("       --> Using arch = $config_arch\n");
+###
+###	    if ( -s "$rpm_topdir/$config_arch/$rpm.rpm" ) {
+###		INFO("       --> $rpm RPM available\n");
+###	    } else {
+###		INFO("       --> $rpm RPM not available locally\n");
+###	    }
+###
 #	    $rpm_defined{$_} = 1;
 	}
 
 	# check RPM version for downloaded packages
 
 ###	undef @rpms_to_add;
-	undef @rpms_to_update;
+###	undef @rpms_to_update;
 
 	INFO("\n");
 
@@ -329,27 +321,30 @@ sub add_distro_package {
 
 	    if (! $is_configured ) {
 		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
-		INFO("       --> Adding $file\n");
-#		$local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
-		$local_os_cfg->push("OS Packages",$node_type,$rpm_package);
-#		$local_os_cfg->WriteConfig("koomie.ini");
+		INFO("       --> Adding $file ($node_type)\n");
+
+		if($local_os_cfg->exists("OS Packages","$node_type")) {
+		    $local_os_cfg->push("OS Packages",$node_type,$rpm_package);
+		} else {
+		    $local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
+		}
 
 		# Stage downloaded RPM files into LosF repository
 
 		my $basename = basename($file);
 		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
-		    INFO("       --> Copying $basename to RPM repository\n");
+		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
 		    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
 		}
 	    }
 	
 	} # end loop over new packages to configure
-
+	
 	# Update LosF config to include newly added distro packages
 
 	my $new_file = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
 	my $ref_file = "$osf_config_dir/os-packages/$node_cluster/packages.config";
-	
+
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
 	if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }

@@ -31,6 +31,8 @@
 use OSF_paths;
 use base 'Exporter';
 use lib "$osf_log4perl_dir";
+use Sys::Syslog;  
+use Switch;
 
 #@EXPORT = qw(verify_sw_dependencies
 #	     get_logger);
@@ -71,6 +73,58 @@ sub verify_file_exists {
     }
 }
 
+sub ask_user_for_yes_no {
+
+    print "\n[LosF] Enter yes/no to confirm: ";
+    chomp(my $line = <STDIN>);
+
+    my $response = verify_yes_no_response($line);
+#    print "you wrote $line\n";
+
+    if( $response >= 0 ) {
+	return $response;
+    }
+
+    # Ask again if dodgy response
+
+    print "\n[LosF] Unknown response: please enter \"yes\" or \"no\ to confirm: ";  
+
+    chomp(my $line = <STDIN>);
+    my $response = verify_yes_no_response($line);
+    if( $response >= 0 ) {
+	return $response;
+    }
+
+    # 3rd time is a charm....?
+
+    print "\n[LosF] Unknown response: please enter \"yes\" or \"no\ to confirm: ";  
+
+    chomp(my $line = <STDIN>);
+    my $response = verify_yes_no_response($line);
+    if( $response >= 0 ) {
+	return $response;
+    } else  {
+	MYERROR("Unable to validate user response for yes/no; terminating...");
+    }
+}
+
+sub verify_yes_no_response {
+    my $response = shift;
+
+    switch ($response) {
+
+	case "Yes" { return 1 }
+	case "yes" { return 1 }
+	case "y"   { return 1 }
+
+	case "No"  { return 0 }
+	case "no"  { return 0 }
+	case "n"   { return 0 }
+	
+	else { return -1 };
+    }
+}
+
 sub MYERROR {
 
     ERROR("\n");
@@ -80,6 +134,12 @@ sub MYERROR {
     ERROR("\n");
     exit(1);
 }
+
+sub SYSLOG {
+    openlog(losf,'',LOG_LOCAL0);
+    syslog(LOG_INFO,$_[0]);
+    closelog;
+}				
 
 sub begin_routine {
 

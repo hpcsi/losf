@@ -22,7 +22,7 @@
 #
 #-----------------------------------------------------------------------el-
 #
-# Wrapper to sync all config files/services.
+# Sync desires OS RPMs.
 #
 # $Id$
 #--------------------------------------------------------------------------
@@ -47,10 +47,7 @@ require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 require "$osf_utils_dir/sync_config_utils.pl";
 
-parse_and_sync_const_files();
-parse_and_sync_softlinks();
-parse_and_sync_services();
-parse_and_sync_permissions();
+parse_and_sync_os_packages();
 
 1;
 
