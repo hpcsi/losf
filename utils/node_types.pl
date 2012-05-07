@@ -41,9 +41,9 @@ require "$osf_utils_dir/header.pl";
 
 my $output_mode = $ENV{'OSF_ECHO_MODE'};
 
-#print "output_mode = $output_mode\n\n";
+###print "output_mode = $output_mode\n\n";
 
-determine_node_membership();
+determine_node_membership();  
 
 BEGIN {
     my $osf_membership_init = 0;        # initialization flag 
