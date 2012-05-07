@@ -195,7 +195,7 @@ sub add_distro_package {
     if( @igot >= 1 ) {
 	INFO("   --> package $package is already installed locally\n");
 	foreach( @igot ) {
-	    INFO("       --> ".$_->as_nvre."\n");
+	    DEBUG("       --> ".$_->as_nvre."\n");
 	}
 	MYERROR("   --> use updatepkg to check for a newer distro version\n");
     }
