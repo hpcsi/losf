@@ -41,8 +41,6 @@ require "$osf_utils_dir/header.pl";
 
 my $output_mode = $ENV{'OSF_ECHO_MODE'};
 
-###print "output_mode = $output_mode\n\n";
-
 determine_node_membership();  
 
 BEGIN {
@@ -84,7 +82,7 @@ BEGIN {
 	
 	chomp($host_name=`hostname -s`);
 	chomp($domain_name=`dnsdomainname`);
-	
+
         #---------------
         # Global Parsing
         #---------------
