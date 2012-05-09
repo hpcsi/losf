@@ -64,20 +64,18 @@ $losf_dir="/home1/0000/build/admin/hpc_stack";
 # Usage()
 
 sub usage {
-    print "Host Command Usage: losf [COMMAND] hostname\n\n";
-    print "where \"hostname\" is the desired node to edit.\n";
-    print "\nCOMMANDS:\n";
-    print "    add         Register a new host for provisioning\n";
-    print "    del         Delete an existing host\n";
+    print "\nUsage: losf [COMMAND] [ARG]\n\n";
+    print "    Available COMMANDS are as follows:\n\n";
+
+    print "    add [host]          Register a new host for provisioning\n";
+    print "    del [host]          Delete an existing host\n";
     print "\n";
 
-    print "Distro Command Usage: losf [COMMAND] package-name\n\n";
-    print "where \"packagename\" is the desired rpm package name.\n\n";
-    print "    addpkg      Add a new package (and dependencies) from Linux distro for current node type\n";
-    print "    delpkg      Remove previously added package\n";
-    print "    updatepkg   Check for newly available distro package\n";
-
+    print "    addpkg    [package] Add a new package (and dependencies) from Linux distro for current node type\n";
+    print "    delpkg    [package] Remove previously added package\n";
+    print "    updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
     print "\n";
+
 }
 
 sub add_node  {
@@ -371,7 +369,7 @@ sub add_distro_package {
     }
 
     end_routine();
-}
+} # end sub add_distr_package
 
 # Command-line parsing
 
