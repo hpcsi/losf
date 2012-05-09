@@ -54,12 +54,12 @@ use File::Copy;
 
 # Lonestar42 settings
 
-$cobbler_profile="centos5-x86_64";
-$domainname="ls4.tacc.utexas.edu";
-$ip_tool="/home1/0000/build/admin/rpms/lonestar42/tacc_ips";
-$mac_addresses="/home1/0000/build/admin/misc/lonestar42/mac-addresses";
-$name_server="206.76.192.1";
-$losf_dir="/home1/0000/build/admin/hpc_stack";
+#$cobbler_profile="centos5-x86_64";
+###$domainname="ls4.tacc.utexas.edu";
+#####$ip_tool="/home1/0000/build/admin/rpms/lonestar42/tacc_ips";
+###$mac_addresses="/home1/0000/build/admin/misc/lonestar42/mac-addresses";
+###$name_server="206.76.192.1";
+###$losf_dir="/home1/0000/build/admin/hpc_stack";
 
 # Usage()
 
@@ -83,79 +83,113 @@ sub add_node  {
     
     print "\n** Adding new node $host\n";
 
+    chomp($domain_name=`dnsdomainname`);
+    ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
+
+    # 
+    # Parse defined Losf network interface settings
+    #
+
+    my $filename = "";
+
+    if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
+	if ( "$myval" eq "yes" ) {
+	    $filename = "$osf_config_dir/ips."."$node_cluster";
+	    INFO("   --> IPs assigned from file $filename\n");
+	    if ( ! -e ("$filename") ) {
+		MYERROR("$filename does not exist");
+	    }
+	    $assign_from_file = 1;
+	}
+    }
+
+    if ( $assign_from_file != 1) {
+	MYERROR("Assignment of IP addresses is currently only available using the assign_ips_from_file option");
+    }
 
     # -------------------------
     # Get interface IP/netmask
     # -------------------------
 
-    if ( ! -x $ip_tool ) {
-	print "\n[Error]: IP space utility unavailable ($ip_tool)\n\n";
-	exit(1);
-    }
+    my @ip        = ();
+    my @mac       = ();
+    my @netmask   = ();
+    my @interface = ();
 
-    $igot=`$ip_tool $host`;
+    open($IN,"<$filename") || die "Cannot open $filename\n";
 
-    if($igot =~ m/(\S+)\s*=\s*(\S+)\s*(\S+)/ ) {
-	if( "$1" != "$host") {die "Unable to determine IP address for $host\n"};
-	$ip = $2;
-	$netmask = $3;
-    } else {
-	die "Unable to determine IP address for $host\n";
-    }
+    # example file format....
+    # hostname ip mac interface netmask
+    # stampede_master 10.42.0.100 00:26:6C:FB:A6:75 eth1 255.255.224.0
 
-    print "   --> IP address  = $ip\n";
-    print "   --> Netmask     = $netmask\n";
-
-    #------------------------------------------
-    # Membership type - hardcoded, fixe later.
-    #------------------------------------------
-
-    if ( $host =~ m/oss(\d+)*/ ) {
-	$kickstart="raid1.os.sd.2drives";
-    } elsif ( $host =~ m/mds(\d+)*/ ) {
-	$kickstart="raid1.os.sd.2drives";
-    } elsif ( $host =~ m/login(\d+)*/ ) {
-	$kickstart="raid1.os.sd.2drives";
-    } elsif ( $host =~ m/data(\d+)*/ ) {
-	$kickstart="raid1.os.sd.2drives";
-    } elsif ( $host =~ m/gridftp(\d+)*/ ) {
-	$kickstart="raid1.os.sd.2drives";
-    } else {
-	$kickstart="sample.ks"
-    } 
-
-    print "   --> Kickstart   = $kickstart\n";
-
-    # ----------------
-    # Get MAC Address
-    # ----------------
-
-    open(FILE, "<$mac_addresses") or die "\n[Error]: Mac address file unavailable ($mac_adresses)\n\n";
-
-    $found=0;
-
-    while( $line = <FILE> ) {
-
-	if($line =~ m/^$host\s*(\S+)/) {
-	    $found=1;
-	    $mac=$1;
+    while( $line = <$IN>) {
+	if( $line =~ m/$host\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
+	    push(@ip       ,$1);
+	    push(@mac      ,$2);
+	    push(@interface,$3);
+	    push(@netmask  ,$4);
 	}
     }
 
-    if(!$found) { die "\n[Error]: Unable to find mac address for $host (in $mac_addresses)\n\n"};
-    close(FILE);
+    close($IN);
 
-    print "   --> MAC Address = $mac\n";
+    my $num_interfaces = @ip;
+    my $count = 0;
 
-#    print "   --> [Info]: Using compute node kickstart setup.....)\n";
+    if( $num_interfaces ge 1 ) {
 
-    $cmd="cobbler system add --name=$host --hostname=$host.$domainname --static=true --mac=$mac --dns=$host.$domainname --subnet=$netmask --profile=$cobbler_profile --ip=$ip --kickstart=/var/lib/cobbler/kickstarts/$kickstart --name-servers=$name_server --name-servers-search=$domainname";
+	for my $count (0 .. ($num_interfaces-1)) {
+	    print "\n";
+	    print "   Defined Interface:\n";
+	    
+	    INFO("   --> IP address  = $ip[$count]\n");
+	    INFO("   --> MAC         = $mac[$count]\n");
+	    INFO("   --> Interface   = $interface[$count]\n");
+	    INFO("   --> Netmask     = $netmask[$count]\n");
+	}
+    } else {
+	ERROR("\n[ERROR]: $host not defined in $filename\n");
+	ERROR("[ERROR]: Please define desired network setting in IP config file and retry\n");
+	ERROR("\n");
+	exit(1);
+    }
+    
+    #-------------------
+    # OS Imaging Config
+    #-------------------
 
-    print "$cmd\n\n";
+    my $kickstart         = query_cluster_config_kickstarts           ($node_cluster,$node_type);
+    my $profile           = query_cluster_config_profiles             ($node_cluster,$node_type);
+    my $name_server       = query_cluster_config_name_servers         ($node_cluster,$node_type);
+    my $name_server_search = query_cluster_config_name_servers_search ($node_cluster,$node_type);
+
+    print "\n";
+    print "   --> Kickstart   = $kickstart\n";
+    print "   --> Profile     = $profile\n";
+    print "   --> Name Server = $name_server (search = $name_server_search)\n";
+
+    $cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
+	."--mac=$mac[0] " 
+	."--dns=$host.$domain_name --subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
+	."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search";
+
+    print "\n$cmd\n\n";
 
     my $returnCode = system($cmd);
-
     print "return = $returnCode\n";
+
+    # now, add any additional interfaces
+
+    for my $count (1 .. ($num_interfaces-1)) {
+	print "count = $count";
+	$cmd="cobbler system edit --name=$host --interface=$interface[$count] --static=true "
+	    ."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] " 
+    }
+
+    print "\n$cmd\n\n";
+    my $returnCode = system($cmd);
+    print "return = $returnCode\n";
+
     
 }
 

@@ -16,6 +16,7 @@ BEGIN {
     my $osf_init_local_config     = 0; 
     my $osf_init_os_local_config  = 0; 
     my $osf_init_sync_permissions = 0;
+    my $osf_init_sync_kickstarts  = 0;
 
     my %osf_file_perms = ();
 
@@ -27,6 +28,8 @@ BEGIN {
 	my $domain = shift;
 	my $logr   = get_logger();
 	my $found  = 0;
+
+	#$logr->level($DEBUG);
 
 	INFO("   --> Looking for DNS domainname match...($domain)\n");
 
@@ -56,7 +59,7 @@ BEGIN {
 
 			    if ( $_ eq "domainname" ) { next; }
 
-			    # Look for a matching hostname
+			    # Look for a matching hostname (exact match first)
 
 			    my $loc_name = $global_cfg->val($loc_cluster,$_);
 			    DEBUG("      --> Read $_ = $loc_name\n");
@@ -67,6 +70,16 @@ BEGIN {
 				$found        = 1;
 				last;
 			    }
+			}
+
+			foreach(@params) {
+
+			    # Skip the domainname entry
+
+			    if ( $_ eq "domainname" ) { next; }
+
+			    # Look for a matching hostname (regex match second)
+
 			    elsif ($host =~ m/$loc_name/ ) {
 				DEBUG("      --> Found regex match\n");
 				$node_cluster = $loc_cluster;
@@ -545,6 +558,122 @@ BEGIN {
 	}
 
 	return($rpm_topdir);
+    }
+
+    sub query_cluster_config_kickstarts {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+	
+	my $logr    = get_logger();
+	
+	my $kickstart    = "";
+
+	DEBUG("   --> Looking for defined kickstart file...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("Kickstarts") ) {
+	    MYERROR("No Input section found for cluster $cluster [Kickstarts]\n");
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("Kickstarts",$host_type)) ) {
+	    DEBUG("   --> Read kickstart   = $myval\n");
+	    $kickstart = $myval;
+	} else {
+	    MYERROR("Kickstart file not defined for node type $host_type - plesae update config.\n");
+	}
+	
+	$osf_init_sync_kickstarts=1;
+
+	end_routine();
+	return($kickstart);
+    }
+
+    sub query_cluster_config_profiles {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+	
+	my $logr      = get_logger();
+
+	my $profile    = "";
+
+	DEBUG("   --> Looking for defined OS imaging profile...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("Profiles") ) {
+	    MYERROR("No Input section found for cluster $cluster [Profiles]\n");
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("Profiles",$host_type)) ) {
+	    DEBUG("   --> Read profile   = $myval\n");
+	    $profile = $myval;
+	} else {
+	    MYERROR("OS profile not defined for node type $host_type - plesae update config.\n");
+	}
+	
+	end_routine();
+	return($profile);
+    }
+
+    sub query_cluster_config_name_servers {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+	my $section   = "Name-Servers";
+
+	DEBUG("   --> Looking for defined name-server profile...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("$section") ) {
+	    MYERROR("No Input section found for cluster $cluster [$section]\n");
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read name-server   = $myval\n");
+	    $value = $myval;
+	} else {
+	    MYERROR("Name server not defined for node type $host_type - plesae update config.\n");
+	}
+	
+	end_routine();
+	return($value);
+    }
+
+    sub query_cluster_config_name_servers_search {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+	my $section   = "Name-Servers-Search";
+
+	DEBUG("   --> Looking for defined name-server search profile...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("$section") ) {
+	    MYERROR("No Input section found for cluster $cluster [$section]\n");
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read name-server search  = $myval\n");
+	    $value = $myval;
+	} else {
+	    MYERROR("Name server search not defined for node type $host_type - plesae update config.\n");
+	}
+	
+	end_routine();
+	return($value);
     }
 
 }
