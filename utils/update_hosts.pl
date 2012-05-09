@@ -106,8 +106,8 @@ if ( $assign_from_file != 1) {
 `cobbler system report >& $tmpfile`;
 
 if ( ! -s $tmpfile ) {
-    print "Unable to query managed hosts...\n";
-    exit(1);
+    print "   --> No hosts defined to sync...\n";
+    exit(0);
 }
 
 open($IN1, "<$tmpfile")  || die "Cannot open $tmpfile for reading\n";
