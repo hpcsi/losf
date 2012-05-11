@@ -667,6 +667,7 @@ BEGIN {
 	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
 
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
+
 	verify_rpms(@os_rpms);
 
 	end_routine();

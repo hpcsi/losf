@@ -53,84 +53,6 @@ sub verify_rpms {
 
     if($num_rpms < 1) { return; }
 
-#    my $db = RPM2->open_rpm_db ();
-    my $db = RPM2->open_rpm_db ();
-    my $tr = RPM2->create_transaction(RPM2->vsf_nohdrchk);
-
-    INFO("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
-    foreach $rpm (@rpm_list) {
-	DEBUG("   --> Checking $rpm\n");
-
-	my $arch     = rpm_arch_from_filename($rpm);
-	my $filename = "$rpm_topdir/$arch/$rpm.rpm";
-
-	if ( ! -s "$filename" ) {
-	    MYERROR("Unable to locate local OS rpm-> $filename\n");
-	}
-
-	my $desired_rpm = RPM2->open_package("$filename");
-	my ($installed) = sort { $b <=> $a } $db->find_by_name($desired_rpm->name);
-
-	if( ! $installed ) {
-	    INFO("   --> ".$desired_rpm->name." is not installed - registering for add...\n");
-#	    $tr->add_install($desired_rpm);
-
-	    # ks (5/7/12): i'll be damned, the rpm2 interface can't do multiple packages and apparently it has been a 
-	    # known issue since 2005.  
-	    # 
-	    # that's really sad.
-
-	    push(@rpms_to_install,$filename);
-	    
-	} elsif ($desired_rpm != $installed ) {
-	    INFO("   --> version mismatch\n");
-	}
-
-#	if(is_rpm_installed($_) == 0) {
-#	    INFO("   --> $_ is not installed - registering for add\n");
-#	    push(@rpms_to_install,$_);
-#	} else {
-#	    INFO("   --> $_ is already installed\n");
-#	}
-    }
-
-
-
-#    $tr->order();
-#    $tr->check();
-#    $tr->run();
-
-    $tr->close_db();
-
-    # Do the transactions with gool ol' rpm command line.
-
-    if(@rpms_to_install eq 0 ) {
-	INFO("   --> OK: OS packages in sync\n");
-	return;
-    }
-
-    my $cmd = "rpm -Uvh "."@rpms_to_install";
-
-    system($cmd);
-
-    my $ret = $?;
-
-    if ( $ret != 0 ) {
-	MYERROR("Unable to install OS package RPMs (status = $ret)\n");
-    }
-
-    end_routine();
-}
-
-sub verify_rpms2 {
-    begin_routine();
-
-    my @rpm_list        = @_;
-    my @rpms_to_install = ();
-    my $num_rpms        = @rpm_list;
-
-    if($num_rpms < 1) { return; }
-
     INFO("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
     foreach $rpm (@rpm_list) {
 	DEBUG("   --> Checking $rpm\n");
@@ -144,12 +66,9 @@ sub verify_rpms2 {
 
 	# return array format = (name,version,release,arch)
 
-	my @desired_rpm   = rpm_version_from_file2($filename);
-	my @installed_rpm = is_rpm_installed2($rpm,$arch);
+	my @desired_rpm   = rpm_version_from_file($filename);
+	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
 
-#	print "desired:   $desired_rpm[1] - $desired_rpm[2]\n";
-#	print "installed: $installed_rpm[1] - $installed_rpm[2]\n";
-	
 	if( @installed_rpm eq 0 ) {
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	} elsif( "$desired_rpm[1]-$desired_rpm[2]" != "$installed_rpm[1]-$installed_rpm[2]") {
@@ -193,24 +112,6 @@ sub verify_rpms2 {
 sub is_rpm_installed {
     begin_routine();
 
-    my $packagename    = shift;
-    my @matching_rpms = ();
-
-    DEBUG("   --> Checking if $packagename RPM is installed locally\n");
-
-    $db = RPM2->open_rpm_db(RPM2->vsf_nosha1header);
-
-    @matching_rpms = $db->find_by_name($packagename);
-
-    $db = undef;
-
-    end_routine();
-    return(@matching_rpms);
-}
-
-sub is_rpm_installed2 {
-    begin_routine();
-
     my $packagename   = shift;
     my @matching_rpms = ();
 
@@ -232,33 +133,6 @@ sub is_rpm_installed2 {
 # --------------------------------------------------------
 
 sub rpm_version_from_file {
-    begin_routine();
-
-    my $filename        = shift;
-    my @rpm_header_info = ();
-
-    DEBUG("   --> Querying RPM file $filename\n");
-
-    if ( ! -e $filename ) { MYERROR("Unable to query rpm file $filename") };
-    
-    $pkg = RPM2->open_package($filename);
-    
-#    my $name    = $pkg->tagformat("%{NAME}");
-#    my $version = $pkg->tagformat("%{VERSION}-%{RELEASE}");
-#    my $arch    = $pkg->tagformat("%{ARCH}");
-
-    push(@rpm_header_info,$pkg->tagformat("%{NAME}"));
-    push(@rpm_header_info,$pkg->tagformat("%{VERSION}"));
-    push(@rpm_header_info,$pkg->tagformat("%{RELEASE}"));
-    push(@rpm_header_info,$pkg->tagformat("%{ARCH}"));
-
-    $pkg = undef;
-
-    end_routine();
-    return(@rpm_header_info);
-}
-
-sub rpm_version_from_file2 {
     begin_routine();
 
     my $filename = shift;
