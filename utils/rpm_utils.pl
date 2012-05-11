@@ -53,8 +53,9 @@ sub verify_rpms {
 
     if($num_rpms < 1) { return; }
 
+#    my $db = RPM2->open_rpm_db ();
     my $db = RPM2->open_rpm_db ();
-    my $tr = RPM2->create_transaction();
+    my $tr = RPM2->create_transaction(RPM2->vsf_nohdrchk);
 
     INFO("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
     foreach $rpm (@rpm_list) {
@@ -121,6 +122,67 @@ sub verify_rpms {
     end_routine();
 }
 
+sub verify_rpms2 {
+    begin_routine();
+
+    my @rpm_list        = @_;
+    my @rpms_to_install = ();
+    my $num_rpms        = @rpm_list;
+
+    if($num_rpms < 1) { return; }
+
+    INFO("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
+    foreach $rpm (@rpm_list) {
+	DEBUG("   --> Checking $rpm\n");
+
+	my $arch     = rpm_arch_from_filename($rpm);
+	my $filename = "$rpm_topdir/$arch/$rpm.rpm";
+
+	if ( ! -s "$filename" ) {
+	    MYERROR("Unable to locate local OS rpm-> $filename\n");
+	}
+
+	# return array format = (name,version,release,arch)
+
+	my @desired_rpm   = rpm_version_from_file2($filename);
+	my @installed_rpm = is_rpm_installed2($rpm,$arch);
+
+#	print "desired:   $desired_rpm[1] - $desired_rpm[2]\n";
+#	print "installed: $installed_rpm[1] - $installed_rpm[2]\n";
+	
+	if( @installed_rpm eq 0 ) {
+	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
+	} elsif( "$desired_rpm[1]-$desired_rpm[2]" != "$installed_rpm[1]-$installed_rpm[2]") {
+	    INFO("   --> version mismatch\n");
+	} else {
+	    DEBUG("   --> $desired_rpm[0] is already installed\n");
+	}
+
+    }
+
+    # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
+
+    if( @rpms_to_install eq 0 ) {
+	INFO("   --> OK: OS packages in sync ($num_rpms rpms checked)\n");
+	return;
+    }
+
+    # This is for OS packages, for which there can be only 1 version
+    # installed; hence we always upgrade
+
+    my $cmd = "rpm -Uvh "."@rpms_to_install";
+
+    system($cmd);
+
+    my $ret = $?;
+
+    if ( $ret != 0 ) {
+	MYERROR("Unable to install OS package RPMs (status = $ret)\n");
+    }
+
+    end_routine();
+}
+
 # --------------------------------------------------------
 # is_rpm_installed (packagename)
 # 
@@ -136,11 +198,26 @@ sub is_rpm_installed {
 
     DEBUG("   --> Checking if $packagename RPM is installed locally\n");
 
-    $db = RPM2->open_rpm_db();
+    $db = RPM2->open_rpm_db(RPM2->vsf_nosha1header);
 
     @matching_rpms = $db->find_by_name($packagename);
 
     $db = undef;
+
+    end_routine();
+    return(@matching_rpms);
+}
+
+sub is_rpm_installed2 {
+    begin_routine();
+
+    my $packagename   = shift;
+    my @matching_rpms = ();
+
+    DEBUG("   --> Checking if $packagename RPM is installed locally\n");
+
+    @matching_rpms  = 
+	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
 
     end_routine();
     return(@matching_rpms);
@@ -179,6 +256,27 @@ sub rpm_version_from_file {
 
     end_routine();
     return(@rpm_header_info);
+}
+
+sub rpm_version_from_file2 {
+    begin_routine();
+
+    my $filename = shift;
+    my @rpm_info = ();
+
+    DEBUG("   --> Querying RPM file $filename\n");
+
+    if ( ! -e $filename ) { MYERROR("Unable to query rpm file $filename") };
+
+    @rpm_info = split(' ',`rpm -qp --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $filename`);
+    
+#    print "name    = $rpm_info[0]\n";
+#    print "version = $rpm_info[1]\n";
+#    print "release = $rpm_info[2]\n";
+#    print "arch    = $rpm_info[3]\n";
+
+    end_routine();
+    return(@rpm_info);
 }
 
 # --------------------------------------------------------
