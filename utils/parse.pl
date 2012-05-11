@@ -73,14 +73,17 @@ BEGIN {
 			}
 
 			foreach(@params) {
-
+			    
 			    # Skip the domainname entry
 
 			    if ( $_ eq "domainname" ) { next; }
 
+			    my $loc_name = $global_cfg->val($loc_cluster,$_);
+			    DEBUG("      --> Read for regex $_ = $loc_name\n");
+
 			    # Look for a matching hostname (regex match second)
 
-			    elsif ($host =~ m/$loc_name/ ) {
+			    if ($host =~ m/$loc_name/ ) {
 				DEBUG("      --> Found regex match\n");
 				$node_cluster = $loc_cluster;
 				$node_type    = $_;
