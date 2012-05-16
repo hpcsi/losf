@@ -68,6 +68,8 @@ BEGIN {
 	    $logr->level($output_mode);
 	}
 
+	#$logr->level($DEBUG);
+
 	if ( $osf_membership_init == 1 ) {
 	    DEBUG("--> Returning from determine_node_membership\n");
 	    return($node_cluster,$node_type);
