@@ -44,10 +44,8 @@ require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
-my $hostfile_begin_delim='----------begin-koomie-losf-$';
-my $hostfile_end_delim='------------end-koomie-losf-$';
-
-$ip_tool="/home1/0000/build/admin/rpms/lonestar42/tacc_ips";
+my $hostfile_begin_delim='----------begin-sync-losf-$';
+my $hostfile_end_delim='------------end-sync-losf-$';
 
 #---------------
 # Initialization
@@ -70,8 +68,6 @@ print "\nMaster Host File Update Mechanism:\n";
 print "   --> tmpfile = $tmpfile\n";
 
 # Parse defined Losf network interface settings
-
-
 
 if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
     if ( "$myval" eq "yes" ) {
@@ -114,6 +110,8 @@ open($IN1, "<$tmpfile")  || die "Cannot open $tmpfile for reading\n";
 
 while ($line1 = <$IN1>) {
 
+#    print "$line1";
+
     if($line1 =~ m/^Name\s+: (\S+)/ ) {
 	$current_host=$1;
     }
@@ -140,8 +138,9 @@ unlink($tmpfile);
 
 # domainname
 
-$cmd=`dnsdomainname`;
-my $domainname=chomp($cmd);
+my $domainname="";
+chomp($domainname=`dnsdomainname`);
+
 
 if ( $domainname eq "" ) {
     MYERRROR("Unable to ascertain local domainname\n");
@@ -160,8 +159,8 @@ open($TMPFILE,">$tmpfile") || die "Cannot create tmp file $tmpfile";
 while (<$IN>) {
     if(/$hostfile_begin_delim/../$hostfile_end_delim/) {
 	$found_delim=1;
-	if (/--begin-koomie-losf-$/) {
-	    print $TMPFILE "#--------------------------------------------------------------begin-koomie-losf-\n";
+	if (/--begin-sync-losf-$/) {
+	    print $TMPFILE "#--------------------------------------------------------------begin-sync-losf-\n";
 	    print $TMPFILE "#\n";
 	    print $TMPFILE "# Auto-generated host entries; please do not edit entries between the begin/end\n";
 	    print $TMPFILE "# delimiters as these hosts are managed via PXE installs. However, feel free to\n";
@@ -172,7 +171,7 @@ while (<$IN>) {
 	    foreach $key (sort (keys(%managed_hosts))) {
 		print $TMPFILE "$managed_hosts{$key} $key.$domainname $key\n";
 	    }
-	    print $TMPFILE "#----------------------------------------------------------------end-koomie-losf-\n";
+	    print $TMPFILE "#----------------------------------------------------------------end-sync-losf-\n";
 	}
     } else {
 	print $TMPFILE $_;
