@@ -86,6 +86,8 @@ sub add_node  {
     chomp($domain_name=`dnsdomainname`);
     ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
 
+    print "node_cluster = $node_cluster\n";
+
     # 
     # Parse defined Losf network interface settings
     #
@@ -142,10 +144,10 @@ sub add_node  {
 	    print "\n";
 	    print "   Defined Interface:\n";
 	    
-	    INFO("   --> IP address  = $ip[$count]\n");
-	    INFO("   --> MAC         = $mac[$count]\n");
-	    INFO("   --> Interface   = $interface[$count]\n");
-	    INFO("   --> Netmask     = $netmask[$count]\n");
+	    INFO("   --> IP address     = $ip[$count]\n");
+	    INFO("   --> MAC            = $mac[$count]\n");
+	    INFO("   --> Interface      = $interface[$count]\n");
+	    INFO("   --> Netmask        = $netmask[$count]\n");
 	}
     } else {
 	ERROR("\n[ERROR]: $host not defined in $filename\n");
@@ -158,39 +160,51 @@ sub add_node  {
     # OS Imaging Config
     #-------------------
 
-    my $kickstart         = query_cluster_config_kickstarts           ($node_cluster,$node_type);
-    my $profile           = query_cluster_config_profiles             ($node_cluster,$node_type);
-    my $name_server       = query_cluster_config_name_servers         ($node_cluster,$node_type);
+    my $kickstart          = query_cluster_config_kickstarts          ($node_cluster,$node_type);
+    my $profile            = query_cluster_config_profiles            ($node_cluster,$node_type);
+    my $name_server        = query_cluster_config_name_servers        ($node_cluster,$node_type);
     my $name_server_search = query_cluster_config_name_servers_search ($node_cluster,$node_type);
+    my $kernel_options     = query_cluster_config_kernel_boot_options ($node_cluster,$node_type);
 
     print "\n";
-    print "   --> Kickstart   = $kickstart\n";
-    print "   --> Profile     = $profile\n";
-    print "   --> Name Server = $name_server (search = $name_server_search)\n";
+    print "   --> Kickstart      = $kickstart\n";
+    print "   --> Profile        = $profile\n";
+    print "   --> Name Server    = $name_server (search = $name_server_search)\n";
+
+    my $kopts = "";
+
+    if( $kernel_options ne "" ) {
+	print "   --> Kernel Options = $kernel_options\n";
+	$kopts = "--kopts=$kernel_options --kopts-post=$kernel_options";
+    }
 
     $cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
 	."--mac=$mac[0] " 
 	."--dns=$host.$domain_name --subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
-	."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search";
-
-    print "\n$cmd\n\n";
+	."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search "
+	."$kopts";
 
     my $returnCode = system($cmd);
-    print "return = $returnCode\n";
+
+    if($returnCode != 0) {
+	print "\n$cmd\n\n";	
+	MYERROR("Cobbler insertion failed ($returnCode)\n");
+    }
 
     # now, add any additional interfaces
 
     for my $count (1 .. ($num_interfaces-1)) {
-	print "count = $count";
 	$cmd="cobbler system edit --name=$host --interface=$interface[$count] --static=true "
-	    ."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] " 
+	    ."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] ";
+
+	print "\n$cmd\n\n";
+	my $returnCode = system($cmd);
+
+	if($returnCode != 0) {
+	    print "\n$cmd\n\n";	
+	    MYERROR("Cobbler edit for additional network interfaces failed ($returnCode)\n");
+	}
     }
-
-    print "\n$cmd\n\n";
-    my $returnCode = system($cmd);
-    print "return = $returnCode\n";
-
-    
 }
 
 sub del_node {
