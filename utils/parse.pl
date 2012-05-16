@@ -679,6 +679,36 @@ BEGIN {
 	return($value);
     }
 
+    sub query_cluster_config_kernel_boot_options {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+	my $section   = "Kernel-Boot-Options";
+
+	DEBUG("   --> Looking for defined kernel boot options...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("$section") ) {
+	    DEBUG("No Input section found for cluster $cluster [$section]\n");
+	    return($value);
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read kernel boot option  = $myval\n");
+	    $value = $myval;
+	} else {
+	    DEBUG("No kernel boot options provided for node type $host_type - plesae update config.\n");
+	}
+	
+	end_routine();
+	return($value);
+    }
+
 }
 
 1;
