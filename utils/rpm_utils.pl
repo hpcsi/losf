@@ -71,8 +71,10 @@ sub verify_rpms {
 
 	if( @installed_rpm eq 0 ) {
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
+	    push(@rpms_to_install,$filename);
 	} elsif( "$desired_rpm[1]-$desired_rpm[2]" != "$installed_rpm[1]-$installed_rpm[2]") {
-	    INFO("   --> version mismatch\n");
+	    INFO("   --> version mismatch - registring for update...\n");
+	    push(@rpms_to_install,$filename);
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
 	}
@@ -90,7 +92,8 @@ sub verify_rpms {
     # installed; hence we always upgrade
 
     my $cmd = "rpm -Uvh "."@rpms_to_install";
-
+    
+    print "cmd = $cmd\n";
     system($cmd);
 
     my $ret = $?;
@@ -142,7 +145,7 @@ sub rpm_version_from_file {
 
     if ( ! -e $filename ) { MYERROR("Unable to query rpm file $filename") };
 
-    @rpm_info = split(' ',`rpm -qp --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $filename`);
+    @rpm_info = split(' ',`rpm --nosignature -qp --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $filename`);
     
 #    print "name    = $rpm_info[0]\n";
 #    print "version = $rpm_info[1]\n";
