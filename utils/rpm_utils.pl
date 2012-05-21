@@ -36,6 +36,7 @@ use lib "$osf_rpm2_arch_dir";
 use rpm_topdir;
 use Sys::Syslog;  
 use RPM2;
+use Env qw(SRC_DIR MODE);
 
 # --------------------------------------------------------
 # verify_rpms (rpms)
@@ -57,8 +58,20 @@ sub verify_rpms {
     foreach $rpm (@rpm_list) {
 	DEBUG("   --> Checking $rpm\n");
 
+
+	# Installing from path provided by user on command-line?
+
+	my $filename = "";
 	my $arch     = rpm_arch_from_filename($rpm);
-	my $filename = "$rpm_topdir/$arch/$rpm.rpm";
+
+	if ( "$MODE" eq "PXE" ) {
+
+	    $filename = "$SRC_DIR/$arch/$rpm.rpm";
+	} else {
+	    my $filename = "$rpm_topdir/$arch/$rpm.rpm";
+	}
+
+	print "rpm filename = $filename\n";
 
 	if ( ! -s "$filename" ) {
 	    MYERROR("Unable to locate local OS rpm-> $filename\n");
