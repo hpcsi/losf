@@ -83,7 +83,7 @@ BEGIN {
 
 			    # Look for a matching hostname (regex match second)
 
-			    if ($host =~ m/$loc_name/ ) {
+			    if ($host =~ m/\b$loc_name/ ) {
 				DEBUG("      --> Found regex match\n");
 				$node_cluster = $loc_cluster;
 				$node_type    = $_;
