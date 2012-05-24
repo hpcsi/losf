@@ -65,13 +65,12 @@ sub verify_rpms {
 	my $arch     = rpm_arch_from_filename($rpm);
 
 	if ( "$MODE" eq "PXE" ) {
-
 	    $filename = "$SRC_DIR/$arch/$rpm.rpm";
 	} else {
-	    my $filename = "$rpm_topdir/$arch/$rpm.rpm";
+	    $filename = "$rpm_topdir/$arch/$rpm.rpm";
 	}
 
-	print "rpm filename = $filename\n";
+#	print "rpm filename = $filename\n";
 
 	if ( ! -s "$filename" ) {
 	    MYERROR("Unable to locate local OS rpm-> $filename\n");
@@ -85,8 +84,8 @@ sub verify_rpms {
 	if( @installed_rpm eq 0 ) {
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
-	} elsif( "$desired_rpm[1]-$desired_rpm[2]" != "$installed_rpm[1]-$installed_rpm[2]") {
-	    INFO("   --> version mismatch - registring for update...\n");
+	} elsif( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]") {
+	    INFO("   --> version mismatch - registering for update...\n");
 	    push(@rpms_to_install,$filename);
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
@@ -130,13 +129,21 @@ sub is_rpm_installed {
 
     my $packagename   = shift;
     my @matching_rpms = ();
+    my @empty_list    = ();
 
     DEBUG("   --> Checking if $packagename RPM is installed locally\n");
 
     @matching_rpms  = 
 	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
+ 
+    if( $? != 0) {
+	@matching_rpms = @empty_list;
+#	return(@empty_list);
+    }
 
     end_routine();
+
+#    print "matching rpms = @matching_rpms\n";
     return(@matching_rpms);
 }
 
