@@ -52,15 +52,6 @@ use File::Copy;
 #require "$osf_utils_dir/parse.pl";
 #require "$osf_utils_dir/header.pl";
 
-# Lonestar42 settings
-
-#$cobbler_profile="centos5-x86_64";
-###$domainname="ls4.tacc.utexas.edu";
-#####$ip_tool="/home1/0000/build/admin/rpms/lonestar42/tacc_ips";
-###$mac_addresses="/home1/0000/build/admin/misc/lonestar42/mac-addresses";
-###$name_server="206.76.192.1";
-###$losf_dir="/home1/0000/build/admin/hpc_stack";
-
 # Usage()
 
 sub usage {
@@ -125,7 +116,7 @@ sub add_node  {
     # stampede_master 10.42.0.100 00:26:6C:FB:A6:75 eth1 255.255.224.0
 
     while( $line = <$IN>) {
-	if( $line =~ m/$host\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
+	if( $line =~ m/^$host\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
 	    push(@ip       ,$1);
 	    push(@mac      ,$2);
 	    push(@interface,$3);
@@ -231,18 +222,19 @@ sub add_distro_package {
 
     my $check_pkg = "yum-plugin-downloadonly";
     my @igot = is_rpm_installed($check_pkg);
-    if ( @igot  == 0 ) {
+
+    if ( @igot  eq 0 ) {
 	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
     }
 
     # (1) Check if already installed....
 
     my @igot = is_rpm_installed($package);
-    if( @igot >= 1 ) {
+
+    print "igot = @igot\n";
+
+    if( @igot ne 0 ) {
 	INFO("   --> package $package is already installed locally\n");
-	foreach( @igot ) {
-	    DEBUG("       --> ".$_->as_nvre."\n");
-	}
 	MYERROR("   --> use updatepkg to check for a newer distro version\n");
     }
 
