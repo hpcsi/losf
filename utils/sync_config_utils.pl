@@ -229,15 +229,22 @@ BEGIN {
 		print "\n"; 
 	    }
 
-	    # Save current copy....
+	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
+
+	    my $save_dir = "/tmp/losf";
+
+	    if ( ! -d $save_dir ) {
+		INFO("Creating $save_dir directory to store orig file during syncing\n");
+		mkdir($save_dir,0700)
+	    }
 	    
 	    if ( -e $file ) {
-		my $orig_copy = "/tmp/$basename.orig";
+		my $orig_copy = "$save_dir/$basename.orig";
 		
-		if ( "$basename" ne "shadow" ) {
-		    print("   --> Copy of original file saved at $orig_copy\n");
-		    copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
-		    mirrorPermissions("$file","/tmp/$basename.orig");
+		if ( "$basename" ne "shadow" || "$basename" ne "passwd" || "$basename" ne "group" ) {
+		    print "       --> Copy of original file saved at $orig_copy\n";
+		    copy($file,"$save_dir/$basename.orig") || MYERROR("Unable to save copy of $basename");
+		    mirrorPermissions("$file","$save_dir/$basename.orig");
 		}
 	    }
 	    
@@ -386,12 +393,19 @@ BEGIN {
 	} else {
 	    ERROR("   --> FAILED: [$basename] Differences found: $basename requires partial syncing\n");
 
-	    # Save copy of current file
+	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
+
+	    my $save_dir = "/tmp/losf";
+
+	    if ( ! -d $save_dir ) {
+		INFO("Creating $save_dir directory to store orig file during syncing\n");
+		mkdir($save_dir,0700)
+	    }
 
 	    if ( -e $file ) {
-		my $orig_copy = "/tmp/$basename.orig";
-		print("   --> Copy of original file saved at $orig_copy\n");
-		copy($file,"/tmp/$basename.orig") || MYERROR("Unable to save copy of $basename");
+		my $orig_copy = "$save_dir/$basename.orig";
+		print "       --> Copy of original file saved at $orig_copy\n";
+		copy($file,"$save_dir/$basename.orig") || MYERROR("Unable to save copy of $basename");
 	    }
 
 	    # Update production file
@@ -597,7 +611,7 @@ BEGIN {
 	# NOOP if init.d script is not present
 
 	if ( ! -s "/etc/init.d/$service" ) {
-		print "   --> NOOP: $service not installed, ignoring sync request\n";
+		DEBUG("   --> NOOP: $service not installed, ignoring sync request\n");
 		return;
 	    }
 
