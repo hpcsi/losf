@@ -105,7 +105,7 @@ sub verify_rpms {
 
     my $cmd = "rpm -Uvh "."@rpms_to_install";
     
-    print "cmd = $cmd\n";
+    #print "cmd = $cmd\n";
     system($cmd);
 
     my $ret = $?;
