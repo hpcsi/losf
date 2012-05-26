@@ -709,6 +709,37 @@ BEGIN {
 	return($value);
     }
 
+    sub query_cluster_config_dns_options {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+	my $section   = "DNS-Enable";
+
+	DEBUG("   --> Looking for DNS options...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("$section") ) {
+	    DEBUG("No Input section found for cluster $cluster [$section]\n");
+	    return($value);
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read DNS config option  = $myval\n");
+	    $value = $myval;
+	} else {
+	    DEBUG("No DNS options provided for node type $host_type - default is to not include DNS.\n");
+	    $value = "no";
+	}
+	
+	end_routine();
+	return($value);
+    }
+
 }
 
 1;
