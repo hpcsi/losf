@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
+# Copyright (C) 2007-2012 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -259,15 +259,15 @@ BEGIN {
 	    my $tmpfile = "$file"."__losf__new";
 
 	    DEBUG("   --> Copying contents to $tmpfile\n");
-	    
+
 	    copy("$ref_file","$tmpfile")  || MYERROR("Unable to copy $sync_file to $tmpfile");
 
-	    
 	    MYERROR("Unable to copy temp file to desired volume ($tmpfile)") unless -s $tmpfile;
 
 	    # Unix-safe way to update
 	    
 	    rename ($tmpfile,$file)       || MYERROR("Unable to rename $tmpfile -> $file");
+
 	    mirrorPermissions("$sync_file","$file",0);
 	    
 	    INFO("   --> [$basename] Sync successful\n");
@@ -576,8 +576,12 @@ BEGIN {
 
 	# make sure ownership is consistent as well
 
-	print "   --> FAILED: updating sync file  ownership...\n" unless $uid_old == $uid_new;
-	print "   --> FAILED: updating sync group ownership...\n" unless $gid_old == $gid_new;
+	if ($display_change_message && $uid_old != $uid_new) {
+	    ERROR( "   --> FAILED: updating sync file  ownership...\n")
+	}
+	if ($display_change_message && $gid_old != $gid_new) {
+	    ERROR( "   --> FAILED: updating sync group ownership...\n")
+	}
 
 	my $cnt = chown $uid_old,$gid_old, $newfile;
 
