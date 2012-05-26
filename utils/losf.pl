@@ -77,8 +77,6 @@ sub add_node  {
     chomp($domain_name=`dnsdomainname`);
     ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
 
-    print "node_cluster = $node_cluster\n";
-
     # 
     # Parse defined Losf network interface settings
     #
@@ -117,10 +115,11 @@ sub add_node  {
 
     while( $line = <$IN>) {
 	if( $line =~ m/^$host\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
-	    push(@ip       ,$1);
-	    push(@mac      ,$2);
-	    push(@interface,$3);
-	    push(@netmask  ,$4);
+	    push(@ip       , $1);
+	    push(@mac      , $2);
+	    push(@interface, $3);
+	    push(@netmask  , $4);
+#	    push(@enable_dns,$5);
 	}
     }
 
@@ -135,10 +134,10 @@ sub add_node  {
 	    print "\n";
 	    print "   Defined Interface:\n";
 	    
-	    INFO("   --> IP address     = $ip[$count]\n");
-	    INFO("   --> MAC            = $mac[$count]\n");
-	    INFO("   --> Interface      = $interface[$count]\n");
-	    INFO("   --> Netmask        = $netmask[$count]\n");
+	    INFO("   --> IP address        = $ip[$count]\n");
+	    INFO("   --> MAC               = $mac[$count]\n");
+	    INFO("   --> Interface         = $interface[$count]\n");
+	    INFO("   --> Netmask           = $netmask[$count]\n");
 	}
     } else {
 	ERROR("\n[ERROR]: $host not defined in $filename\n");
@@ -156,22 +155,31 @@ sub add_node  {
     my $name_server        = query_cluster_config_name_servers        ($node_cluster,$node_type);
     my $name_server_search = query_cluster_config_name_servers_search ($node_cluster,$node_type);
     my $kernel_options     = query_cluster_config_kernel_boot_options ($node_cluster,$node_type);
+    my $dns_options        = query_cluster_config_dns_options         ($node_cluster,$node_type);
 
     print "\n";
     print "   --> Kickstart      = $kickstart\n";
     print "   --> Profile        = $profile\n";
     print "   --> Name Server    = $name_server (search = $name_server_search)\n";
 
-    my $kopts = "";
+    my $kopts    = "";
+    my $dns_opts = "";
 
     if( $kernel_options ne "" ) {
 	print "   --> Kernel Options = $kernel_options\n";
 	$kopts = "--kopts=$kernel_options --kopts-post=$kernel_options";
     }
 
+    if ($dns_options eq "yes" ) {
+	print "   --> DNS enabled    = yes ($host.$domain_name on first defined interface)\n";
+	$dns_opts = "--dns=$host.$domain_name";
+    } else {
+	print "   --> DNS enabled     = no\n";
+    }
+
     $cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
-	."--mac=$mac[0] " 
-	."--dns=$host.$domain_name --subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
+	."--mac=$mac[0] $dns_opts " 
+	."--subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
 	."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search "
 	."$kopts";
 
@@ -188,7 +196,7 @@ sub add_node  {
 	$cmd="cobbler system edit --name=$host --interface=$interface[$count] --static=true "
 	    ."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] ";
 
-	print "\n$cmd\n\n";
+	#print "\n$cmd\n\n";
 	my $returnCode = system($cmd);
 
 	if($returnCode != 0) {
@@ -230,8 +238,6 @@ sub add_distro_package {
     # (1) Check if already installed....
 
     my @igot = is_rpm_installed($package);
-
-    print "igot = @igot\n";
 
     if( @igot ne 0 ) {
 	INFO("   --> package $package is already installed locally\n");
@@ -301,7 +307,7 @@ sub add_distro_package {
 
 	foreach $rpm (@os_rpms) {
 
-	    INFO("   --> Config rpm = $rpm\n");
+	    DEBUG("   --> Config rpm = $rpm\n");
 
 	    # Did the user give us an ARCH; if not, use default.
 
