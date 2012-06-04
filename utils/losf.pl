@@ -66,6 +66,9 @@ sub usage {
     print "    delpkg    [package] Remove previously added package\n";
     print "    updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
     print "\n";
+    print "    addgroup  [group]   Add a new OS group (and dependencies) from Linux distro for current node type\n";
+
+    print "\n";
 
 }
 
@@ -417,6 +420,174 @@ sub add_distro_package {
     end_routine();
 } # end sub add_distr_package
 
+sub add_distro_group {
+
+    begin_routine();
+    my $package = shift;
+
+    INFO("\n** Checking on possible addition of requested distro group: $package\n");
+    SYSLOG("losf: Checking on addition of distro group $package");
+
+    # the yum-plugin-downloadonly package is required to support
+    # auto-addition of distro packages...
+
+    my $check_pkg = "yum-plugin-downloadonly";
+    my @igot = is_rpm_installed($check_pkg);
+
+    if ( @igot  eq 0 ) {
+	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
+    }
+
+    # (1) Check if already installed....yum grouplist doesn't seem to work for this...
+
+#    my @igot = is_rpm_installed($package);
+
+#    if( @igot ne 0 ) {
+#	INFO("   --> package $package is already installed locally\n");
+#	MYERROR("   --> use updatepkg to check for a newer distro version\n");
+#    }
+
+    # (2) Check if it exists in available yum repo...general approach
+    # is to try and download the package and any required dependencies
+    # into a temporary directory of our own creation.  Then, if we got
+    # a hit, ask the user if they want us to add to LosF, otherwise,
+    # we punt.
+
+    my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
+    INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+
+    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir groupinstall $package >& /dev/null";
+    DEBUG("   --> Running yum command \"$cmd\"\n");
+
+   `$cmd`;
+
+    # Now check to see if we downloaded anything
+
+    my @newfiles = <$tmpdir/*>;
+
+    my $extra_deps = @newfiles - 1;
+
+    if( @newfiles >= 1 ) {
+
+	if( @newfiles == 1 ) {
+	    INFO("   --> \"$package\" successfully downloaded from repository\n");
+	} else {
+	    INFO("   --> \"$package\" and $extra_deps dependencies successfully downloaded from repository\n");
+	}
+
+	INFO("\n   --> Cluster = $node_cluster, Node Type = $node_type\n");
+	INFO("\n   --> Would you like to add the following RPM(s) to your local LosF config for ".
+	     "$node_cluster:$node_type nodes?\n\n");
+
+	foreach $file (@newfiles) {
+	    print "       $file\n";
+	}
+
+	my $response = ask_user_for_yes_no();
+
+	if( $response == 0 ) {
+	    INFO("   --> Did not add $package LosF config, terminating....\n");
+	    exit(-22);
+	} 
+
+	print "\n";
+
+	# (3) Read relevant configfile for OS packages
+
+	my $host_name;
+	chomp($host_name=`hostname -s`);
+
+	INFO("   Reading OS package config file -> $osf_config_dir/OS-packages."."$node_cluster\n");
+	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
+
+	# cache defined OS rpms. If the RPM is available, we derive
+	# the version information directly from RPM header; otherwise,
+	# we do our best to derive from filename
+
+	DEBUG("   --> Using $rpm_topdir for top-level RPM dir\n");
+
+	foreach $rpm (@os_rpms) {
+	    DEBUG("   --> Config rpm = $rpm\n");
+	}
+
+	# check RPM version for downloaded packages
+
+	INFO("\n");
+
+	foreach $file (@newfiles) {
+	    my @version_info = rpm_version_from_file($file);
+	    my $rpm_package  = rpm_package_string_from_header(@version_info);
+	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
+
+	    my $rpm_name    = $version_info[0];
+	    my $rpm_version = $version_info[1]-$version[2];
+	    my $rpm_arch    = $version_info[3];
+
+	    my $is_configured = 0;
+
+	    foreach $rpm (@os_rpms) {
+		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
+#		    push(@rpms_to_update,$file);
+		    $is_configured = 1;
+		    last;
+		}
+	    }
+
+	    if (! $is_configured ) {
+		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
+		INFO("       --> Adding $file ($node_type)\n");
+
+		if($local_os_cfg->exists("OS Packages","$node_type")) {
+		    $local_os_cfg->push("OS Packages",$node_type,$rpm_package);
+		} else {
+		    $local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
+		}
+
+		# Stage downloaded RPM files into LosF repository
+
+		my $basename = basename($file);
+		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
+		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
+		    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
+		}
+	    }
+	
+	} # end loop over new packages to configure
+	
+	# Update LosF config to include newly added distro packages
+
+	my $new_file = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
+	my $ref_file = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+
+	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+	if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+	if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+
+	if ( compare($new_file,$ref_file) != 0 ) {
+	    my $timestamp=`date +%F:%H:%M`;
+	    chomp($timestamp);
+	    print "   --> Updating OS config file...\n";
+	    rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unaable to save previous OS config file\n");
+	    rename($new_file,$ref_file)                || MYERROR("Unaable to update OS config file\n");
+	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+	} else {
+	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+	}
+
+#	my @os_rpms = query_cluster_config_os_packages($node_cluster,$host_name,$node_type);
+
+    } else {
+	INFO("   --> The package \"$package\" is not available locally via yum.\n\n");
+	INFO("   --> Please verify that yum is pointed to a valid repository (or mirror)\n");
+	INFO("   --> and that the package name you provided is a legitimate distro package.\n");
+	MYERROR(" Unable to add $package to local LosF configuration\n");
+    }
+
+    end_routine();
+} # end sub add_distr_group
+
 # Command-line parsing
 
 if (@ARGV >= 2) {
@@ -446,7 +617,8 @@ switch ($command) {
     case "del"    { del_node($argument) };
     case "delete" { del_node($argument) };
 
-    case "addpkg" { add_distro_package($argument) };
+    case "addpkg"   { add_distro_package($argument) };
+    case "addgroup" { add_distro_group  ($argument) };
     
     
     print "\n[Error]: Unknown command received-> $command\n";
