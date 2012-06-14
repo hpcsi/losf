@@ -56,20 +56,25 @@ use File::Copy;
 
 sub usage {
     print "\nUsage: losf [COMMAND] [ARG]\n\n";
-    print "    Available COMMANDS are as follows:\n\n";
+    print "  Available COMMANDS are as follows:\n\n";
 
-    print "    add [host]          Register a new host for provisioning\n";
-    print "    del [host]          Delete an existing host\n";
+    print "  Host Registration:\n";
+    print "     add [host]          Register a new host for provisioning\n";
+    print "     del [host]          Delete an existing host\n";
     print "\n";
 
-    print "    addpkg    [package] Add a new package (and dependencies) from Linux distro for current node type\n";
-    print "    delpkg    [package] Remove previously added package\n";
-    print "    updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
+    print "  OS package Customization:\n";
+    print "     addpkg    [package] Add a new OS package (and dependencies) from Linux distro for current node type\n";
+    print "     delpkg    [package] Remove previously added OS package\n";
+    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
     print "\n";
-    print "    addgroup  [group]   Add a new OS group (and dependencies) from Linux distro for current node type\n";
+    print "     addgroup  [group]   Add a new OS group (and dependencies) from Linux distro for current node type\n";
+    print "\n";
+
+    print "  Local RPM Customization:\n";
+    print "     addrpm    [rpm]     Add a new custom RPM for current node type\n";
 
     print "\n";
-
 }
 
 sub add_node  {
@@ -309,40 +314,10 @@ sub add_distro_package {
 	DEBUG("   --> Using $rpm_topdir for top-level RPM dir\n");
 
 	foreach $rpm (@os_rpms) {
-
 	    DEBUG("   --> Config rpm = $rpm\n");
-
-	    # Did the user give us an ARCH; if not, use default.
-
-###	    my $config_arch;
-###
-###	    if( $rpm =~ /^\S+.x86_64$/ ) {
-###		$config_arch = "x86_64"; 
-###	    } elsif( $rpm =~ /^\S+.i386$/ ) {
-###		$config_arch = "i386"; 
-###	    } elsif( $rpm =~ /^\S+.i686$/ ) {
-###		$config_arch = "i686"; 
-###	    } elsif( $rpm =~ /^\S+.noarch$/ ) {
-###		$config_arch = "noarch"; 
-###	    } else {
-###		$config_arch = "x86_64";
-###	    }
-###
-###	    INFO("       --> Using arch = $config_arch\n");
-###
-###	    if ( -s "$rpm_topdir/$config_arch/$rpm.rpm" ) {
-###		INFO("       --> $rpm RPM available\n");
-###	    } else {
-###		INFO("       --> $rpm RPM not available locally\n");
-###	    }
-###
-#	    $rpm_defined{$_} = 1;
 	}
 
 	# check RPM version for downloaded packages
-
-###	undef @rpms_to_add;
-###	undef @rpms_to_update;
 
 	INFO("\n");
 
@@ -407,8 +382,6 @@ sub add_distro_package {
 	} else {
 	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
 	}
-
-#	my @os_rpms = query_cluster_config_os_packages($node_cluster,$host_name,$node_type);
 
     } else {
 	INFO("   --> The package \"$package\" is not available locally via yum.\n\n");
