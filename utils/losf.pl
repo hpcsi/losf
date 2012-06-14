@@ -48,9 +48,6 @@ use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
 
-#require "$osf_utils_dir/utils.pl";
-#require "$osf_utils_dir/parse.pl";
-#require "$osf_utils_dir/header.pl";
 
 # Usage()
 
@@ -288,10 +285,10 @@ sub add_distro_package {
 	    print "       $file\n";
 	}
 
-	my $response = ask_user_for_yes_no();
+	my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
 
 	if( $response == 0 ) {
-	    INFO("   --> Did not add $package LosF config, terminating....\n");
+	    INFO("   --> Did not add $package LosF to config, terminating....\n");
 	    exit(-22);
 	} 
 
@@ -456,10 +453,10 @@ sub add_distro_group {
 	    print "       $file\n";
 	}
 
-	my $response = ask_user_for_yes_no();
+	my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
 
 	if( $response == 0 ) {
-	    INFO("   --> Did not add $package LosF config, terminating....\n");
+	    INFO("   --> Did not add $package LosF to config, terminating....\n");
 	    exit(-22);
 	} 
 
@@ -561,6 +558,142 @@ sub add_distro_group {
     end_routine();
 } # end sub add_distr_group
 
+sub add_custom_rpm {
+
+    begin_routine();
+    my $package = shift;
+
+    my $basename = basename($package);
+
+    INFO("\n** Checking on possible addition of custom RPM package: $basename\n");
+    SYSLOG("User requested addition of custom RPM: $basename");
+
+    if ( ! -s $package ) {
+	MYERROR("Unable to access requested RPM -> $basename\n");
+    }
+
+    my $md5sum = md5sum_file($package);
+
+    if( $md5sum ne "" )  {
+	INFO("   --> md5sum = $md5sum\n");
+    } else {
+	MYERROR("   --> invalid md5sum for package\n");
+    }
+
+    INFO("   --> Cluster = $node_cluster, Node Type = $node_type\n");
+    INFO("\n");
+    INFO("   --> Would you like to add $basename \n");
+    INFO("       to your local LosF config for $node_cluster:$node_type nodes?\n\n");
+
+    my $response = ask_user_for_yes_no("Enter yes/no to confirm (or -1 to add to multiple node types): ",2);
+
+    print "response  = $response\n";
+
+    exit(1);
+###
+###	if( $response == 0 ) {
+###	    INFO("   --> Did not add $package to LosF config, terminating....\n");
+###	    exit(-22);
+###	} 
+###
+###	print "\n";
+###
+###	# (3) Read relevant configfile for OS packages
+###
+###	my $host_name;
+###	chomp($host_name=`hostname -s`);
+###
+###	INFO("   Reading OS package config file -> $osf_config_dir/OS-packages."."$node_cluster\n");
+###	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
+###
+###	# cache defined OS rpms. If the RPM is available, we derive
+###	# the version information directly from RPM header; otherwise,
+###	# we do our best to derive from filename
+###
+####	undef %rpm_defined;
+###
+###	DEBUG("   --> Using $rpm_topdir for top-level RPM dir\n");
+###
+###	foreach $rpm (@os_rpms) {
+###	    DEBUG("   --> Config rpm = $rpm\n");
+###	}
+###
+###	# check RPM version for downloaded packages
+###
+###	INFO("\n");
+###
+###	foreach $file (@newfiles) {
+###	    my @version_info = rpm_version_from_file($file);
+###	    my $rpm_package  = rpm_package_string_from_header(@version_info);
+###	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
+###
+###	    my $rpm_name    = $version_info[0];
+###	    my $rpm_version = $version_info[1]-$version[2];
+###	    my $rpm_arch    = $version_info[3];
+###
+###	    my $is_configured = 0;
+###
+###	    foreach $rpm (@os_rpms) {
+###		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+###		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
+####		    push(@rpms_to_update,$file);
+###		    $is_configured = 1;
+###		    last;
+###		}
+###	    }
+###
+###	    if (! $is_configured ) {
+###		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
+###		INFO("       --> Adding $file ($node_type)\n");
+###
+###		if($local_os_cfg->exists("OS Packages","$node_type")) {
+###		    $local_os_cfg->push("OS Packages",$node_type,$rpm_package);
+###		} else {
+###		    $local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
+###		}
+###
+###		# Stage downloaded RPM files into LosF repository
+###
+###		my $basename = basename($file);
+###		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
+###		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
+###		    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
+###		}
+###	    }
+###	
+###	} # end loop over new packages to configure
+###	
+###	# Update LosF config to include newly added distro packages
+###
+###	my $new_file = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
+###	my $ref_file = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+###
+###	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+###
+###	if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+###	if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+###
+###	if ( compare($new_file,$ref_file) != 0 ) {
+###	    my $timestamp=`date +%F:%H:%M`;
+###	    chomp($timestamp);
+###	    print "   --> Updating OS config file...\n";
+###	    rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unaable to save previous OS config file\n");
+###	    rename($new_file,$ref_file)                || MYERROR("Unaable to update OS config file\n");
+###	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+###	} else {
+###	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+###	}
+###
+###    } else {
+###	INFO("   --> The package \"$package\" is not available locally via yum.\n\n");
+###	INFO("   --> Please verify that yum is pointed to a valid repository (or mirror)\n");
+###	INFO("   --> and that the package name you provided is a legitimate distro package.\n");
+###	MYERROR(" Unable to add $package to local LosF configuration\n");
+###    }
+###
+    end_routine();
+} # end sub add_custom_rpm
+
 # Command-line parsing
 
 if (@ARGV >= 2) {
@@ -582,19 +715,18 @@ $logr->level($INFO);
 
 switch ($command) {
 
-#    exit(1);
-
     # Do the deed
     
-    case "add"    { add_node($argument) };
-    case "del"    { del_node($argument) };
-    case "delete" { del_node($argument) };
+    case "add"      { add_node($argument) };
+    case "del"      { del_node($argument) };
+    case "delete"   { del_node($argument) };
 
     case "addpkg"   { add_distro_package($argument) };
     case "addgroup" { add_distro_group  ($argument) };
-    
+    case "addrpm"   { add_custom_rpm  ($argument) };
     
     print "\n[Error]: Unknown command received-> $command\n";
+
     usage();
     exit(1);
 }
