@@ -70,8 +70,6 @@ sub verify_rpms {
 	    $filename = "$rpm_topdir/$arch/$rpm.rpm";
 	}
 
-#	print "rpm filename = $filename\n";
-
 	if ( ! -s "$filename" ) {
 	    MYERROR("Unable to locate local OS rpm-> $filename\n");
 	}
@@ -82,6 +80,7 @@ sub verify_rpms {
 	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
 
 	if( @installed_rpm eq 0 ) {
+
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
 	} elsif( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]") {
@@ -184,14 +183,14 @@ sub verify_custom_rpms {
 	# array of hashes, so the syntax is slightly gnarly.
 
 	if( @installed_rpm eq 0 ) {
+	    verify_expected_md5sum($filename,$md5_desired);
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    SYSLOG("Registering previously uninstalled $desired_rpm[0] for update");
-	    #push(@rpms_to_install,$filename);
 	    push(@{$rpms_to_install{$rpm_options}},$filename);
 	} elsif( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]") {
+	    verify_expected_md5sum($filename,$md5_desired);
 	    INFO("   --> version mismatch - registering for update...\n");
 	    SYSLOG("Registering locally installed $desired_rpm[0] for update");
-	    #push(@rpms_to_install,$filename);
 	    push(@{$rpms_to_install{$rpm_options}},$filename);
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
@@ -234,7 +233,7 @@ sub verify_custom_rpms {
 	    MYERROR("Unable to install Custom RPMs (status = $ret)\n");
 
 	} else {
-	    SYSLOG("RPM installs successful");
+	    SYSLOG("RPM install(s) successful");
 	}
 
     }
@@ -336,6 +335,24 @@ sub rpm_arch_from_filename {
 
     end_routine();
     return($config_arch);
+}
+
+sub verify_expected_md5sum {
+    begin_routine();
+
+    my $file = shift;		# rpm file
+    my $md5  = shift; 		# expected md5sum from input file
+
+    my $local_md5 = md5sum_file($file);
+
+    if($md5 ne $local_md5) {
+	ERROR  ("RPM md5sums to not match for $file\n");
+	ERROR  (" --> desired    = $md5\n");
+	MYERROR(" --> local file = $md5\n");
+    }
+
+    return;
+    end_routine;
 }
 
 sub md5sum_file {
