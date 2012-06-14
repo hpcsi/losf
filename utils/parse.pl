@@ -1,6 +1,26 @@
 #!/usr/bin/perl
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
+# 
+# LosF - a Linux operating system Framework for HPC clusters
 #
-#-------------------------------------------------------------------
+# Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
 #
 # Input File Parsing Utilities: Used to query specific variables
 # from .ini style configuration files.
@@ -12,11 +32,12 @@ use Config::IniFiles;
 
 BEGIN {
 
-    my $osf_init_global_config    = 0;
-    my $osf_init_local_config     = 0; 
-    my $osf_init_os_local_config  = 0; 
-    my $osf_init_sync_permissions = 0;
-    my $osf_init_sync_kickstarts  = 0;
+    my $osf_init_global_config       = 0;
+    my $osf_init_local_config        = 0; 
+    my $osf_init_os_local_config     = 0; 
+    my $osf_init_custom_local_config = 0; 
+    my $osf_init_sync_permissions    = 0;
+    my $osf_init_sync_kickstarts     = 0;
 
     my %osf_file_perms = ();
 
@@ -217,6 +238,34 @@ BEGIN {
 	end_routine();
     };
 
+    #-------------------------------------------------------------------
+    # Init parsing of Cluster-specific Custom package configuration file
+    #-------------------------------------------------------------------
+
+    sub init_local_custom_config_file_parsing {
+	use File::Basename;
+
+	begin_routine();
+
+	if ( $osf_init_custom_local_config == 0 ) {
+
+	    my $infile    = shift;
+	    my $logr      = get_logger();
+	    my $shortname = fileparse($infile);
+	    
+	    INFO("   --> Initializing Custom config_parsing ($shortname)\n");
+	    
+	    verify_file_exists($infile);
+	    
+	    $local_custom_cfg = new Config::IniFiles( -file => "$infile", 
+						      -allowcontinue => 1,
+						      -nomultiline   => 1);
+	    $osf_init_custom_local_config = 1;
+	}
+	
+	end_routine();
+    };
+
     sub query_global_config_os_sync_date {
 
 	begin_routine();
@@ -288,12 +337,11 @@ BEGIN {
 	begin_routine();
 
 	my $cluster       = shift;
-#	my $host          = shift;
 	my $node_type     = shift;
 		          
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
-	my %os_rpms       = ();
+#	my %os_rpms       = ();
 
 	INFO("   --> Looking for OS packages to sync...($cluster->$node_type)\n");
 
@@ -313,6 +361,37 @@ BEGIN {
 		DEBUG("       --> Read $rpm from config\n");
 	    }
 
+	}
+
+	end_routine();
+
+	return(@rpms_defined);
+    }
+
+    sub query_cluster_config_custom_packages {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $node_type     = shift;
+		          
+	my $logr          = get_logger();
+	my @rpms_defined  = ();
+#	my %custom_rpms   = ();
+
+	INFO("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
+
+	if ( ! $local_custom_cfg->SectionExists("Custom Packages") ) {
+	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
+	}
+
+	if($local_custom_cfg->exists("Custom Packages",$node_type)) {
+	    INFO("   --> Custom packages defined for node type = $node_type\n");
+	    @rpms_defined = $local_custom_cfg->val("Custom Packages",$node_type);
+
+	    foreach $rpm (@rpms_defined) {
+		DEBUG("       --> Read $rpm from config\n");
+	    }
 	}
 
 	end_routine();

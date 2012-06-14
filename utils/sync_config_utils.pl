@@ -707,13 +707,15 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_os_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
 
-	my @custom_rpms = query_cluster_config_rpm_packages($node_cluster,$node_type);
-	print "hello koomie\n";
-	exit(1);
+	my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
-#	verify_rpms(@custom_rpms);
+	foreach my $rpm (@custom_rpms) {
+	    INFO("   --> Custom rpm = $rpm\n");
+	}
+
+	verify_custom_rpms(@custom_rpms);
 
 	end_routine();
     }

@@ -36,13 +36,12 @@ use lib "$osf_rpm2_arch_dir";
 use rpm_topdir;
 use Sys::Syslog;  
 use Digest::MD5;
-#use RPM2;
 use Env qw(SRC_DIR MODE);
 
 # --------------------------------------------------------
 # verify_rpms (rpms)
 # 
-# Checks to see if input list of rpms versions are
+# Checks to see if input list of Distro rpms versions are
 # installed; if not, installs desires packages.
 # --------------------------------------------------------
 
@@ -113,6 +112,131 @@ sub verify_rpms {
 
     if ( $ret != 0 ) {
 	MYERROR("Unable to install OS package RPMs (status = $ret)\n");
+    }
+
+    end_routine();
+}
+
+# --------------------------------------------------------
+# verify_custom_rpms (rpms)
+# 
+# Checks to see if input list of Custom rpms versions are
+# installed; if not, installs desires packages with 
+# user specified options.
+# --------------------------------------------------------
+
+sub verify_custom_rpms {
+    begin_routine();
+
+    my @rpm_list        = @_;
+#    my @rpms_to_install = ();
+    my %rpms_to_install = ();
+    my $num_rpms        = @rpm_list;
+
+    if($num_rpms < 1) { return; }
+
+    INFO("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
+
+    foreach $rpm (@rpm_list) {
+
+	my @rpm_array  = split(/\s+/,$rpm);
+
+	# Cull rpm install options for this package
+
+	my $md5_desired    = $rpm_array[1];  # <- required option for all custom packages (all others are optional)
+	my $num_options    = @rpm_array;
+
+	my $rpm_options    = "";
+	my $install_method = "--upgrade ";   # we default to upgrade, may be overridden by parsing options below
+
+	for(my $count = 2; $count < $num_options; $count++) {
+	    $rpm_options = $rpm_options . validate_rpm_option($rpm_array[$count]);
+	}
+
+	$rpm_options = $install_method . $rpm_options;
+
+	DEBUG("   --> rpm_options = $rpm_options\n");
+	DEBUG("   --> Checking $rpm_array[0]\n");
+
+	# Installing from path provided by user on command-line?
+
+	my $filename = "";
+	my $arch     = rpm_arch_from_filename($rpm_array[0]);
+
+	if ( "$MODE" eq "PXE" ) {
+	    $filename = "$SRC_DIR/$arch/$rpm_array[0].rpm";
+	} else {
+	    $filename = "$rpm_topdir/$arch/$rpm_array[0].rpm";
+	}
+
+	if ( ! -s "$filename" ) {
+	    MYERROR("Unable to locate local Custom rpm-> $filename\n");
+	}
+
+	my @desired_rpm   = rpm_version_from_file($filename);
+	my @installed_rpm = is_rpm_installed     ($rpm_array[0],$arch);
+
+	# Decide if we need to install. Note that we build up arrays
+	# of rpms to install on a per-rpm-option-combination basis.
+	# This is to allow for multiple rpms to be installed, but it
+	# is conceivable that some of the rpms which need to be
+	# installed have different options specified. This uses a perl
+	# array of hashes, so the syntax is slightly gnarly.
+
+	if( @installed_rpm eq 0 ) {
+	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
+	    SYSLOG("Registering previously uninstalled $desired_rpm[0] for update");
+	    #push(@rpms_to_install,$filename);
+	    push(@{$rpms_to_install{$rpm_options}},$filename);
+	} elsif( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]") {
+	    INFO("   --> version mismatch - registering for update...\n");
+	    SYSLOG("Registering locally installed $desired_rpm[0] for update");
+	    #push(@rpms_to_install,$filename);
+	    push(@{$rpms_to_install{$rpm_options}},$filename);
+	} else {
+	    DEBUG("   --> $desired_rpm[0] is already installed\n");
+	}
+    }
+
+    # Do we have rpms to install
+
+    my $count = 0;
+    foreach my $options (keys %rpms_to_install) {
+	foreach(@{$rpms_to_install{$options}}) {
+	    $count++;
+	}
+    }
+
+    if( $count == 0 ) {
+	INFO("   --> OK: Custom packages in sync ($num_rpms rpm(s) checked)\n");
+	return;
+    } else {
+	INFO("   --> A total of $count rpm(s) need updating\n");
+
+    }
+
+    # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
+
+    foreach my $options (keys %rpms_to_install) {
+
+	my $local_count = @{$rpms_to_install{$options}};
+	INFO("   --> Using rpm_options = $options (number of rpms = $local_count)\n");
+	SYSLOG("Issuing transactions for $local_count rpm(s) ($options)");
+
+	my $cmd = "rpm $options "."@{$rpms_to_install{$options}}";
+    
+	system($cmd);
+
+	my $ret = $?;
+
+	if ( $ret != 0 ) {
+	    SYSLOG("** Local RPM update unsuccessful");
+	    MYERROR("Unable to install Custom RPMs (status = $ret)\n");
+
+	} else {
+	    SYSLOG("RPM installs successful");
+	}
+
     }
 
     end_routine();
@@ -236,6 +360,24 @@ sub md5sum_file {
     end_routine();
     return $digest;
 
+}
+
+sub validate_rpm_option {
+    begin_routine();
+    my $option = shift;
+    my $rpm_mapping = "";
+
+    if( $option eq "NODEPS" )  {
+	end_routine;
+	return("--nodeps ");
+    } elsif ( $option eq "IGNORESIZE" ) {
+	end_routine;
+	return("--ignoresize ");
+    } else {
+	end_routine;
+	WARN("   [WARN]: Ignoring unsupported RPM option type -> $option\n");
+	return("");
+    }
 }
 
 1;

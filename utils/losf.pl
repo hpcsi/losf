@@ -467,7 +467,7 @@ sub add_distro_group {
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
-	INFO("   Reading OS package config file -> $osf_config_dir/OS-packages."."$node_cluster\n");
+	INFO("   Reading OS package config file -> $osf_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
@@ -587,111 +587,87 @@ sub add_custom_rpm {
 
     my $response = ask_user_for_yes_no("Enter yes/no to confirm (or -1 to add to multiple node types): ",2);
 
-    print "response  = $response\n";
+    if( $response == 0 ) {
+	INFO("   --> Did not add $basename to LosF config, terminating....\n");
+	exit(-22);
+    } 
 
-    exit(1);
-###
-###	if( $response == 0 ) {
-###	    INFO("   --> Did not add $package to LosF config, terminating....\n");
-###	    exit(-22);
-###	} 
-###
-###	print "\n";
-###
-###	# (3) Read relevant configfile for OS packages
-###
-###	my $host_name;
-###	chomp($host_name=`hostname -s`);
-###
-###	INFO("   Reading OS package config file -> $osf_config_dir/OS-packages."."$node_cluster\n");
-###	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
-###
-###	# cache defined OS rpms. If the RPM is available, we derive
-###	# the version information directly from RPM header; otherwise,
-###	# we do our best to derive from filename
-###
-####	undef %rpm_defined;
-###
-###	DEBUG("   --> Using $rpm_topdir for top-level RPM dir\n");
-###
-###	foreach $rpm (@os_rpms) {
-###	    DEBUG("   --> Config rpm = $rpm\n");
-###	}
-###
-###	# check RPM version for downloaded packages
-###
-###	INFO("\n");
-###
-###	foreach $file (@newfiles) {
-###	    my @version_info = rpm_version_from_file($file);
-###	    my $rpm_package  = rpm_package_string_from_header(@version_info);
-###	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
-###
-###	    my $rpm_name    = $version_info[0];
-###	    my $rpm_version = $version_info[1]-$version[2];
-###	    my $rpm_arch    = $version_info[3];
-###
-###	    my $is_configured = 0;
-###
-###	    foreach $rpm (@os_rpms) {
-###		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
-###		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
-####		    push(@rpms_to_update,$file);
-###		    $is_configured = 1;
-###		    last;
-###		}
-###	    }
-###
-###	    if (! $is_configured ) {
-###		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
-###		INFO("       --> Adding $file ($node_type)\n");
-###
-###		if($local_os_cfg->exists("OS Packages","$node_type")) {
-###		    $local_os_cfg->push("OS Packages",$node_type,$rpm_package);
-###		} else {
-###		    $local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
-###		}
-###
-###		# Stage downloaded RPM files into LosF repository
-###
-###		my $basename = basename($file);
-###		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
-###		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
-###		    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
-###		}
-###	    }
-###	
-###	} # end loop over new packages to configure
-###	
-###	# Update LosF config to include newly added distro packages
-###
-###	my $new_file = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
-###	my $ref_file = "$osf_config_dir/os-packages/$node_cluster/packages.config";
-###
-###	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
-###
-###	if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
-###	if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
-###
-###	if ( compare($new_file,$ref_file) != 0 ) {
-###	    my $timestamp=`date +%F:%H:%M`;
-###	    chomp($timestamp);
-###	    print "   --> Updating OS config file...\n";
-###	    rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unaable to save previous OS config file\n");
-###	    rename($new_file,$ref_file)                || MYERROR("Unaable to update OS config file\n");
-###	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
-###	} else {
-###	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
-###	}
-###
-###    } else {
-###	INFO("   --> The package \"$package\" is not available locally via yum.\n\n");
-###	INFO("   --> Please verify that yum is pointed to a valid repository (or mirror)\n");
-###	INFO("   --> and that the package name you provided is a legitimate distro package.\n");
-###	MYERROR(" Unable to add $package to local LosF configuration\n");
-###    }
-###
+    print "\n";
+
+    # Read relevant configfile for custom packages
+
+    INFO("   Reading Custom package config file -> $osf_config_dir/custom-packages/".
+	 "$node_cluster/packages.config\n");
+
+    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
+
+    foreach $rpm (@custom_rpms) {
+	INFO("   --> Existing custom rpm = $rpm\n");
+    }
+
+    # check RPM version for the custom package
+
+    INFO("\n");
+    my @version_info = rpm_version_from_file($package);
+    my $rpm_package  = rpm_package_string_from_header(@version_info);
+    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
+
+
+    my $rpm_name    = $version_info[0];
+    my $rpm_version = $version_info[1]-$version[2];
+    my $rpm_arch    = $version_info[3];
+
+    my $is_configured = 0;
+
+    foreach $rpm (@custom_rpms) {
+	my @rpm_array  = split(/\s+/,$rpm);
+	if ($rpm_array[0] =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+	    INFO("       --> $rpm_name already configured - ignoring addition request\n");
+	    $is_configured = 1;
+	    return;
+	}
+    }
+
+    # all custom rpm specifications must include md5 checksums; we also provide default options
+    # use --nodeps and --ignoresize
+
+    my $default_options = "NODEPS IGNORESIZE";
+
+    if (! $is_configured ) {
+	INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
+	INFO("       --> Adding $file ($node_type)\n");
+	
+	if($local_custom_cfg->exists("Custom Packages","$node_type")) {
+	    $local_custom_cfg->push("Custom Packages",$node_type,"$rpm_package $md5sum $default_options");
+	} else {
+	    $local_custom_cfg->newval("Custom Packages",$node_type,"$rpm_package $md5sum $default_options");
+	}
+
+    }
+
+    # Update LosF config to include desired custom package
+
+    my $new_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config";
+
+    $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+
+    if ( compare($new_file,$ref_file) != 0 ) {
+	my $timestamp=`date +%F:%H:%M`;
+	chomp($timestamp);
+	print "   --> Updating Custom RPM config file...\n";
+	rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unable to save previous OS config file\n");
+	rename($new_file,$ref_file)                || MYERROR("Unable to update OS config file\n");
+	print "\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect\n";
+    } else {
+	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+    }
+
     end_routine();
+    return;
 } # end sub add_custom_rpm
 
 # Command-line parsing
@@ -709,8 +685,10 @@ verify_sw_dependencies();
 (my $node_cluster, my $node_type) = determine_node_membership();
 
 
-init_local_config_file_parsing   ("$osf_config_dir/config."."$node_cluster");
-init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
+init_local_config_file_parsing       ("$osf_config_dir/config."."$node_cluster");
+init_local_os_config_file_parsing    ("$osf_config_dir/os-packages/$node_cluster/packages.config");
+init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+
 $logr->level($INFO);
 
 switch ($command) {
