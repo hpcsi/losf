@@ -22,15 +22,15 @@
 #
 #-----------------------------------------------------------------------el-
 #
-# Wrapper for OS package syncing utility.
+# Wrapper for local customized package syncing utility.
 #
-# $Id: sync_config_files 534 2011-01-18 15:16:12Z karl $
+# $Id$
 #--------------------------------------------------------------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 export PERL5LIB=$TOP_DIR/utils
 
-$TOP_DIR/utils/verify_os_packages.pl
+$TOP_DIR/utils/verify_custom_packages.pl
 
 
 
