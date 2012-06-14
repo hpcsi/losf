@@ -35,7 +35,8 @@ use lib "$osf_rpm2_arch_dir";
 
 use rpm_topdir;
 use Sys::Syslog;  
-use RPM2;
+use Digest::MD5;
+#use RPM2;
 use Env qw(SRC_DIR MODE);
 
 # --------------------------------------------------------
@@ -211,6 +212,30 @@ sub rpm_arch_from_filename {
 
     end_routine();
     return($config_arch);
+}
+
+sub md5sum_file {
+    begin_routine();
+
+    my $file = shift;
+    my $digest = "";
+
+    eval{
+	open(FILE, $file) || MYERROR("Unable to access file for md5 calculation: $file");
+	my $ctx = Digest::MD5->new;
+	$ctx->addfile(*FILE);
+	$digest = $ctx->hexdigest;
+	close(FILE);
+    };
+
+    if($@){
+	print $@;
+	return "";
+    }
+
+    end_routine();
+    return $digest;
+
 }
 
 1;

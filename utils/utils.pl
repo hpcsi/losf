@@ -75,53 +75,77 @@ sub verify_file_exists {
 
 sub ask_user_for_yes_no {
 
-    print "\n[LosF] Enter yes/no to confirm: ";
+    my $prompt   = shift;
+    my $flag     = shift;
+
+    # Flag = 1 -> only look for yes/no responses
+    # Flag = 2 -> lood for yes/no, and -1 responses
+
+    print "\n[LosF] $prompt";
     chomp(my $line = <STDIN>);
 
-    my $response = verify_yes_no_response($line);
-#    print "you wrote $line\n";
+    my $response = verify_yes_no_response($line,$flag);
 
-    if( $response >= 0 ) {
+    if( $response > -10 ) {
 	return $response;
     }
 
     # Ask again if dodgy response
 
-    print "\n[LosF] Unknown response: please enter \"yes\" or \"no\ to confirm: ";  
+    print "\n[LosF] Unknown response->  $prompt";
 
     chomp(my $line = <STDIN>);
-    my $response = verify_yes_no_response($line);
-    if( $response >= 0 ) {
+    my $response = verify_yes_no_response($line,$flag);
+
+    if( $response > -10 ) {
 	return $response;
     }
 
-    # 3rd time is a charm....?
+    # dude, get it right. 3rd time is a charm....?
 
-    print "\n[LosF] Unknown response: please enter \"yes\" or \"no\ to confirm: ";  
+    print "\n[LosF] Unknown response-> $prompt";
 
     chomp(my $line = <STDIN>);
-    my $response = verify_yes_no_response($line);
-    if( $response >= 0 ) {
+    my $response = verify_yes_no_response($line,$flag);
+
+    if( $response > -10 ) {
 	return $response;
     } else  {
-	MYERROR("Unable to validate user response for yes/no; terminating...");
+	MYERROR("Unable to validate user response; terminating...");
     }
 }
 
 sub verify_yes_no_response {
     my $response = shift;
+    my $flag     = shift;   
 
-    switch ($response) {
+    # Flag = 1 -> only look for yes/no responses
+    # Flag = 2 -> lood for yes/no, and -1 responses
 
-	case "Yes" { return 1 }
-	case "yes" { return 1 }
-	case "y"   { return 1 }
-
-	case "No"  { return 0 }
-	case "no"  { return 0 }
-	case "n"   { return 0 }
-	
-	else { return -1 };
+    if ( $response eq "Yes" ) {
+	return 1;
+    } elsif( $response eq "YES" ) {
+	return 1;
+    } elsif( $response eq "yes" ) {
+	return 1;
+    } elsif( $response eq "y" ) {
+	return 1;
+    } elsif( $response eq "Y" ) {
+	return 1;
+    } elsif( $response eq  "no" ) { 
+	return 0;
+    } elsif( $response eq  "NO" ) { 
+	return 0;
+    } elsif( $response eq  "No" ) { 
+	return 0;
+    } elsif( $response eq  "n" ) { 
+	return 0;
+    } elsif( $response eq  "N" ) { 
+	return 0;
+    } elsif( $flag == 2 && $response eq  "-1" ) { 
+	return -1;
+    } else {
+	return -10; 
     }
 }
 
