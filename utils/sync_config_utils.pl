@@ -52,11 +52,12 @@ require "$osf_utils_dir/rpm_utils.pl";
 
 BEGIN {
 
-    my $osf_sync_const_file  = 0;
-    my $osf_sync_soft_links  = 0;
-    my $osf_sync_services    = 0;
-    my $osf_sync_permissions = 0;
-    my $osf_sync_os_packages = 0;
+    my $osf_sync_const_file      = 0;
+    my $osf_sync_soft_links      = 0;
+    my $osf_sync_services        = 0;
+    my $osf_sync_permissions     = 0;
+    my $osf_sync_os_packages     = 0;
+    my $osf_sync_custom_packages = 0;
     
     sub parse_and_sync_const_files {
 
@@ -687,6 +688,32 @@ BEGIN {
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	verify_rpms(@os_rpms);
+
+	end_routine();
+    }
+
+
+    sub parse_and_sync_custom_packages {
+
+	verify_sw_dependencies();
+	begin_routine();
+	
+	if ( $osf_sync_custom_packages == 0 ) {
+	    INFO("\n** Syncing Custom packages\n\n");
+	    $osf_sync_custom_packages = 1;
+	} else {
+	    return;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+
+	init_local_os_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+
+	my @custom_rpms = query_cluster_config_rpm_packages($node_cluster,$node_type);
+	print "hello koomie\n";
+	exit(1);
+
+#	verify_rpms(@custom_rpms);
 
 	end_routine();
     }

@@ -22,7 +22,7 @@
 #
 #-----------------------------------------------------------------------el-
 #
-# Sync desired OS packages.
+# Sync desired Custom RPMs.
 #
 # $Id$
 #--------------------------------------------------------------------------
@@ -47,7 +47,7 @@ require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 require "$osf_utils_dir/sync_config_utils.pl";
 
-parse_and_sync_os_packages();
+parse_and_sync_custom_packages();
 
 1;
 
