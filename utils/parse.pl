@@ -127,7 +127,7 @@ BEGIN {
 	    
 	    INFO("   --> Node type determination successful\n");
 	    INFO("\n");
-	    INFO("   Cluster:Node_Type   = $node_cluster:$node_type\n");
+	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
 	    INFO("\n");
 	}
 

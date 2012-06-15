@@ -37,6 +37,7 @@ use File::Copy;
 use File::Path;
 use File::stat;
 use File::Temp qw(tempfile);
+use Term::ANSIColor;
 
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
@@ -65,11 +66,12 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_const_file == 0 ) {
-	    INFO("** Syncing configuration files (const)\n\n");
+	    #INFO("** Syncing configuration files (const)\n\n");
 	    $osf_sync_const_file = 1;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
+	print "** Syncing configuration files ($node_cluster:$node_type)\n";
 
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
@@ -122,11 +124,12 @@ BEGIN {
 	begin_routine();
 
 	if ( $osf_sync_services == 0 ) {
-	    INFO("\n** Syncing runlevel services\n\n");
+#	    INFO("\n** Syncing runlevel services\n\n");
 	    $osf_sync_services = 1;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
+	print "** Syncing runlevel services ($node_cluster:$node_type)\n";
 
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
@@ -215,7 +218,12 @@ BEGIN {
 	# Deal with non-symbolic link and diff directly.
 	    
 	if ( compare($file,$ref_file) == 0 ) {
-	    print "   --> OK: $file in sync ";
+	    print "   --> "; 
+	    print color 'green';
+	    print "OK";
+	    print color 'reset';
+	    print ": $file in sync ";;
+	    #print "   --> OK: $file in sync ";
 	    if($customized) { 
 		print "(using customized config for $host_name)\n";
 	    } else { 
@@ -642,7 +650,12 @@ BEGIN {
 	if ( $setting =~ m/3:on/ ) {
 	    DEBUG("   --> $service is ON\n");
 	    if($enable_service) {
-		print "   --> OK: $service is ON\n";
+		print "   --> "; 
+		print color 'green';
+		print "OK";
+		print color 'reset';
+		print ": $service is ON\n";
+#		print "   --> OK: $service is ON\n";
 	    } else {
 		print "   --> FAILED: disabling $service\n";
 		`/sbin/chkconfig $service off`;
@@ -663,7 +676,12 @@ BEGIN {
 		    MYERROR("Unable to chkconfig $service on");
 		}
 	    } else {
-		print "   --> OK: $service is OFF\n";
+		print "   --> "; 
+		print color 'green';
+		print "OK";
+		print color 'reset';
+		print ": $service is OFF\n";
+#		print "   --> OK: $service is OFF\n";
 	    }
 	}
 
@@ -675,13 +693,13 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_os_packages == 0 ) {
-	    INFO("\n** Syncing OS packages\n\n");
 	    $osf_sync_os_packages = 1;
 	} else {
 	    return;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
+	print "** Syncing OS packages ($node_cluster:$node_type)\n";
 
 	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
 

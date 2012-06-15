@@ -40,20 +40,15 @@ use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir";
 
-# Default logging is set to ERROR
-
-#$ENV{OSF_ECHO_MODE}="ERROR";
-
-#my $logr = get_logger();
-#$logr->level($ERROR);
-
 use node_types;
 use utils;
 
 require "$osf_utils_dir/sync_config_utils.pl";
 
+# Default logging is set to ERROR
+
 my $logr = get_logger();
-$logr->level($ERROR);
+$logr->level($INFO);
 
 parse_and_sync_os_packages();
 parse_and_sync_custom_packages();

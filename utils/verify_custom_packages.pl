@@ -42,12 +42,13 @@ use lib "$osf_utils_dir";
 use node_types;
 use utils;
 
-require "$osf_utils_dir/utils.pl";
-require "$osf_utils_dir/parse.pl";
-require "$osf_utils_dir/header.pl";
-require "$osf_utils_dir/sync_config_utils.pl";
+#require "$osf_utils_dir/utils.pl";
+#require "$osf_utils_dir/parse.pl";
+#require "$osf_utils_dir/header.pl";
+#require "$osf_utils_dir/sync_config_utils.pl";
 
-parse_and_sync_custom_packages();
+print "hello koomie\n";
+#parse_and_sync_custom_packages();
 
 1;
 
