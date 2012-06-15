@@ -377,7 +377,6 @@ BEGIN {
 		          
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
-#	my %custom_rpms   = ();
 
 	INFO("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
 
@@ -386,7 +385,7 @@ BEGIN {
 	}
 
 	if($local_custom_cfg->exists("Custom Packages",$node_type)) {
-	    INFO("   --> Custom packages defined for node type = $node_type\n");
+	    DEBUG("   --> Custom packages defined for node type = $node_type\n");
 	    @rpms_defined = $local_custom_cfg->val("Custom Packages",$node_type);
 
 	    foreach $rpm (@rpms_defined) {

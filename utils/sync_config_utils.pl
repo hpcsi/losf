@@ -706,16 +706,31 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-
 	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
 
-	my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
+	my @custom_rpms = ();
 
+	# (1) verify packages for ALL node types
+
+	INFO("\n");
+	@custom_rpms = query_cluster_config_custom_packages($node_cluster,"ALL");
 	foreach my $rpm (@custom_rpms) {
-	    INFO("   --> Custom rpm = $rpm\n");
+	    DEBUG("   --> Custom rpm for ALL = $rpm\n");
 	}
 
-	verify_custom_rpms(@custom_rpms);
+	verify_custom_rpms("ALL",@custom_rpms);
+
+	# (2) verify packages for current node types
+	
+	INFO("\n");
+
+	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
+
+	foreach my $rpm (@custom_rpms) {
+	    DEBUG("   --> Custom rpm = $rpm\n");
+	}
+
+	verify_custom_rpms($node_type,@custom_rpms);
 
 	end_routine();
     }

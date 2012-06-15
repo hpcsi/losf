@@ -7,7 +7,7 @@
 # $Id$
 #-------------------------------------------------------------------
 
-my $VERSION="0.32.0";
+my $VERSION="0.40.0";
 my $PKGNAME="Linux OSF";
 
 sub print_header {

@@ -31,7 +31,7 @@
 # $Id$
 #-------------------------------------------------------------------
 
-#use warnings;
+use warnings;
 use Switch;
 use OSF_paths;
 
@@ -47,29 +47,53 @@ use rpm_utils;
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
-
+use Term::ANSIColor;
+use Getopt::Long;
 
 # Usage()
 
 sub usage {
-    print "\nUsage: losf [COMMAND] [ARG]\n\n";
-    print "  Available COMMANDS are as follows:\n\n";
+    print "\n";
+    print color 'bold yellow';
+    print "  Usage: losf [COMMAND] [ARG]\n\n";
+    print color 'reset';
+    print "  where available COMMANDs are as follows:\n\n";
 
+    print color 'bold blue';
     print "  Host Registration:\n";
-    print "     add [host]          Register a new host for provisioning\n";
-    print "     del [host]          Delete an existing host\n";
+    print color 'reset';
+
+    print "     add [host]               Register a new host for provisioning\n";
+    print "     del [host]               Delete an existing host\n";
     print "\n";
 
-    print "  OS package Customization:\n";
-    print "     addpkg    [package] Add a new OS package (and dependencies) from Linux distro for current node type\n";
-    print "     delpkg    [package] Remove previously added OS package\n";
-    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
-    print "\n";
-    print "     addgroup  [group]   Add a new OS group (and dependencies) from Linux distro for current node type\n";
+    print color 'bold blue';
+    print "  OS Package Customization:\n";
+    print color 'reset';
+
+    print "     These commands update the Linux distro OS package configuration\n";
+    print "     for the local node type on which the command is executed:\n";
     print "\n";
 
+    print "     addpkg    [package]      Add new OS package (and dependencies)\n";
+    print "     delpkg    [package]      Remove previously added OS package\n";
+#    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
+    print "     addgroup  [group]        Add new OS group (and dependencies)\n";
+    print "\n";
+
+    print color 'bold blue';
     print "  Local RPM Customization:\n";
-    print "     addrpm    [rpm]     Add a new custom RPM for current node type\n";
+    print color 'reset';
+
+    print "     These commands update the non-distro (custom) RPM configuration\n";
+    print "     for the local node type on which the command is executed:\n";
+    print "\n";
+
+    print "     addrpm <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
+    print "\n";
+    print "     OPTIONS:\n";
+    print "        --all                              Add rpm for all node types\n";
+    print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
 
     print "\n";
 }
@@ -242,7 +266,7 @@ sub add_distro_package {
 
     # (1) Check if already installed....
 
-    my @igot = is_rpm_installed($package);
+    @igot = is_rpm_installed($package);
 
     if( @igot ne 0 ) {
 	INFO("   --> package $package is already installed locally\n");
@@ -561,12 +585,19 @@ sub add_distro_group {
 sub add_custom_rpm {
 
     begin_routine();
-    my $package = shift;
+    my $package          = shift;
+    my $node_config_type = shift;
+    my $options          = shift;
 
     my $basename = basename($package);
 
+    my $appliance = $node_config_type;
+
+    if ( $node_config_type eq "local" ) {
+	$appliance = $node_type;
+    } 
+	
     INFO("\n** Checking on possible addition of custom RPM package: $basename\n");
-    SYSLOG("User requested addition of custom RPM: $basename");
 
     if ( ! -s $package ) {
 	MYERROR("Unable to access requested RPM -> $basename\n");
@@ -580,10 +611,10 @@ sub add_custom_rpm {
 	MYERROR("   --> invalid md5sum for package\n");
     }
 
-    INFO("   --> Cluster = $node_cluster, Node Type = $node_type\n");
+    INFO("   --> Cluster = $node_cluster, Node Type = $appliance\n");
     INFO("\n");
     INFO("   --> Would you like to add $basename \n");
-    INFO("       to your local LosF config for $node_cluster:$node_type nodes?\n\n");
+    INFO("       to your local LosF config for $node_cluster:".$appliance." nodes?\n\n");
 
     my $response = ask_user_for_yes_no("Enter yes/no to confirm (or -1 to add to multiple node types): ",2);
 
@@ -592,29 +623,24 @@ sub add_custom_rpm {
 	exit(-22);
     } 
 
-    print "\n";
-
     # Read relevant configfile for custom packages
 
     INFO("   Reading Custom package config file -> $osf_config_dir/custom-packages/".
 	 "$node_cluster/packages.config\n");
 
-    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
+    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$appliance);
 
     foreach $rpm (@custom_rpms) {
-	INFO("   --> Existing custom rpm = $rpm\n");
+	DEBUG("   --> Existing custom rpm = $rpm\n");
     }
 
     # check RPM version for the custom package
 
-    INFO("\n");
     my @version_info = rpm_version_from_file($package);
     my $rpm_package  = rpm_package_string_from_header(@version_info);
     INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
 
-
     my $rpm_name    = $version_info[0];
-    my $rpm_version = $version_info[1]-$version[2];
     my $rpm_arch    = $version_info[3];
 
     my $is_configured = 0;
@@ -628,22 +654,32 @@ sub add_custom_rpm {
 	}
     }
 
-    # all custom rpm specifications must include md5 checksums; we also provide default options
-    # use --nodeps and --ignoresize
+    # all custom rpm specifications must include md5 checksums; we
+    # also provide default options to use --nodeps and --ignoresize
 
     my $default_options = "NODEPS IGNORESIZE";
 
+    if( $options ne "" ) {
+	my @custom_options = split(/\s+/,$options);
+	foreach $opt (@custom_options) {
+	    if($opt eq "") {next;};
+	    INFO("   --> Additional user options = $opt\n");
+	    $default_options = "$default_options "."$opt";
+	}
+    }
+
     if (! $is_configured ) {
 	INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
-	INFO("       --> Adding $file ($node_type)\n");
 	
-	if($local_custom_cfg->exists("Custom Packages","$node_type")) {
-	    $local_custom_cfg->push("Custom Packages",$node_type,"$rpm_package $md5sum $default_options");
+	if($local_custom_cfg->exists("Custom Packages","$appliance")) {
+	    $local_custom_cfg->push("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
 	} else {
-	    $local_custom_cfg->newval("Custom Packages",$node_type,"$rpm_package $md5sum $default_options");
+	    $local_custom_cfg->newval("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
 	}
 
     }
+
+    SYSLOG("User requested addition of custom RPM: $basename (type=$appliance)");
 
     # Update LosF config to include desired custom package
 
@@ -669,6 +705,13 @@ sub add_custom_rpm {
     end_routine();
     return;
 } # end sub add_custom_rpm
+
+
+#-------------------------------------------
+# Main front-end for losf command-line tool
+#-------------------------------------------
+
+GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all);
 
 # Command-line parsing
 
@@ -701,7 +744,24 @@ switch ($command) {
 
     case "addpkg"   { add_distro_package($argument) };
     case "addgroup" { add_distro_group  ($argument) };
-    case "addrpm"   { add_custom_rpm  ($argument) };
+    case "addrpm"   { 
+
+	# parse any additional options used with addrpm
+
+	my $options  = "";
+	my $nodetype = "local";
+
+	if(@relocate_options) {
+	    $options = "RELOCATABLE:$relocate_options[0]:$relocate_options[1]";
+	}
+
+	if($all) {
+	    $nodetype = "ALL";
+	}
+
+	print "options=$options\n";
+	add_custom_rpm  ($argument,$nodetype,$options);
+    }
     
     print "\n[Error]: Unknown command received-> $command\n";
 

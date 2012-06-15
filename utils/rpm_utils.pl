@@ -37,6 +37,7 @@ use rpm_topdir;
 use Sys::Syslog;  
 use Digest::MD5;
 use Env qw(SRC_DIR MODE);
+use Term::ANSIColor;
 
 # --------------------------------------------------------
 # verify_rpms (rpms)
@@ -127,10 +128,11 @@ sub verify_rpms {
 sub verify_custom_rpms {
     begin_routine();
 
+    my $appliance       = shift;
     my @rpm_list        = @_;
-#    my @rpms_to_install = ();
     my %rpms_to_install = ();
     my $num_rpms        = @rpm_list;
+
 
     if($num_rpms < 1) { return; }
 
@@ -207,10 +209,16 @@ sub verify_custom_rpms {
     }
 
     if( $count == 0 ) {
-	INFO("   --> OK: Custom packages in sync ($num_rpms rpm(s) checked)\n");
+#	print color 'green'; 
+	print "   --> "; 
+	print color 'green';
+	print "OK";
+	print color 'reset';
+	print ": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
+#	print "   --> OK: Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
 	return;
     } else {
-	INFO("   --> A total of $count rpm(s) need updating\n");
+	INFO("   --> FAILED: A total of $count custom rpm(s) need updating\n");
 
     }
 
@@ -390,6 +398,9 @@ sub validate_rpm_option {
     } elsif ( $option eq "IGNORESIZE" ) {
 	end_routine;
 	return("--ignoresize ");
+    } elsif ( $option =~ "m/RELOCATE:(\S+):(\S+)" ) {
+	end_routine;
+	return("--relocate $1=$2 ");
     } else {
 	end_routine;
 	WARN("   [WARN]: Ignoring unsupported RPM option type -> $option\n");
