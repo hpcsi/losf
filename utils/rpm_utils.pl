@@ -155,6 +155,10 @@ sub verify_custom_rpms {
 	}
 
 	$rpm_options = $install_method . $rpm_options;
+	
+	# We always use --nosig as well as we frequently don't import keys to computes
+
+	$rpm_options = $rpm_options . "--nosignature";
 
 	DEBUG("   --> rpm_options = $rpm_options\n");
 	DEBUG("   --> Checking $rpm_array[0]\n");
@@ -209,17 +213,18 @@ sub verify_custom_rpms {
     }
 
     if( $count == 0 ) {
-#	print color 'green'; 
 	print "   --> "; 
 	print color 'green';
 	print "OK";
 	print color 'reset';
 	print ": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
-#	print "   --> OK: Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
 	return;
     } else {
-	INFO("   --> FAILED: A total of $count custom rpm(s) need updating\n");
-
+	print "   --> ";
+	print color 'red';
+	print "FAILED";
+	print color 'reset';
+	print ": A total of $count custom rpm(s) need updating for $appliance\n";
     }
 
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).

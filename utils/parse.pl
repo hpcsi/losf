@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
+# Copyright (C) 2007-2012 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -378,7 +378,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
 
-	INFO("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
+	DEBUG("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
 
 	if ( ! $local_custom_cfg->SectionExists("Custom Packages") ) {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");

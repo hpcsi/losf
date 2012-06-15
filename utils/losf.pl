@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007,2008,2009,2010,2011 Karl W. Schulz
+# Copyright (C) 2007-2012 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -625,8 +625,9 @@ sub add_custom_rpm {
 
     # Read relevant configfile for custom packages
 
-    INFO("   Reading Custom package config file -> $osf_config_dir/custom-packages/".
-	 "$node_cluster/packages.config\n");
+    INFO("\n");
+    INFO("   --> Reading Custom package config file:\n");
+    INFO("       --> $osf_config_dir/custom-packages/$node_cluster/packages.config\n");
 
     my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$appliance);
 
