@@ -24,7 +24,6 @@ require "$osf_utils_dir/header.pl";
 # Initialization
 #---------------
 
-
 my $logr = get_logger();
 
 verify_sw_dependencies(); $logr->level($ERROR);
@@ -46,7 +45,7 @@ chomp(my $host_name=`hostname -s`);
 (my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
 
 $logr->level($INFO);
-INFO("\nRPM_TOPDIR = $rpm_topdir\n");
+DEBUG("\nRPM_TOPDIR = $rpm_topdir\n");
 
 1;
-#exit 0;
+

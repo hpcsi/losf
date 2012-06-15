@@ -96,7 +96,12 @@ sub verify_rpms {
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
 
     if( @rpms_to_install eq 0 ) {
-	INFO("   --> OK: OS packages in sync ($num_rpms rpms checked)\n");
+	print "   --> "; 
+	print color 'green';
+	print "OK";
+	print color 'reset';
+	print ": OS packages in sync ($num_rpms rpms checked)\n";
+#	INFO("   --> OK: OS packages in sync ($num_rpms rpms checked)\n");
 	return;
     }
 
@@ -156,9 +161,10 @@ sub verify_custom_rpms {
 
 	$rpm_options = $install_method . $rpm_options;
 	
-	# We always use --nosig as well as we frequently don't import keys to computes
+	# We always use --nosignature as well since we frequently
+	# don't import keys to computes; include --hash for visual feedback
 
-	$rpm_options = $rpm_options . "--nosignature";
+	$rpm_options = $rpm_options . "--nosignature --hash -v";
 
 	DEBUG("   --> rpm_options = $rpm_options\n");
 	DEBUG("   --> Checking $rpm_array[0]\n");

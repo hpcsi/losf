@@ -66,6 +66,8 @@ BEGIN {
 	     "$output_mode" eq "WARN"  ||
 	     "$output_mode" eq "DEBUG" ) {
 	    $logr->level($output_mode);
+	} else {
+	    $logr->level($ERROR);
 	}
 
 	#$logr->level($DEBUG);

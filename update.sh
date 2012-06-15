@@ -31,7 +31,14 @@ export UPDATE_RPMS=1
 # End Inputs -------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+export PERL5LIB=$TOP_DIR/utils
 export MYHOST=`hostname -s`
+
+#----------------------------------------------------------------
+# Perform LosF updates (todo, handle PXE arguments appropriately)
+#----------------------------------------------------------------
+
+$TOP_DIR/utils/update.pl 
 
 #-------------------
 # Query node type
@@ -51,20 +58,25 @@ if [ x"$BASENAME" == "x" -o x"$CLUSTER" == "x" ];then
     echo " "
     exit 1
 else
+
+
+
     if [ -x $TOP_DIR/update.$CLUSTER ];then
 	echo " "
-	echo "Performing Updates for $CLUSTER -> $BASENAME node type"
+	echo "Running update.$CLUSTER to perform local customizations for $CLUSTER -> $BASENAME node type"
 	echo " "
+
 	$TOP_DIR/update.$CLUSTER $@
-    else
-	echo " "
-	echo "[Warning]: Unable to perform updates"
-	echo "[Warning]: $TOP_DIR/update.$CLUSTER is not present or executable"
-	echo " "
-	echo "Please create necessary file to perform desired software updates."
-	echo " "
-	exit 1
     fi
+###    else
+###	echo " "
+###	echo "[Warning]: Unable to perform updates"
+###	echo "[Warning]: $TOP_DIR/update.$CLUSTER is not present or executable"
+###	echo " "
+###	echo "Please create necessary file to perform desired software updates."
+###	echo " "
+###	exit 1
+###    fi
 fi
 
 

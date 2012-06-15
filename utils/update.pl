@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/perl
 #-----------------------------------------------------------------------bl-
 #--------------------------------------------------------------------------
 # 
@@ -22,15 +22,45 @@
 #
 #-----------------------------------------------------------------------el-
 #
-# Wrapper for OS package syncing utility.
+# Top-level update utility: used to synchronize all packages and
+# config files for local node type.
 #
-# $Id: sync_config_files 534 2011-01-18 15:16:12Z karl $
+# $Id$
 #--------------------------------------------------------------------------
 
-export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
-export PERL5LIB=$TOP_DIR/utils
+use strict;
+use OSF_paths;
 
-$TOP_DIR/utils/verify_os_packages.pl
+use File::Basename;
+use File::Compare;
+use File::Copy;
+use File::Temp qw(tempfile);
 
+use lib "$osf_log4perl_dir";
+use lib "$osf_ini4perl_dir";
+use lib "$osf_utils_dir";
 
+# Default logging is set to ERROR
+
+#$ENV{OSF_ECHO_MODE}="ERROR";
+
+#my $logr = get_logger();
+#$logr->level($ERROR);
+
+use node_types;
+use utils;
+
+require "$osf_utils_dir/sync_config_utils.pl";
+
+my $logr = get_logger();
+$logr->level($ERROR);
+
+parse_and_sync_os_packages();
+parse_and_sync_custom_packages();
+parse_and_sync_const_files();
+parse_and_sync_softlinks();
+parse_and_sync_services();
+parse_and_sync_permissions();
+
+1;
 

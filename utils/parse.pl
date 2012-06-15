@@ -354,7 +354,7 @@ BEGIN {
 #	INFO("   --> \# of files defined = $num_files\n");
 
 	if($local_os_cfg->exists("OS Packages",$node_type)) {
-	    INFO("   --> OS packages defined for node type = $node_type\n");
+	    DEBUG("   --> OS packages defined for node type = $node_type\n");
 	    @rpms_defined = $local_os_cfg->val("OS Packages",$node_type);
 
 	    foreach $rpm (@rpms_defined) {
@@ -378,7 +378,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
 
-	DEBUG("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
+	INFO("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
 
 	if ( ! $local_custom_cfg->SectionExists("Custom Packages") ) {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
