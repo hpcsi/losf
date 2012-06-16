@@ -680,6 +680,20 @@ sub add_custom_rpm {
 
     }
 
+    # Verify this rpm is available in default LosF location
+
+    (my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
+
+    if(! -d "$rpm_topdir/$rpm_arch" ) {
+	INFO("  --> Creating rpm housing directory: $rpm_topdir/$rpm_arch");
+	mkdir("$rpm_topdir/$rpm_arch",0700) || MYERROR("Unable to create rpm directory: $rpm_topdir/$rpm_arch");
+    }
+
+    if ( ! -e "$rpm_topdir/$rpm_arch/$basename" )  {
+	INFO("   --> Copying package to default RPM config dir: $rpm_topdir/$rpm_arch\n");
+	copy($package,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename");
+    }
+
     SYSLOG("User requested addition of custom RPM: $basename (type=$appliance)");
 
     # Update LosF config to include desired custom package
@@ -702,6 +716,8 @@ sub add_custom_rpm {
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
+
+
 
     end_routine();
     return;
@@ -753,7 +769,7 @@ switch ($command) {
 	my $nodetype = "local";
 
 	if(@relocate_options) {
-	    $options = "RELOCATABLE:$relocate_options[0]:$relocate_options[1]";
+	    $options = "RELOCATE:$relocate_options[0]:$relocate_options[1]";
 	}
 
 	if($all) {

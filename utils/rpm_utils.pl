@@ -346,6 +346,10 @@ sub rpm_arch_from_filename {
 	$config_arch = "i386"; 
     } elsif( $rpm =~ /^\S+.i686$/ ) {
 	$config_arch = "i686"; 
+    } elsif( $rpm =~ /^\S+.486$/ ) {
+	$config_arch = "i486"; 
+    } elsif( $rpm =~ /^\S+.586$/ ) {
+	$config_arch = "i586"; 
     } elsif( $rpm =~ /^\S+.noarch$/ ) {
 	$config_arch = "noarch"; 
     } else {
@@ -403,13 +407,15 @@ sub validate_rpm_option {
     my $option = shift;
     my $rpm_mapping = "";
 
+    INFO("Validating rpm option = $option\n");
+
     if( $option eq "NODEPS" )  {
 	end_routine;
 	return("--nodeps ");
     } elsif ( $option eq "IGNORESIZE" ) {
 	end_routine;
 	return("--ignoresize ");
-    } elsif ( $option =~ "m/RELOCATE:(\S+):(\S+)" ) {
+    } elsif ( $option =~ m/RELOCATE:(\S+):(\S+)/ ) {
 	end_routine;
 	return("--relocate $1=$2 ");
     } else {
