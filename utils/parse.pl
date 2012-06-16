@@ -319,7 +319,7 @@ BEGIN {
 	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		if ( "$myval" eq "yes" ) {
-		    INFO("   --> Sync defined for $_\n");
+		    DEBUG("   --> Sync defined for $_\n");
 		    push(@sync_files,$_);
 		}
 	    } else {
@@ -426,7 +426,7 @@ BEGIN {
 	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		if ( "$myval" eq "partial" ) {
-		    INFO("   --> Partial sync defined for $_\n");
+		    DEBUG("   --> Partial sync defined for $_\n");
 		    push(@sync_partials,$_);
 		}
 	    } else {
@@ -628,7 +628,7 @@ BEGIN {
 	my $logr    = get_logger();
 	my $found   = 0;
 
-	INFO("--> Looking for top-level rpm dir...($cluster)\n");
+	INFO("   --> Looking for top-level rpm dir...($cluster)\n");
 
 	if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir_$type")) ) {
 	    DEBUG("--> Read node specific topdir = $rpm_topdir\n");
