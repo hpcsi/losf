@@ -237,6 +237,12 @@ sub expand_individual_macro {
 
     @expand_text = <$TEMPLATE>;
 
+    # update text with any other supported macro's
+
+    foreach(@expand_text) {
+	s/\@losf_synced_file_location\@/$file_in/
+    }
+
     while( $line = <$IN>) {
 	if( $line =~ m/$keyword/ ) {
 	    DEBUG(   "--> found a text macro...\n");
