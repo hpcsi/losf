@@ -59,7 +59,6 @@ sub verify_rpms {
     foreach $rpm (@rpm_list) {
 	DEBUG("   --> Checking $rpm\n");
 
-
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
@@ -169,6 +168,7 @@ sub verify_custom_rpms {
 	DEBUG("   --> rpm_options = $rpm_options\n");
 	DEBUG("   --> Checking $rpm_array[0]\n");
 
+
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
@@ -185,7 +185,8 @@ sub verify_custom_rpms {
 	}
 
 	my @desired_rpm   = rpm_version_from_file($filename);
-	my @installed_rpm = is_rpm_installed     ($rpm_array[0],$arch);
+#	my @installed_rpm = is_rpm_installed     ($rpm_array[0],$arch);
+	my @installed_rpm = is_rpm_installed     ("$desired_rpm[0]-$desired_rpm[1]",$arch);
 
 	# Decide if we need to install. Note that we build up arrays
 	# of rpms to install on a per-rpm-option-combination basis.
@@ -339,6 +340,12 @@ sub rpm_arch_from_filename {
 
     my $rpm = shift;
     my $config_arch;
+
+    # Trim suffix of .rpm 
+
+#    if ($rpm =~ m/(\S+).rpm$/ ) {
+#	$rpm = $1;
+#    }
 
     if( $rpm =~ /^\S+.x86_64$/ ) {
 	$config_arch = "x86_64"; 
