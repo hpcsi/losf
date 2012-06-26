@@ -1,5 +1,12 @@
-Version 0.33.0  (In Progress)
+Version 0.40.0  (In Progress)
 
+  * addition new options to losf command-line utility (see "losf --help" for more info)
+  * re-factorization of OS packages, use "losf addpkg" to register OS distro packages
+  * re-facttorization of custom packages, use "losf addrpm" to add custom RPMs
+  * added support for customization of relocatable rpms
+  * added top-level update alias, can extend normal funnctionality with the presence 
+    of a update.<Cluster> shell script
+  * added support for custom rpm aliases which can be reused across various node types
   * added capability to define local rpm source repositories on a per-appliance basis
   * bug fix for chassis-only koomie_cf command launching
 

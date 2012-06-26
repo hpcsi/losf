@@ -63,7 +63,7 @@ else
 
     if [ -x $TOP_DIR/update.$CLUSTER ];then
 	echo " "
-	echo "Running update.$CLUSTER to perform local customizations for $CLUSTER -> $BASENAME node type"
+	echo "Running update.$CLUSTER to perform local customizations for $BASENAME node type"
 	echo " "
 
 	$TOP_DIR/update.$CLUSTER $@
