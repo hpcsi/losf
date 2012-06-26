@@ -111,7 +111,7 @@ BEGIN {
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%sync_files) ) {
-	    DEBUG("   --> $key => $value\n");
+	    INFO("   --> $key => $value\n");
 	    sync_soft_link_file($key,$value);
 	}
 
@@ -230,7 +230,12 @@ BEGIN {
 		print "\n"; 
 	    }
 	} else {
-	    ERROR("   --> FAILED: [$basename] Differences found: requires syncing ");
+	    print "   --> "; 
+	    print color 'red';
+	    print "FAILED";
+	    print color 'reset';
+	    print ": [$basename] Differences found: requires syncing";
+#	    ERROR("   --> FAILED: [$basename] Differences found: requires syncing ");
 
 	    if($customized) { 
 		print "(using custom config for $host_name)\n";
@@ -726,17 +731,26 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
 
-	my @custom_rpms = ();
+	my %custom_aliases = ();
+	my @custom_rpms    = ();
+
+	INFO("\n");
+
+	# (0) read aliases for later use in custom rpms
+
+	%custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+	ERROR("   --> number of custom aliases defined = ".keys(%custom_aliases)."\n");
 
 	# (1) verify packages for ALL node types
 
-	INFO("\n");
-	@custom_rpms = query_cluster_config_custom_packages($node_cluster,"ALL");
+	my $ALL_type = "ALL";
+
+	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$ALL_type);
 	foreach my $rpm (@custom_rpms) {
 	    DEBUG("   --> Custom rpm for ALL = $rpm\n");
 	}
 
-	verify_custom_rpms("ALL",@custom_rpms);
+	verify_custom_rpms(\$ALL_type,\@custom_rpms,\%custom_aliases);
 
 	# (2) verify packages for current node types
 	
@@ -748,7 +762,7 @@ BEGIN {
 	    DEBUG("   --> Custom rpm = $rpm\n");
 	}
 
-	verify_custom_rpms($node_type,@custom_rpms);
+	verify_custom_rpms(\$node_type,\@custom_rpms,\%custom_aliases);
 
 	end_routine();
     }

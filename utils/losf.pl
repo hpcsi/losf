@@ -92,7 +92,9 @@ sub usage {
     print "     addrpm <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --all                              Add rpm for all node types\n";
+    print "        --all                              Add rpm for all node types (valid for addrpm)\n";
+    print "        --yes                              Assume \"yes\" for interactive additions\n";
+    print "        --alias    [name]                  Add rpm to alias with given name\n";
     print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
 
     print "\n";
@@ -588,9 +590,9 @@ sub add_custom_rpm {
     my $package          = shift;
     my $node_config_type = shift;
     my $options          = shift;
+    my $alias            = shift;
 
-    my $basename = basename($package);
-
+    my $basename  = basename($package);
     my $appliance = $node_config_type;
 
     if ( $node_config_type eq "local" ) {
@@ -614,7 +616,11 @@ sub add_custom_rpm {
     INFO("   --> Cluster = $node_cluster, Node Type = $appliance\n");
     INFO("\n");
     INFO("   --> Would you like to add $basename \n");
-    INFO("       to your local LosF config for $node_cluster:".$appliance." nodes?\n\n");
+    if( $alias ne "" ) {
+	INFO("       to the alias \"$alias\" for $node_cluster?\n\n");
+    } else {
+	INFO("       to your local LosF config for $node_cluster:".$appliance." nodes?\n\n");
+    }
 
     my $response = ask_user_for_yes_no("Enter yes/no to confirm (or -1 to add to multiple node types): ",2);
 
@@ -629,7 +635,13 @@ sub add_custom_rpm {
     INFO("   --> Reading Custom package config file:\n");
     INFO("       --> $osf_config_dir/custom-packages/$node_cluster/packages.config\n");
 
-    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$appliance);
+    my @custom_rpms = {};
+
+    if( $alias ne "" ) {
+	@custom_rpms = query_cluster_config_custom_aliases($node_cluster);
+    } else {
+	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$appliance);
+    }
 
     foreach $rpm (@custom_rpms) {
 	DEBUG("   --> Existing custom rpm = $rpm\n");
@@ -671,11 +683,30 @@ sub add_custom_rpm {
 
     if (! $is_configured ) {
 	INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
-	
-	if($local_custom_cfg->exists("Custom Packages","$appliance")) {
-	    $local_custom_cfg->push("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
+
+	my $config_name = $basename;
+
+	# Trim suffix of .rpm 
+
+	if ($basename =~ m/(\S+).rpm$/ ) {
+	    $config_name = $1;
+	}
+
+	if($alias ne "" ) {
+	    if($local_custom_cfg->exists("Custom Packages/Aliases","$alias")) {
+		$local_custom_cfg->push("Custom Packages/Aliases",$alias,"$config_name $md5sum $default_options");
+	    } else {
+		$local_custom_cfg->newval("Custom Packages/Aliases",$alias,"$config_name $md5sum $default_options");
+	    }
 	} else {
-	    $local_custom_cfg->newval("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
+
+	    if($local_custom_cfg->exists("Custom Packages","$appliance")) {
+#	        $local_custom_cfg->push("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
+		$local_custom_cfg->push("Custom Packages",$appliance,"$config_name $md5sum $default_options");
+	    } else {
+#	        $local_custom_cfg->newval("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
+		$local_custom_cfg->newval("Custom Packages",$appliance,"$config_name $md5sum $default_options");
+	    }
 	}
 
     }
@@ -728,7 +759,8 @@ sub add_custom_rpm {
 # Main front-end for losf command-line tool
 #-------------------------------------------
 
-GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all);
+GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,
+	   'alias=s' => \$alias_option,'yes' => \$assume_yes);
 
 # Command-line parsing
 
@@ -767,19 +799,27 @@ switch ($command) {
 
 	my $options  = "";
 	my $nodetype = "local";
+	my $alias    = "";
 
 	if(@relocate_options) {
 	    $options = "RELOCATE:$relocate_options[0]:$relocate_options[1]";
+	}
+
+	if($alias_option) {
+	    $alias = $alias_option;
 	}
 
 	if($all) {
 	    $nodetype = "ALL";
 	}
 
-	print "options=$options\n";
-	add_custom_rpm  ($argument,$nodetype,$options);
+	if($assume_yes) {
+	    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
+	}
+
+	add_custom_rpm  ($argument,$nodetype,$options,$alias);
     }
-    
+
     print "\n[Error]: Unknown command received-> $command\n";
 
     usage();

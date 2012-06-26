@@ -398,6 +398,37 @@ BEGIN {
 	return(@rpms_defined);
     }
 
+    sub query_cluster_config_custom_aliases {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $logr          = get_logger();
+	my @aliases       = ();
+
+	INFO("   --> Looking for Custom aliases...($cluster)\n");
+
+	if ( ! $local_custom_cfg->SectionExists("Custom Packages/Aliases") ) {
+	    MYERROR("No Input section found for cluster $cluster [Custom Packages/Aliases]\n");
+	} 
+
+	@aliases = $local_custom_cfg->Parameters("Custom Packages/Aliases");
+
+	# We have an array for all defined aliases, now hash the rpms for each alias
+
+	my %alias_rpms = ();
+
+	foreach $alias (@aliases) {
+	    if(defined ( @myvals = $local_custom_cfg->val("Custom Packages/Aliases",$alias)) ) {
+		foreach $rpm (@myvals) {
+		    push(@{$alias_rpms{$alias}},$rpm);
+		}
+	    }
+	}
+
+	end_routine();
+	return(%alias_rpms);
+    }
 
     sub query_cluster_config_partial_sync_files {
 
@@ -447,29 +478,48 @@ BEGIN {
 	my $host           = shift;
 		          
 	my $logr           = get_logger();
-#	my @sync_softlinks = ();
 	my %sync_softlinks = ();
+
+	my @defined_files  = ();
+	my $section        = ();
 
 	INFO("   --> Looking for defined soft links to sync...($cluster->$host)\n");
 
-	if ( ! $local_cfg->SectionExists("SoftLinks") ) {
-	    WARN("No Input section found for cluster $cluster [SoftLinks]\n");
-	}
+	if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
+	    $section = "SoftLinks";
 
-	my @defined_files = $local_cfg->Parameters("SoftLinks");
+	    if ( ! $local_cfg->SectionExists($section) ) {
+		WARN("No global softlinks defined for cluster $cluster\n");
+		return(%sync_softlinks);
+#		MYERROR("No Input section found for cluster $cluster [Services]\n");
+	    }
+
+	    @defined_files = $local_cfg->Parameters($section);
+	} else {
+	    $section = "SoftLinks/$host";
+
+	    if ( ! $local_cfg->SectionExists($section) ) {
+		WARN("No node type specific softlinks defined for cluster $cluster ($host)\n");
+		return(%sync_softlinks);
+#		MYERROR("No Input section found for cluster $cluster [Services]\n");
+	    }
+
+	    @defined_files = $local_cfg->Parameters($section);
+	}
 
 	my $num_files = @defined_files;
 
 	INFO("   --> \# of soft links defined = $num_files\n");
 
 	foreach(@defined_files) {
-	    DEBUG("   --> Read value for $_\n");
-	    if (defined ($myval = $local_cfg->val("SoftLinks",$_)) ) {
-		DEBUG("   --> Value = $myval\n");
+	    INFO("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val($section,$_)) ) {
+		INFO("   --> Value = $myval\n");
 		$sync_softlinks{$_} = $myval;
 #		push(@sync_softlinks,$_);
 	    }
 	}
+
 
 	end_routine();
 	return(%sync_softlinks);

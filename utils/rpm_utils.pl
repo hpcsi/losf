@@ -132,17 +132,50 @@ sub verify_rpms {
 sub verify_custom_rpms {
     begin_routine();
 
-    my $appliance       = shift;
-    my @rpm_list        = @_;
+    my $appliance_ref = shift;
+    my $rpm_ref       = shift;
+    my $alias_ref     = shift;
+
+    my $appliance = $$appliance_ref;
+    my @rpm_list  = @$rpm_ref;
+    my %aliases   = %$alias_ref;
+
+    my @rpm_list_start = @rpm_list;
+
+#    my $appliance       = shift;
+#    my @rpm_list        = @_;
+#    my %aliases         = shift;
+
     my %rpms_to_install = ();
     my $num_rpms        = @rpm_list;
-
 
     if($num_rpms < 1) { return; }
 
     INFO("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
 
+    # Resolve any group aliases
+
     foreach $rpm (@rpm_list) {
+	if( $rpm =~ m/^@(\S+)/ ) {
+	    my $group = $1;
+	    DEBUG("   --> rpm group requested -> $group\n");
+
+	    if( ! exists $aliases{$group} ) {
+		MYERROR("   --> Alias $group requested but not defined\n");
+	    }
+
+	    # replace  @group with defined rpms
+
+	    foreach $rpm_group (@{$aliases{$group}}) {
+		INFO("   --> adding $rpm_group for $appliance\n");
+		push(@rpm_list,$rpm_group);
+	    }
+	}
+    }
+
+    foreach $rpm (@rpm_list) {
+
+	if( $rpm =~ m/^@(\S+)/ ) { next; } # @groups names have already been expanded, skip this @group
 
 	my @rpm_array  = split(/\s+/,$rpm);
 
@@ -376,9 +409,10 @@ sub verify_expected_md5sum {
     my $local_md5 = md5sum_file($file);
 
     if($md5 ne $local_md5) {
-	ERROR  ("RPM md5sums to not match for $file\n");
-	ERROR  (" --> desired    = $md5\n");
-	MYERROR(" --> local file = $md5\n");
+	ERROR  ("   --> RPM md5sums do not match for $file\n");
+	ERROR  ("       --> desired    = $md5\n");
+	ERROR  ("       --> local      = $local_md5\n\n");
+	MYERROR("FAILED: Aborting install\n");
     }
 
     return;
