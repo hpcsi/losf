@@ -853,7 +853,7 @@ sub show_defined_aliases {
     my %custom_aliases = ();
 
     INFO("\n");
-    INFO("Querying locally defined aliases for Cluster:$node_cluster:\n");
+    INFO("Querying locally defined aliases for Cluster:$node_cluster\n");
 
     %custom_aliases = query_cluster_config_custom_aliases($node_cluster);
 
