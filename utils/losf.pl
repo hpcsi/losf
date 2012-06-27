@@ -63,8 +63,8 @@ sub usage {
     print "  Host Registration:\n";
     print color 'reset';
 
-    print "     add [host]               Register a new host for provisioning\n";
-    print "     del [host]               Delete an existing host\n";
+    print "     add [host]                  Register a new host for provisioning\n";
+    print "     del [host]                  Delete an existing host\n";
     print "\n";
 
     print color 'bold blue';
@@ -75,10 +75,10 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
 
-    print "     addpkg    [package]      Add new OS package (and dependencies)\n";
-    print "     delpkg    [package]      Remove previously added OS package\n";
+    print "     addpkg    [package]         Add new OS package (and dependencies)\n";
+    print "     delpkg    [package]         Remove previously added OS package\n";
 #    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
-    print "     addgroup  [group]        Add new OS group (and dependencies)\n";
+    print "     addgroup  [group]           Add new OS group (and dependencies)\n";
     print "\n";
 
     print color 'bold blue';
@@ -89,13 +89,19 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
 
-    print "     addrpm <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
+    print "     addrpm    <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
+    print "     addalias  <OPTIONS> [alias] Add a new alias for current node type\n";
+    print "     showalias                   Show all currently defined aliases\n";
     print "\n";
     print "     OPTIONS:\n";
     print "        --all                              Add rpm for all node types (valid for addrpm)\n";
     print "        --yes                              Assume \"yes\" for interactive additions\n";
-    print "        --alias    [name]                  Add rpm to alias with given name\n";
-    print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
+    print "        --alias    [name]                  Add rpm to alias with given name (addrpm)\n";
+    print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm (addrpm)\n";
+
+    print "\n";
+
+
 
     print "\n";
 }
@@ -754,6 +760,116 @@ sub add_custom_rpm {
     return;
 } # end sub add_custom_rpm
 
+sub register_alias {
+
+    begin_routine();
+    my $alias            = shift;
+    my $node_config_type = shift;
+
+    my $appliance = $node_config_type;
+
+    if ( $node_config_type eq "local" ) {
+	$appliance = $node_type;
+    } 
+	
+    INFO("\n** Checking on possible addition of custom RPM alias: $alias\n");
+
+    INFO("   --> Cluster = $node_cluster, Node Type = $appliance\n");
+    INFO("\n");
+    INFO("   --> Would you like to add $alias \n");
+    INFO("       to your local LosF config for $node_cluster:".$appliance." nodes?\n\n");
+
+    my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
+
+    if( $response == 0 ) {
+	INFO("   --> Did not add $alias to LosF config, terminating....\n");
+	exit(-22);
+    } 
+
+    # Read relevant configfile for custom packages
+
+    INFO("\n");
+    INFO("   --> Reading Custom package config file:\n");
+    INFO("       --> $osf_config_dir/custom-packages/$node_cluster/packages.config\n");
+
+    my @custom_rpms = {};
+
+    @custom_rpms    = query_cluster_config_custom_packages($node_cluster,$appliance);
+
+    # check to see if alias is already registered
+
+    foreach $rpm (@custom_rpms) {
+	if( $rpm =~ m/^@(\S+)/ ) {
+	    my $group = $1;
+	    if( "$group" eq "$alias" )  {
+		INFO("       --> $alias already configured - ignoring addition request\n");
+		$is_configured = 1;
+		return;
+	    }
+	}
+    }
+
+    if (! $is_configured ) {
+	INFO("       --> $alias not previously configured - Registering for addition\n"); 
+
+	if($local_custom_cfg->exists("Custom Packages","$node_type")) {
+	    $local_custom_cfg->push("Custom Packages",$appliance,"@"."$alias");
+	} else {
+	    $local_custom_cfg->newval("Custom Packages",$appliance,"@"."$alias");
+	}
+    }
+
+    SYSLOG("User requested addition of custom RPM alias: $alias (type=$appliance)");
+
+    # Update LosF config to include desired custom package
+
+    my $new_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config";
+
+    $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+
+    if ( compare($new_file,$ref_file) != 0 ) {
+	my $timestamp=`date +%F:%H:%M`;
+	chomp($timestamp);
+	print "   --> Updating Custom RPM config file...\n";
+	rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unable to save previous OS config file\n");
+	rename($new_file,$ref_file)                || MYERROR("Unable to update OS config file\n");
+	print "\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect\n";
+    } else {
+	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+    }
+
+    end_routine();
+    return;
+} # end sub register_alias
+
+sub show_defined_aliases {
+
+    begin_routine();
+
+    my %custom_aliases = ();
+
+    INFO("\n");
+    INFO("Querying locally defined aliases for Cluster:$node_cluster:\n");
+
+    %custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+
+    foreach my $group ( keys %custom_aliases) {
+	my $group_size =  @{$custom_aliases{$group}};
+	INFO("   --> $group ($group_size ");
+	if($group_size == 1) {
+	    INFO("package)\n");
+	} else {
+	    INFO("packages)\n");
+	}
+    }
+
+    end_routine();
+    return;
+} # end sub show_defined_aliases()
 
 #-------------------------------------------
 # Main front-end for losf command-line tool
@@ -764,9 +880,11 @@ GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,
 
 # Command-line parsing
 
-if (@ARGV >= 2) {
+if (@ARGV >= 1) {
     $command  = shift@ARGV;
-    $argument = shift@ARGV;
+    if(@ARGV >= 1) {
+	$argument = shift@ARGV;
+    }
 } else {
     usage();
     exit(1);
@@ -793,6 +911,26 @@ switch ($command) {
 
     case "addpkg"   { add_distro_package($argument) };
     case "addgroup" { add_distro_group  ($argument) };
+    case "showalias"{ show_defined_aliases()        };
+    case "addalias" { 
+
+	# parse any additional options used with addalias
+
+	my $nodetype = "local";
+
+	if($all) {
+	    $nodetype = "ALL";
+	}
+
+	if($assume_yes) {
+	    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
+	}
+
+	print "my argument = $argument\n";
+
+	register_alias  ($argument,$nodetype);
+
+    }
     case "addrpm"   { 
 
 	# parse any additional options used with addrpm

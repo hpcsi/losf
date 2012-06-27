@@ -140,12 +140,6 @@ sub verify_custom_rpms {
     my @rpm_list  = @$rpm_ref;
     my %aliases   = %$alias_ref;
 
-    my @rpm_list_start = @rpm_list;
-
-#    my $appliance       = shift;
-#    my @rpm_list        = @_;
-#    my %aliases         = shift;
-
     my %rpms_to_install = ();
     my $num_rpms        = @rpm_list;
 
@@ -153,7 +147,9 @@ sub verify_custom_rpms {
 
     INFO("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
 
-    # Resolve any group aliases
+    # Resolve any group aliases, we pop to the end of the array, so
+    # that multiple levels of alias resolution can be resolved (ie. an
+    # alias might include another alias)
 
     foreach $rpm (@rpm_list) {
 	if( $rpm =~ m/^@(\S+)/ ) {
@@ -167,11 +163,15 @@ sub verify_custom_rpms {
 	    # replace  @group with defined rpms
 
 	    foreach $rpm_group (@{$aliases{$group}}) {
-		INFO("   --> adding $rpm_group for $appliance\n");
+		INFO("   --> $group expansion - adding $rpm_group for $appliance\n");
 		push(@rpm_list,$rpm_group);
 	    }
 	}
     }
+
+    # reset num_rpms to account for alias expansion
+
+    $num_rpms = @rpm_list;    
 
     foreach $rpm (@rpm_list) {
 
@@ -218,7 +218,6 @@ sub verify_custom_rpms {
 	}
 
 	my @desired_rpm   = rpm_version_from_file($filename);
-#	my @installed_rpm = is_rpm_installed     ($rpm_array[0],$arch);
 	my @installed_rpm = is_rpm_installed     ("$desired_rpm[0]-$desired_rpm[1]",$arch);
 
 	# Decide if we need to install. Note that we build up arrays
@@ -272,6 +271,7 @@ sub verify_custom_rpms {
     foreach my $options (keys %rpms_to_install) {
 
 	my $local_count = @{$rpms_to_install{$options}};
+	print "\n";
 	INFO("   --> Using rpm_options = $options (number of rpms = $local_count)\n");
 	SYSLOG("Issuing transactions for $local_count rpm(s) ($options)");
 
@@ -288,7 +288,7 @@ sub verify_custom_rpms {
 	} else {
 	    SYSLOG("RPM install(s) successful");
 	}
-
+	print "\n";
     }
 
     end_routine();
@@ -448,7 +448,7 @@ sub validate_rpm_option {
     my $option = shift;
     my $rpm_mapping = "";
 
-    INFO("Validating rpm option = $option\n");
+    DEBUG("Validating rpm option = $option\n");
 
     if( $option eq "NODEPS" )  {
 	end_routine;

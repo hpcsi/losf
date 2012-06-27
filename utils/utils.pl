@@ -78,6 +78,13 @@ sub ask_user_for_yes_no {
     my $prompt   = shift;
     my $flag     = shift;
 
+    # Check environment variable which allows for user to assume yes.
+
+    if( $ENV{'LOSF_ALWAYS_ASSUME_YES'} ) {
+	INFO("Assuming yes for user interaction\n");
+	return 1;
+    }
+
     # Flag = 1 -> only look for yes/no responses
     # Flag = 2 -> lood for yes/no, and -1 responses
 

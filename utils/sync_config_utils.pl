@@ -739,7 +739,7 @@ BEGIN {
 	# (0) read aliases for later use in custom rpms
 
 	%custom_aliases = query_cluster_config_custom_aliases($node_cluster);
-	ERROR("   --> number of custom aliases defined = ".keys(%custom_aliases)."\n");
+	DEBUG("   --> number of custom aliases defined = ".keys(%custom_aliases)."\n");
 
 	# (1) verify packages for ALL node types
 

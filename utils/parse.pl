@@ -406,7 +406,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @aliases       = ();
 
-	INFO("   --> Looking for Custom aliases...($cluster)\n");
+	DEBUG("   --> Looking for Custom aliases...($cluster)\n");
 
 	if ( ! $local_custom_cfg->SectionExists("Custom Packages/Aliases") ) {
 	    MYERROR("No Input section found for cluster $cluster [Custom Packages/Aliases]\n");
