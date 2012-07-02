@@ -83,7 +83,7 @@ function verify_rpms
 	      
 	      if [ $ERASE_PREVIOUS -eq 1 ];then
 		  if [ $UPDATE_RPMS == 1 ];then
-		      rpm -ev --allmatches --ignoresize $PACKAGE
+		      rpm -ev --allmatches --nodeps --ignoresize $PACKAGE
 		  fi
 	      fi
 	  fi
@@ -149,7 +149,7 @@ function verify_rpms
 	      INSTALLED="$my_ver-$my_rel"
 
 	      export NOT_INSTALLED=`echo $INSTALLED | awk '{print $3}'`
-	      
+	      export NOT_INSTALLED=`rpm -q $PACKAGE-$VERSION | awk -F "$PACKAGE-" '{print $2}' | awk '{print $3}'`	      	      
 	      if [ "$VERBOSE" == 1 ];then
 		  echo "desired version   = $VERSION"
 		  echo "installed version = $INSTALLED"
