@@ -95,6 +95,7 @@ sub usage {
     print "\n";
     print "     OPTIONS:\n";
     print "        --all                              Add rpm for all node types (valid for addrpm)\n";
+    print "        --upgrade                          Upgrade previous rpm to new version provided\n";
     print "        --yes                              Assume \"yes\" for interactive additions\n";
     print "        --alias    [name]                  Add rpm to alias with given name (addrpm)\n";
     print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm (addrpm)\n";
@@ -662,22 +663,33 @@ sub add_custom_rpm {
     my $rpm_name    = $version_info[0];
     my $rpm_arch    = $version_info[3];
 
-    my $is_configured = 0;
-
+#    my $is_configured = 0;
+    my $is_upgrade = 0;
+    my $old_rpm    = "";
+    
     foreach $rpm (@custom_rpms) {
 	my @rpm_array  = split(/\s+/,$rpm);
-	if ($rpm_array[0] =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
-	    INFO("       --> $rpm_name already configured - ignoring addition request\n");
-	    $is_configured = 1;
-	    return;
+#	print "rpm_array[0] = $rpm_array[0]\n";
+#	print "looking to match $rpm_name-$version_info[1]\n";
+	
+#	if ($rpm_array[0] =~ /^$rpm_name-$version_info[1]-(\S+).($rpm_arch)$/ ) {
+	if ($rpm_array[0] =~ /^$rpm_name-(\S+)-(\S+).($rpm_arch)$/ ) {
+	    if( $ENV{'LOSF_REGISTER_UPGRADE'} ) {
+		$is_upgrade = 1;
+		$old_rpm    = $rpm_array[0];
+	    } else {
+		INFO("       --> $rpm_name already configured - ignoring addition request\n");
+		#$is_configured = 1;
+		return;
+	    }
 	}
     }
 
     # all custom rpm specifications must include md5 checksums; we
     # also provide default options to use --nodeps and --ignoresize
-
+    
     my $default_options = "NODEPS IGNORESIZE";
-
+    
     if( $options ne "" ) {
 	my @custom_options = split(/\s+/,$options);
 	foreach $opt (@custom_options) {
@@ -686,37 +698,66 @@ sub add_custom_rpm {
 	    $default_options = "$default_options "."$opt";
 	}
     }
-
-    if (! $is_configured ) {
-	INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
-
+    
+#    if (! $is_configured ) {
+	INFO("       --> $rpm_name not previously configured - registering for addition/upgrade\n"); 
+	
 	my $config_name = $basename;
-
+	
 	# Trim suffix of .rpm 
-
+	
 	if ($basename =~ m/(\S+).rpm$/ ) {
 	    $config_name = $1;
 	}
-
-	if($alias ne "" ) {
-	    if($local_custom_cfg->exists("Custom Packages/Aliases","$alias")) {
-		$local_custom_cfg->push("Custom Packages/Aliases",$alias,"$config_name $md5sum $default_options");
-	    } else {
-		$local_custom_cfg->newval("Custom Packages/Aliases",$alias,"$config_name $md5sum $default_options");
+	
+	# Update config file with new or upgraded package
+	
+	my $section = "Custom Packages";
+	my $name    = $node_config_type;
+	
+	if($alias ne "") { 
+	    $section = $section . "/Aliases";
+	    $name    = $alias;
+	}
+	
+	# Register updates for custom config input file
+	
+	if($is_upgrade) { 
+	    
+	    # Upgrade: since we are using arrays for input values, upgrade
+	    # means removing all values, and re-inserting desired values.
+	    
+	    INFO("       --> Removing previous entries for $name...\n");
+	    $local_custom_cfg->delval($section,$name);
+	    
+	    foreach $rpm_entry (@custom_rpms) {
+		my @rpm  = split(/\s+/,$rpm_entry);
+		if($rpm[0] eq $old_rpm ) {
+		    print "section = $section\n";
+		    print "name    = $name\n";
+		    if($local_custom_cfg->exists($section,$name)) {
+			$local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
+		    } else {
+			$local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
+		    }
+		    INFO("       --> Configured update for $config_name (previously $old_rpm)\n");
+		} else {
+		    INFO("       --> Restoring entry for $name ($rpm_entry)\n");
+		    if($local_custom_cfg->exists($section,$name)) {
+			$local_custom_cfg->push($section,$name,$rpm_entry); 
+		    } else { 
+			$local_custom_cfg->newval($section,$name,$rpm_entry); 
+		    }
+		}
 	    }
 	} else {
-
-	    if($local_custom_cfg->exists("Custom Packages","$appliance")) {
-#	        $local_custom_cfg->push("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
-		$local_custom_cfg->push("Custom Packages",$appliance,"$config_name $md5sum $default_options");
+	    if($local_custom_cfg->exists($section,$name)) {
+		$local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
 	    } else {
-#	        $local_custom_cfg->newval("Custom Packages",$appliance,"$rpm_package $md5sum $default_options");
-		$local_custom_cfg->newval("Custom Packages",$appliance,"$config_name $md5sum $default_options");
+		$local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
 	    }
 	}
-
-    }
-
+	
     # Verify this rpm is available in default LosF location
 
     (my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
@@ -875,7 +916,7 @@ sub show_defined_aliases {
 # Main front-end for losf command-line tool
 #-------------------------------------------
 
-GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,
+GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$upgrade,
 	   'alias=s' => \$alias_option,'yes' => \$assume_yes);
 
 # Command-line parsing
@@ -949,6 +990,10 @@ switch ($command) {
 
 	if($all) {
 	    $nodetype = "ALL";
+	}
+
+	if($upgrade) {
+	    $ENV{'LOSF_REGISTER_UPGRADE'} = '1';
 	}
 
 	if($assume_yes) {
