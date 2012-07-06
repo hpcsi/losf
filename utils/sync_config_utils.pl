@@ -662,7 +662,11 @@ BEGIN {
 		print ": $service is ON\n";
 #		print "   --> OK: $service is ON\n";
 	    } else {
-		print "   --> FAILED: disabling $service\n";
+		print "   --> "; 
+		print color 'red';
+		print "FAILED";
+		print color 'reset';
+		print ": disabling $service\n";
 		`/sbin/chkconfig $service off`;
 		`/etc/init.d/$service stop`;
 		chomp(my $setting=`/sbin/chkconfig --list $service`);
@@ -673,7 +677,11 @@ BEGIN {
 	} elsif ( $setting =~ m/3:off/ ) {
 	    DEBUG("   --> $service is OFF\n");
 	    if($enable_service) {
-		print "   --> FAILED: enabling $service\n";
+		print "   --> "; 
+		print color 'red';
+		print "FAILED";
+		print color 'reset';
+		print ": enabling $service\n";
 		`/sbin/chkconfig $service on`;
 		`/etc/init.d/$service start`;
 		chomp(my $setting=`/sbin/chkconfig --list $service`);

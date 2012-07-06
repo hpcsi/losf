@@ -699,64 +699,61 @@ sub add_custom_rpm {
 	}
     }
     
-#    if (! $is_configured ) {
-	INFO("       --> $rpm_name not previously configured - registering for addition/upgrade\n"); 
+    INFO("       --> $rpm_name not previously configured - registering for addition/upgrade\n"); 
 	
-	my $config_name = $basename;
+    my $config_name = $basename;
 	
-	# Trim suffix of .rpm 
+    # Trim suffix of .rpm 
+    
+    if ($basename =~ m/(\S+).rpm$/ ) {
+	$config_name = $1;
+    }
+    
+    # Update config file with new or upgraded package
+    
+    my $section = "Custom Packages";
+    my $name    = $appliance;
+    
+    if($alias ne "") { 
+	$section = $section . "/Aliases";
+	$name    = $alias;
+    }
+    
+    # Register updates for custom config input file
+    
+    if($is_upgrade) { 
 	
-	if ($basename =~ m/(\S+).rpm$/ ) {
-	    $config_name = $1;
-	}
+	# Upgrade: since we are using arrays for input values, upgrade
+	# means removing all values, and re-inserting desired values.
 	
-	# Update config file with new or upgraded package
+	DEBUG("       --> Removing previous entries for $name...\n");
+	$local_custom_cfg->delval($section,$name);
 	
-	my $section = "Custom Packages";
-	my $name    = $node_config_type;
-	
-	if($alias ne "") { 
-	    $section = $section . "/Aliases";
-	    $name    = $alias;
-	}
-	
-	# Register updates for custom config input file
-	
-	if($is_upgrade) { 
-	    
-	    # Upgrade: since we are using arrays for input values, upgrade
-	    # means removing all values, and re-inserting desired values.
-	    
-	    INFO("       --> Removing previous entries for $name...\n");
-	    $local_custom_cfg->delval($section,$name);
-	    
-	    foreach $rpm_entry (@custom_rpms) {
-		my @rpm  = split(/\s+/,$rpm_entry);
-		if($rpm[0] eq $old_rpm ) {
-		    print "section = $section\n";
-		    print "name    = $name\n";
-		    if($local_custom_cfg->exists($section,$name)) {
-			$local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
-		    } else {
-			$local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
-		    }
-		    INFO("       --> Configured update for $config_name (previously $old_rpm)\n");
+	foreach $rpm_entry (@custom_rpms) {
+	    my @rpm  = split(/\s+/,$rpm_entry);
+	    if($rpm[0] eq $old_rpm ) {
+		if($local_custom_cfg->exists($section,$name)) {
+		    $local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
 		} else {
-		    INFO("       --> Restoring entry for $name ($rpm_entry)\n");
-		    if($local_custom_cfg->exists($section,$name)) {
-			$local_custom_cfg->push($section,$name,$rpm_entry); 
-		    } else { 
-			$local_custom_cfg->newval($section,$name,$rpm_entry); 
-		    }
+		    $local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
+		}
+		    INFO("       --> Configured update for $config_name (previously $old_rpm)\n");
+	    } else {
+		DEBUG("       --> Restoring entry for $name ($rpm_entry)\n");
+		if($local_custom_cfg->exists($section,$name)) {
+		    $local_custom_cfg->push($section,$name,$rpm_entry); 
+		} else { 
+		    $local_custom_cfg->newval($section,$name,$rpm_entry); 
 		}
 	    }
-	} else {
-	    if($local_custom_cfg->exists($section,$name)) {
-		$local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
-	    } else {
-		$local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
-	    }
 	}
+    } else {
+	if($local_custom_cfg->exists($section,$name)) {
+	    $local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
+	} else {
+	    $local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
+	}
+    }
 	
     # Verify this rpm is available in default LosF location
 
