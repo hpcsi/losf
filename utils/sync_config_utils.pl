@@ -100,11 +100,12 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_soft_links == 0 ) {
-	    INFO("** Syncing soft links\n\n");
+	    #INFO("** Syncing soft links\n\n");
 	    $osf_sync_soft_links = 1;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
+	print "** Syncing soft links ($node_cluster:$node_type)\n";
 
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
@@ -113,6 +114,18 @@ BEGIN {
 	while ( my ($key,$value) = each(%sync_files) ) {
 	    INFO("   --> $key => $value\n");
 	    sync_soft_link_file($key,$value);
+	}
+
+	# Global soft link settings; any node-specific settings
+	# applied above are skipped
+
+	my %sync_files_global = query_cluster_config_softlink_sync_files($node_cluster,"LosF-GLOBAL-NODE-TYPE");
+
+	while ( my ($key,$value) = each(%sync_files_global) ) {
+	    INFO("   --> $key => $value\n");
+	    if ( ! exists $sync_files{$key} ) {
+		sync_soft_link_file($key,$value);
+	    }
 	}
 
 	end_routine();
@@ -505,10 +518,18 @@ BEGIN {
 		symlink("$target","$file") || 
 		    MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
 	    } else {
-		print "   --> OK: $file softlink in sync\n";
+		print "   --> "; 
+		print color 'green';
+		print "OK";
+		print color 'reset';
+		print ": $file softlink in sync\n";
 	    }
 	} else {
-	    print "  --> FAILED: Creating link between $file -> $target\n";
+	    print "   --> "; 
+	    print color 'red';
+	    print "FAILED";
+	    print color 'reset';
+	    print ": Creating link between $file -> $target\n";
 	    symlink("$target","$file") || 
 		MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
 	}

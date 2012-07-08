@@ -491,7 +491,6 @@ BEGIN {
 	    if ( ! $local_cfg->SectionExists($section) ) {
 		WARN("No global softlinks defined for cluster $cluster\n");
 		return(%sync_softlinks);
-#		MYERROR("No Input section found for cluster $cluster [Services]\n");
 	    }
 
 	    @defined_files = $local_cfg->Parameters($section);
@@ -501,7 +500,6 @@ BEGIN {
 	    if ( ! $local_cfg->SectionExists($section) ) {
 		WARN("No node type specific softlinks defined for cluster $cluster ($host)\n");
 		return(%sync_softlinks);
-#		MYERROR("No Input section found for cluster $cluster [Services]\n");
 	    }
 
 	    @defined_files = $local_cfg->Parameters($section);
