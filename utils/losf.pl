@@ -366,8 +366,9 @@ sub add_distro_package {
 		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
 		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
 #		    push(@rpms_to_update,$file);
-		    $is_configured = 1;
+#		    $is_configured = 1;
 		    last;
+#		    return;
 		}
 	    }
 
@@ -642,16 +643,25 @@ sub add_custom_rpm {
     INFO("   --> Reading Custom package config file:\n");
     INFO("       --> $osf_config_dir/custom-packages/$node_cluster/packages.config\n");
 
-    my @custom_rpms = {};
+    my @custom_rpms    = {};
+    my %custom_aliases = ();
 
     if( $alias ne "" ) {
-	@custom_rpms = query_cluster_config_custom_aliases($node_cluster);
+
+	# User is requesting modification of an alias; read existing
+	# aliases and build array of associated rpms
+
+	%custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+	if ( exists $custom_aliases{$alias} ) {
+	    INFO("       --> reading rpms for $alias alias....\n");
+	    @custom_rpms = @{$custom_aliases{$alias}};
+	}
     } else {
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$appliance);
     }
 
     foreach $rpm (@custom_rpms) {
-	DEBUG("   --> Existing custom rpm = $rpm\n");
+	INFO("   --> Existing custom rpm = $rpm\n");
     }
 
     # check RPM version for the custom package
@@ -669,10 +679,16 @@ sub add_custom_rpm {
     
     foreach $rpm (@custom_rpms) {
 	my @rpm_array  = split(/\s+/,$rpm);
+
+#	print "input rpm = $rpm\n";
 #	print "rpm_array[0] = $rpm_array[0]\n";
 #	print "looking to match $rpm_name-$version_info[1]\n";
 	
 #	if ($rpm_array[0] =~ /^$rpm_name-$version_info[1]-(\S+).($rpm_arch)$/ ) {
+#	print "rpm = $rpm\n";
+#	print "looking for $rpm_array[0]\n";
+#	print "name = $rpm_name\n";
+    
 	if ($rpm_array[0] =~ /^$rpm_name-(\S+)-(\S+).($rpm_arch)$/ ) {
 	    if( $ENV{'LOSF_REGISTER_UPGRADE'} ) {
 		$is_upgrade = 1;
