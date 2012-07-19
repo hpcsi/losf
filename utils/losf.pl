@@ -332,7 +332,7 @@ sub add_distro_package {
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
-	INFO("   Reading OS package config file -> $osf_config_dir/OS-packages."."$node_cluster\n");
+	INFO("   Reading OS package config file -> $osf_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
@@ -354,15 +354,17 @@ sub add_distro_package {
 	foreach $file (@newfiles) {
 	    my @version_info = rpm_version_from_file($file);
 	    my $rpm_package  = rpm_package_string_from_header(@version_info);
+
 	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
 
 	    my $rpm_name    = $version_info[0];
-	    my $rpm_version = $version_info[1]-$version[2];
+###	    my $rpm_version = $version_info[1]."-".$version_info[2];
 	    my $rpm_arch    = $version_info[3];
 
 	    my $is_configured = 0;
 
 	    foreach $rpm (@os_rpms) {
+
 		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
 		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
 #		    push(@rpms_to_update,$file);
@@ -524,7 +526,7 @@ sub add_distro_group {
 	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
 
 	    my $rpm_name    = $version_info[0];
-	    my $rpm_version = $version_info[1]-$version[2];
+###	    my $rpm_version = $version_info[1]-$version_info[2];
 	    my $rpm_arch    = $version_info[3];
 
 	    my $is_configured = 0;
