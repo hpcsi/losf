@@ -94,11 +94,11 @@ sub usage {
     print "     showalias                   Show all currently defined aliases\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --all                              Add rpm for all node types (valid for addrpm)\n";
+    print "        --all                              Add rpm for all node types\n";
     print "        --upgrade                          Upgrade previous rpm to new version provided\n";
     print "        --yes                              Assume \"yes\" for interactive additions\n";
-    print "        --alias    [name]                  Add rpm to alias with given name (addrpm)\n";
-    print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm (addrpm)\n";
+    print "        --alias    [name]                  Add rpm to alias with given name\n";
+    print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
 
     print "\n";
 
@@ -987,7 +987,7 @@ switch ($command) {
 ###	register_alias  ($argument,$nodetype);
 ###
 ###    }
-###    case "addrpm"   { 
+    case "addrpm"   { 
 
 	# parse any additional options used with addrpm
 
