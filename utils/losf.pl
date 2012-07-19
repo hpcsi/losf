@@ -397,8 +397,9 @@ sub add_distro_package {
 	
 	# Update LosF config to include newly added distro packages
 
-	my $new_file = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
-	my $ref_file = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+	my $new_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
+	my $ref_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+	my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions/packages.config";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -406,11 +407,16 @@ sub add_distro_package {
 	if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
 
 	if ( compare($new_file,$ref_file) != 0 ) {
+
+	    if ( ! -d "$hist_dir") {
+		mkdir("$hist_dir",0700);
+	    }
+
 	    my $timestamp=`date +%F:%H:%M`;
 	    chomp($timestamp);
 	    print "   --> Updating OS config file...\n";
-	    rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unaable to save previous OS config file\n");
-	    rename($new_file,$ref_file)                || MYERROR("Unaable to update OS config file\n");
+	    rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous OS config file\n");
+	    rename($new_file,$ref_file)                 || MYERROR("Unaable to update OS config file\n");
 	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
 	} else {
 	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
@@ -565,6 +571,7 @@ sub add_distro_group {
 
 	my $new_file = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
 	my $ref_file = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+	my $hist_dir = "$osf_config_dir/os-packages/$node_cluster/previous_revisions";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -572,10 +579,15 @@ sub add_distro_group {
 	if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
 
 	if ( compare($new_file,$ref_file) != 0 ) {
+
+	    if ( ! -d "$hist_dir") {
+		mkdir("$hist_dir",0700);
+	    }
+
 	    my $timestamp=`date +%F:%H:%M`;
 	    chomp($timestamp);
 	    print "   --> Updating OS config file...\n";
-	    rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unaable to save previous OS config file\n");
+	    rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous OS config file\n");
 	    rename($new_file,$ref_file)                || MYERROR("Unaable to update OS config file\n");
 	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
 	} else {
@@ -793,6 +805,7 @@ sub add_custom_rpm {
 
     my $new_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config.new";
     my $ref_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir = "$osf_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -800,11 +813,16 @@ sub add_custom_rpm {
     if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
 
     if ( compare($new_file,$ref_file) != 0 ) {
+
+	if ( ! -d "$hist_dir") {
+	    mkdir("$hist_dir",0700);
+	}
+
 	my $timestamp=`date +%F:%H:%M`;
 	chomp($timestamp);
 	print "   --> Updating Custom RPM config file...\n";
-	rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unable to save previous OS config file\n");
-	rename($new_file,$ref_file)                || MYERROR("Unable to update OS config file\n");
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous custom config file\n");
+	rename($new_file,$ref_file)                || MYERROR("Unable to update custom config file\n");
 	print "\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect\n";
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
@@ -817,6 +835,8 @@ sub add_custom_rpm {
 } # end sub add_custom_rpm
 
 sub register_alias {
+
+    MYERROR("This function deprecated....");
 
     begin_routine();
     my $alias            = shift;
@@ -881,6 +901,7 @@ sub register_alias {
 
     my $new_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config.new";
     my $ref_file = "$osf_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir = "$osf_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -888,11 +909,16 @@ sub register_alias {
     if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
 
     if ( compare($new_file,$ref_file) != 0 ) {
+
+	if ( ! -d "$hist_dir") {
+	    mkdir("$hist_dir",0700);
+	}
+
 	my $timestamp=`date +%F:%H:%M`;
 	chomp($timestamp);
 	print "   --> Updating Custom RPM config file...\n";
-	rename($ref_file,$ref_file.".".$timestamp) || MYERROR("Unable to save previous OS config file\n");
-	rename($new_file,$ref_file)                || MYERROR("Unable to update OS config file\n");
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous custom config file\n");
+	rename($new_file,$ref_file)                || MYERROR("Unable to update custom config file\n");
 	print "\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect\n";
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
