@@ -90,7 +90,7 @@ sub usage {
     print "\n";
 
     print "     addrpm    <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
-    print "     addalias  <OPTIONS> [alias] Add a new alias for current node type\n";
+#    print "     addalias  <OPTIONS> [alias] Add a new alias for current node type\n";
     print "     showalias                   Show all currently defined aliases\n";
     print "\n";
     print "     OPTIONS:\n";
@@ -968,26 +968,26 @@ switch ($command) {
     case "addpkg"   { add_distro_package($argument) };
     case "addgroup" { add_distro_group  ($argument) };
     case "showalias"{ show_defined_aliases()        };
-    case "addalias" { 
-
-	# parse any additional options used with addalias
-
-	my $nodetype = "local";
-
-	if($all) {
-	    $nodetype = "ALL";
-	}
-
-	if($assume_yes) {
-	    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
-	}
-
-	print "my argument = $argument\n";
-
-	register_alias  ($argument,$nodetype);
-
-    }
-    case "addrpm"   { 
+###    case "addalias" { 
+###
+###	# parse any additional options used with addalias
+###
+###	my $nodetype = "local";
+###
+###	if($all) {
+###	    $nodetype = "ALL";
+###	}
+###
+###	if($assume_yes) {
+###	    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
+###	}
+###
+###	print "my argument = $argument\n";
+###
+###	register_alias  ($argument,$nodetype);
+###
+###    }
+###    case "addrpm"   { 
 
 	# parse any additional options used with addrpm
 
