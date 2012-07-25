@@ -737,6 +737,14 @@ BEGIN {
 
 	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
 
+	# verify that certain packages are *not* installed
+
+	my @os_rpms_remove = query_cluster_config_os_packages_remove($node_cluster,$node_type);
+
+	verify_rpms_removed(@os_rpms_remove);
+
+	# now, verify that all desired os packages are installed
+
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	verify_rpms(@os_rpms);

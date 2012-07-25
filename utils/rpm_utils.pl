@@ -121,6 +121,68 @@ sub verify_rpms {
     end_routine();
 }
 
+sub verify_rpms_removed {
+    begin_routine();
+
+    my @rpm_list        = @_;
+    my @rpms_to_remove = ();
+    my $num_rpms        = @rpm_list;
+
+    if($num_rpms < 1) { return; }
+
+    INFO("   --> Verifying desired OS RPMs are *not* installed ($num_rpms total)...\n");
+    foreach $rpm (@rpm_list) {
+	DEBUG("   --> Checking $rpm\n");
+
+	# Installing from path provided by user on command-line?
+
+	my $filename = "";
+	my $arch     = rpm_arch_from_filename($rpm);
+
+	# return array format = (name,version,release,arch)
+
+	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
+
+	if( @installed_rpm ne 0 ) {
+	    INFO("   --> $installed_rpm[0] is installed....removing\n");
+	    SYSLOG("Registering locally installed $installed_rpm[0] for removal");
+	    push(@rpms_to_remove,$rpm);
+	}
+
+    }
+
+    # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
+
+    my $count = @rpms_to_remove;
+
+    if( $count eq 0 ) {
+	return;
+    } else {
+	print "   --> ";
+	print color 'red';
+	print "FAILED";
+	print color 'reset';
+	print ": A total of $count custom rpm(s) need to be removed $appliance\n";
+    }
+
+    # Remove unwanted os packages called out by user.
+
+    my $cmd = "rpm -ev "."@rpms_to_remove";
+    
+    system($cmd);
+
+    my $ret = $?;
+
+    if ( $ret != 0 ) {
+	SYSLOG("** Local RPM removal unsuccessful (ret=$ret)");
+	MYERROR("Unable to remove desired OS package RPMs (status = $ret)\n");
+    } else {
+	SYSLOG("RPM uninstall(s) successful");
+    }
+
+    end_routine();
+}
+
 # --------------------------------------------------------
 # verify_custom_rpms (rpms)
 # 

@@ -675,7 +675,7 @@ sub add_custom_rpm {
     }
 
     foreach $rpm (@custom_rpms) {
-	INFO("   --> Existing custom rpm = $rpm\n");
+	DEBUG("   --> Existing custom rpm = $rpm\n");
     }
 
     # check RPM version for the custom package

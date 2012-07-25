@@ -341,7 +341,6 @@ BEGIN {
 		          
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
-#	my %os_rpms       = ();
 
 	INFO("   --> Looking for OS packages to sync...($cluster->$node_type)\n");
 
@@ -359,6 +358,37 @@ BEGIN {
 
 	    foreach $rpm (@rpms_defined) {
 		DEBUG("       --> Read $rpm from config\n");
+	    }
+
+	}
+
+	end_routine();
+
+	return(@rpms_defined);
+    }
+
+    sub query_cluster_config_os_packages_remove {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $node_type     = shift;
+		          
+	my $logr          = get_logger();
+	my @rpms_defined  = ();
+
+	INFO("   --> Looking for OS packages to remove...($cluster->$node_type)\n");
+
+	if ( ! $local_os_cfg->SectionExists("OS Packages") ) {
+	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
+	}
+
+	if($local_os_cfg->exists("OS Packages",$node_type."_remove")) {
+	    DEBUG("   --> OS packages for removal defined for node type = $node_type\n");
+	    @rpms_defined = $local_os_cfg->val("OS Packages",$node_type."_remove");
+
+	    foreach $rpm (@rpms_defined) {
+		INFO("       --> Read $rpm from config for deletion\n");
 	    }
 
 	}
