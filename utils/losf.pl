@@ -101,10 +101,8 @@ sub usage {
     print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
 
     print "\n";
-
-
-
     print "\n";
+    exit(1);
 }
 
 sub add_node  {
@@ -728,8 +726,10 @@ sub add_custom_rpm {
 	    $default_options = "$default_options "."$opt";
 	}
     }
-    
-    INFO("       --> $rpm_name not previously configured - registering for addition/upgrade\n"); 
+
+    if(! $is_upgrade) {
+	INFO("       --> $rpm_name not previously configured - registering for addition/upgrade\n"); 
+    }
 	
     my $config_name = $basename;
 	
@@ -958,7 +958,8 @@ sub show_defined_aliases {
 #-------------------------------------------
 
 GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$upgrade,
-	   'alias=s' => \$alias_option,'yes' => \$assume_yes);
+	   'alias=s' => \$alias_option,'yes' => \$assume_yes) || usage();
+
 
 # Command-line parsing
 
@@ -969,7 +970,6 @@ if (@ARGV >= 1) {
     }
 } else {
     usage();
-    exit(1);
 }
 
 my $logr = get_logger(); $logr->level($ERROR); 
