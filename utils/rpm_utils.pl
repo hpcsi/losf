@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007,2008,2009,2010,2011,2012 Karl W. Schulz
+# Copyright (C) 2007-2012 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -74,6 +74,17 @@ sub verify_rpms {
 	    MYERROR("Unable to locate local OS rpm-> $filename\n");
 	}
 
+	# 10/5/12 - give preferential treatment to cache directory. If
+	# the file is present in the cache, we try to use
+	# it. Otherwise, we revert to the standard rpm_topdir.
+
+	if( $rpm_cachedir ne "NONE" ) {
+	    if ( -s "$rpm_cachedir/$arch/$rpm.rpm" ) {
+		DEBUG("Using cached rpm in $rpm_cachedir/$arch/$rpm.rpm");
+		$filename="$rpm_cachedir/$arch/$rpm.rpm";
+	    }
+	}
+
 	# return array format = (name,version,release,arch)
 
 	my @desired_rpm   = rpm_version_from_file($filename);
@@ -109,7 +120,7 @@ sub verify_rpms {
 
     my $cmd = "rpm -Uvh "."@rpms_to_install";
     
-    #print "cmd = $cmd\n";
+    print "cmd = $cmd\n";
     system($cmd);
 
     my $ret = $?;
@@ -162,7 +173,7 @@ sub verify_rpms_removed {
 	print color 'red';
 	print "FAILED";
 	print color 'reset';
-	print ": A total of $count custom rpm(s) need to be removed $appliance\n";
+	print ": A total of $count OS rpm(s) need to be removed $appliance\n";
     }
 
     # Remove unwanted os packages called out by user.
@@ -251,6 +262,9 @@ sub verify_custom_rpms {
 
 	for(my $count = 2; $count < $num_options; $count++) {
 	    $rpm_options = $rpm_options . validate_rpm_option($rpm_array[$count]);
+	    if ( $rpm_array[$count] eq "INSTALL" ) {
+		$install_method = ""; # nullify since user overrode default
+	    }
 	}
 
 	$rpm_options = $install_method . $rpm_options;
@@ -262,7 +276,6 @@ sub verify_custom_rpms {
 
 	DEBUG("   --> rpm_options = $rpm_options\n");
 	DEBUG("   --> Checking $rpm_array[0]\n");
-
 
 	# Installing from path provided by user on command-line?
 
@@ -279,8 +292,19 @@ sub verify_custom_rpms {
 	    MYERROR("Unable to locate local Custom rpm-> $filename\n");
 	}
 
+	# 10/5/12 - give preferential treatment to cache directory. If
+	# the file is present in the cache, we try to use
+	# it. Otherwise, we revert to the standard rpm_topdir.
+
+	if( $rpm_cachedir ne "NONE" ) {
+	    if ( -s "$rpm_cachedir/$arch/$rpm_array[0].rpm" ) {
+		DEBUG("Using cached rpm in $rpm_cachedir/$arch/$rpm_array[0].rpm");
+		$filename="$rpm_cachedir/$arch/$rpm_array[0].rpm";
+	    }
+	}
+
 	my @desired_rpm   = rpm_version_from_file($filename);
-	my @installed_rpm = is_rpm_installed     ("$desired_rpm[0]-$desired_rpm[1]",$arch);
+	my @installed_rpm = is_rpm_installed     ("$desired_rpm[0]-$desired_rpm[1].$arch");
 
 	# Decide if we need to install. Note that we build up arrays
 	# of rpms to install on a per-rpm-option-combination basis.
@@ -289,18 +313,49 @@ sub verify_custom_rpms {
 	# installed have different options specified. This uses a perl
 	# array of hashes, so the syntax is slightly gnarly.
 
-	if( @installed_rpm eq 0 ) {
+
+	my $installed_versions = @installed_rpm / 4;
+
+	if( $installed_versions == 0 ) {
 	    verify_expected_md5sum($filename,$md5_desired);
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    SYSLOG("Registering previously uninstalled $desired_rpm[0] for update");
 	    push(@{$rpms_to_install{$rpm_options}},$filename);
-	} elsif( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]") {
-	    verify_expected_md5sum($filename,$md5_desired);
-	    INFO("   --> version mismatch - registering for update...\n");
-	    SYSLOG("Registering locally installed $desired_rpm[0] for update");
-	    push(@{$rpms_to_install{$rpm_options}},$filename);
+	} elsif( ($installed_versions == 1 ) ) {
+	    if ( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]" )  {
+		verify_expected_md5sum($filename,$md5_desired);
+		INFO("   --> version mismatch - registering for update...\n");
+		SYSLOG("Registering locally installed $desired_rpm[0] for update");
+		push(@{$rpms_to_install{$rpm_options}},$filename);
+	    } else {
+		DEBUG("   --> $desired_rpm[0] is already installed\n");
+	    }
 	} else {
-	    DEBUG("   --> $desired_rpm[0] is already installed\n");
+	    # This RPM has multiple versions currently
+	    # installed. Logic is to check to see if the desired
+	    # version is installed, if not, we register new
+	    # installation. 
+
+	    DEBUG("   --> Multiple versions installed, we must proceed with care...\n");
+
+	    my $desired_installed = 0;
+
+	    for(my $count = 0; $count < $installed_versions; $count++) {
+		my $installed_ver = $installed_rpm[1+$count*4];
+		my $installed_rel = $installed_rpm[2+$count*4];
+		if ( "$desired_rpm[1]-$desired_rpm[2]" eq "$installed_ver-$installed_rel" )  {
+		    $desired_installed = 1;
+		}
+	    }
+
+	    if ( ! $desired_installed ) {
+		verify_expected_md5sum($filename,$md5_desired);
+		INFO("   --> desired version not installed - registering for update...\n");
+		SYSLOG("Registering locally installed $desired_rpm[0] for new multi-version");
+		push(@{$rpms_to_install{$rpm_options}},$filename);
+	    } else {
+		INFO("   --> desired multi-rpm version is installed\n");
+	    }
 	}
     }
 
@@ -374,7 +429,7 @@ sub is_rpm_installed {
 
     @matching_rpms  = 
 	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
- 
+
     if( $? != 0) {
 	@matching_rpms = @empty_list;
 #	return(@empty_list);
@@ -518,6 +573,15 @@ sub validate_rpm_option {
     } elsif ( $option eq "IGNORESIZE" ) {
 	end_routine;
 	return("--ignoresize ");
+    } elsif ( $option eq "INSTALL" ) {
+	end_routine;
+	return("--install ");
+    } elsif ( $option eq "FORCE" ) {
+	end_routine;
+	return("--force ");
+    } elsif ( $option eq "MULTI" ) {
+	end_routine;
+	return("--oldpackage ");
     } elsif ( $option =~ m/RELOCATE:(\S+):(\S+)/ ) {
 	end_routine;
 	return("--relocate $1=$2 ");
