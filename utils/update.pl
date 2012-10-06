@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007,2008,2009,2010 Karl W. Schulz
+# Copyright (C) 2007-2012 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -42,13 +42,42 @@ use lib "$osf_utils_dir";
 
 use node_types;
 use utils;
+use Getopt::Long;
 
 require "$osf_utils_dir/sync_config_utils.pl";
+
+sub usage { 
+
+    print "\n";
+    print "Usage: update [OPTIONS]\n\n";
+    print "OPTIONS:\n";
+    print "  --help                generate help message and exit\n";
+    print "\n";
+	  
+}
 
 # Default logging is set to ERROR
 
 my $logr = get_logger();
 $logr->level($INFO);
+
+# Allow for alternate RPM source paths
+
+my $alt_rpm;
+
+if (@ARGV >= 1) {
+    my $indir  = shift@ARGV;
+    if ( -d $indir) {
+	$alt_rpm = $indir;
+	ERROR("\n");
+	INFO("[update]: Using $alt_rpm as preferential RPM source path\n");
+	ERROR("\n");
+    } else {
+	ERROR("\n");
+	ERROR("[update]: $indir directory not available, ignoring RPM path override request\n");
+	ERROR("\n");
+    }
+}
 
 parse_and_sync_os_packages();
 parse_and_sync_custom_packages();
