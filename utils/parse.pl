@@ -716,7 +716,16 @@ BEGIN {
 	    MYERROR("No rpm_build_dir defined for cluster $cluster");
 	}
 
-	return($rpm_topdir);
+	# 10/5/12: add support for a local cache dir
+
+	if (defined ($rpm_cachedir = $global_cfg->val("$cluster","rpm_cache_dir")) ) {
+	    DEBUG("--> Read rpm_cache_dir = $rpm_cachedir\n");
+	} else {
+	    $rpm_cachedir = NONE;
+	}
+	    
+
+	return($rpm_topdir,$rpm_cachedir);
     }
 
     sub query_cluster_config_kickstarts {
