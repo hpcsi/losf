@@ -75,10 +75,11 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
 
-    print "     addpkg    [package]         Add new OS package (and dependencies)\n";
-    print "     delpkg    [package]         Remove previously added OS package\n";
+    print "     addpkg     [package]         Add new OS package (and dependencies)\n";
+    print "     delpkg     [package]         Remove previously added OS package\n";
 #    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
-    print "     addgroup  [group]           Add new OS group (and dependencies)\n";
+    print "     addgroup   [group]           Add new OS group (and dependencies)\n";
+    print "     updatepkgs                   Update all local OS packages (and dependencies)\n";
     print "\n";
 
     print color 'bold blue';
@@ -99,8 +100,21 @@ sub usage {
     print "        --yes                              Assume \"yes\" for interactive additions\n";
     print "        --alias    [name]                  Add rpm to alias with given name\n";
     print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
-
+    print "        --install                          Configure to use install mode as opposed to the default\n";
+    print "                                           upgrade mode for RPM installations. Allows multiple\n";
+    print "                                           RPMs of the same name to be installed.\n";
     print "\n";
+
+    print color 'bold blue';
+    print "  Batch System Interaction:\n";
+    print color 'reset';
+
+    print "     These commands provide administrative interaction with the locally\n";
+    print "     defined batch system\n";
+    print "\n";
+    print "     qclose   [name|all]                  Close specified queue (or all queues)\n";
+    print "     qopen    [name|all]                  Open  specified queue (or all queues)\n";
+
     print "\n";
     exit(1);
 }
@@ -252,6 +266,187 @@ sub del_node {
     `$cmd`;
 
 }
+
+sub update_all_distro_packages {
+
+    begin_routine();
+
+    INFO("\n** Requesting update for all local OS pacakges\n");
+    SYSLOG("Requesting update for all local OS pacakges");
+
+    # the yum-plugin-downloadonly package is required to support
+    # auto-addition of distro packages...
+
+    my $check_pkg = "yum-plugin-downloadonly";
+    my @igot = is_rpm_installed($check_pkg);
+
+    if ( @igot  eq 0 ) {
+	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
+    }
+
+    my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
+    INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+
+    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir update >& /dev/null";
+    DEBUG("   --> Running yum command \"$cmd\"\n");
+
+   `$cmd`;
+
+    # Now check to see if we downloaded anything
+
+    my @newfiles = <$tmpdir/*>;
+
+    my $extra_deps = @newfiles - 1;
+
+    if ( @newfiles == 0) {
+	INFO("   --> no new os packages found...exiting\n");
+	return;
+    }
+
+    my $rpm_count = @newfiles;
+    INFO("   --> $rpm_count packages successfully downloaded from repository\n");
+
+    INFO("\n   --> Cluster = $node_cluster, Node Type = $node_type\n");
+    INFO("\n   --> Would you like to add the following RPM(s) to your local LosF config for ".
+	 "$node_cluster:$node_type nodes?\n\n");
+
+    foreach $file (@newfiles) {
+	print "       $file\n";
+    }
+
+    my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
+
+    if( $response == 0 ) {
+	INFO("   --> Did not add new OS packages to LosF to config, terminating....\n");
+	exit(-22);
+    } 
+
+    print "\n";
+
+    # Now, read current configfile for OS packages
+
+    my $host_name;
+    chomp($host_name=`hostname -s`);
+
+    INFO("   Reading OS package config file -> $osf_config_dir/os-packages/"."$node_cluster/packages.config\n");
+    my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
+
+    # Upgrade: since we are using arrays for input values, upgrade
+    # means removing all values, and re-inserting desired values.
+
+
+    my $section = "OS Packages";
+    my $name    = $node_type;
+    DEBUG("       --> Removing previous entries for $name...\n");
+
+    $local_os_cfg->delval($section,$name);
+
+    # Initialize flag array to identify whether existing os packages
+    # are being updated or not.
+
+    my @flag = (0) x @os_rpms;
+
+    my @os_pkgs_new = ();	# temp array to hold os packages for new config
+
+    foreach $file (@newfiles) {
+	my @version_info = rpm_version_from_file($file);
+	my $rpm_package  = rpm_package_string_from_header(@version_info);
+	
+	INFO("   --> Updating ".rpm_package_string_from_header(@version_info)."\n");
+
+	my $rpm_name    = $version_info[0];
+	my $rpm_arch    = $version_info[3];
+
+	my $old_rpm       = "";
+	my $is_upgrade    = 0;
+	my $count         = 0;
+
+	push(@os_pkgs_new,$rpm_package);
+
+	foreach $rpm (@os_rpms) {
+	    
+	    if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+		INFO("       --> Configuring update for $rpm_package (previously $rpm)\n");
+		$is_upgrade   = 1;
+		$old_rpm      = $rpm;
+		$flag[$count] = 1;
+		last;
+	    }
+
+	    $count++;
+	}
+
+	# Stage downloaded RPM files into LosF repository
+
+	my $basename = basename($file);
+	if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
+	    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
+	    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
+	}
+
+    } # end loop over newly downloaded OS packages
+
+
+    # We have now flagged the previous os packages which are to be
+    # updated with this config change. Update the config in two steps:
+    #
+    #   (1) add new packages, and
+    #   (2) retain old packages which did not get updated
+
+
+    foreach $rpm (@os_pkgs_new) {
+	if($local_os_cfg->exists($section,$name)) {
+	    $local_os_cfg->push($section,$name,"$rpm");
+	} else {
+	    $local_os_cfg->newval($section,$name,"$rpm");
+	}
+    }
+    
+    my $count = 0;
+
+    foreach $rpm (@os_rpms) {
+	if( ! $flag[$count] ) {
+	    if($local_os_cfg->exists($section,$name)) {
+		$local_os_cfg->push($section,$name,"$rpm");
+	    } else {
+		$local_os_cfg->newval($section,$name,"$rpm");
+	    }
+
+	}
+	$count++;
+    }
+
+    # Update LosF config to include newly added distro packages
+
+    my $new_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions/packages.config";
+
+    $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+
+    if ( compare($new_file,$ref_file) != 0 ) {
+
+	if ( ! -d "$hist_dir") {
+	    mkdir("$hist_dir",0700);
+	}
+
+	my $timestamp=`date +%F:%H:%M`;
+	chomp($timestamp);
+	print "   --> Updating OS config file...\n";
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+	    MYERROR("Unable to save previous OS config file\n");
+	rename($new_file,$ref_file)                 || 
+	    MYERROR("Unaable to update OS config file\n");
+	print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+    } else {
+	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+    }
+
+    end_routine();
+} # end sub update_all_distro_packages()
 
 sub add_distro_package {
 
@@ -621,6 +816,8 @@ sub add_custom_rpm {
 	
     INFO("\n** Checking on possible addition of custom RPM package: $basename\n");
 
+    print "package = $package\n";
+
     if ( ! -s $package ) {
 	MYERROR("Unable to access requested RPM -> $basename\n");
     }
@@ -710,6 +907,7 @@ sub add_custom_rpm {
 		#$is_configured = 1;
 		return;
 	    }
+	    last;
 	}
     }
 
@@ -958,7 +1156,7 @@ sub show_defined_aliases {
 #-------------------------------------------
 
 GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$upgrade,
-	   'alias=s' => \$alias_option,'yes' => \$assume_yes) || usage();
+	   'install' => \$install, 'alias=s' => \$alias_option,'yes' => \$assume_yes) || usage();
 
 
 # Command-line parsing
@@ -987,13 +1185,15 @@ switch ($command) {
 
     # Do the deed
     
-    case "add"      { add_node($argument) };
-    case "del"      { del_node($argument) };
-    case "delete"   { del_node($argument) };
+    case "add"        { add_node($argument) };
+    case "del"        { del_node($argument) };
+    case "delete"     { del_node($argument) };
 
-    case "addpkg"   { add_distro_package($argument) };
-    case "addgroup" { add_distro_group  ($argument) };
-    case "showalias"{ show_defined_aliases()        };
+    case "addpkg"     { add_distro_package($argument) };
+    case "addgroup"   { add_distro_group  ($argument) };
+    case "showalias"  { show_defined_aliases()        };
+    case "updatepkgs" { update_all_distro_packages() };
+
 ###    case "addalias" { 
 ###
 ###	# parse any additional options used with addalias
@@ -1035,6 +1235,10 @@ switch ($command) {
 
 	if($upgrade) {
 	    $ENV{'LOSF_REGISTER_UPGRADE'} = '1';
+	}
+
+	if($install) {
+	    $options = $options . "INSTALL";
 	}
 
 	if($assume_yes) {
