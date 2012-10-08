@@ -71,6 +71,8 @@ if (@ARGV >= 1) {
 	$alt_rpm = $indir;
 	ERROR("\n");
 	INFO("[update]: Using $alt_rpm as preferential RPM source path\n");
+	$ENV{'MODE'} = 'PXE';
+	$ENV{'SRC_DIR'} = $alt_rpm;
 	ERROR("\n");
     } else {
 	ERROR("\n");
