@@ -84,13 +84,39 @@ BEGIN {
 	# Now, sync partial contents...
 
 	INFO("** Syncing configuration files (partial contents))\n\n");
-
+	
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
 
 	foreach(@partial_files) {
 	    sync_partial_file("$_");
 	}
-	
+
+	# Now, verify non-existence of certain files
+
+	INFO("** Syncing non-existence of configuration files\n\n");
+
+	my @delete_files = query_cluster_config_delete_sync_files($node_cluster,$node_type);
+
+	foreach(@delete_files) {
+
+	    my $basename = basename("$_");
+
+	    if ( -e "$_") {
+		print "   --> "; 
+		print color 'red';
+		print "FAILED";
+		print color 'reset';
+		print ": [$basename] File present: deleting\n";
+		unlink("$_") || MYERROR("Unable to remove file: $_");
+	    } else {
+		print "   --> "; 
+		print color 'green';
+		print "OK";
+		print color 'reset';
+		print ": $_ not present\n";
+	    }
+	}
+	    
 	end_routine();
     }
 

@@ -500,6 +500,46 @@ BEGIN {
 	return(@sync_partials);
     }
 
+    sub query_cluster_config_delete_sync_files {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $host          = shift;
+		          
+	my $logr          = get_logger();
+	my @sync_partials = ();
+
+	INFO("   --> Looking for defined files to remove...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("ConfigFiles") ) {
+	    MYERROR("No Input section found for cluster $cluster [ConfigFiles]\n");
+	}
+
+	my @defined_files = $local_cfg->Parameters("ConfigFiles");
+
+	my $num_files = @defined_files;
+
+	INFO("   --> \# of files defined = $num_files\n");
+
+	foreach(@defined_files) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		if ( "$myval" eq "delete" ) {
+		    DEBUG("   --> Delete file defined for $_\n");
+		    push(@sync_deletes,$_);
+		}
+	    } else {
+		MYERROR("ConfigFile defined with no value ($_)");
+	    }
+	}
+
+	end_routine();
+
+	return(@sync_deletes);
+    }
+
     sub query_cluster_config_softlink_sync_files {
 
 	begin_routine();
