@@ -403,7 +403,7 @@ BEGIN {
 	if ( !$found_delim ) {
 	    print("   --> INFO: Adding partial sync delimiter to file $file\n");
 	    print IN "#--------------------------------------------------------------begin-sync-losf-\n";
-	    print IN "#--------------------------------------------------------------end-sync-losf-\n";
+	    print IN "#----------------------------------------------------------------end-sync-losf-\n";
 	};
 
 	seek(IN, 0, 0)  || MYERROR("can't rewind numfile: $!");
@@ -423,7 +423,7 @@ BEGIN {
 		    while (my $line=<REF>) {
 			print TMPFILE $line;
 		    }
-		    print TMPFILE "#--------------------------------------------------------------end-sync-losf-\n";
+		    print TMPFILE "#----------------------------------------------------------------end-sync-losf-\n";
 		}
 	    } else {
 		print TMPFILE $_;
@@ -442,9 +442,17 @@ BEGIN {
 	# Check if we have any changes?
 
 	if ( compare($file,$new_file) == 0 ) {
-	    print "   --> OK: $file in (partial) sync\n";
+	    print "   --> "; 
+	    print color 'green';
+	    print "OK";
+	    print color 'reset';
+	    print ": $file in (partial) sync\n";
 	} else {
-	    ERROR("   --> FAILED: [$basename] Differences found: $basename requires partial syncing\n");
+	    print "   --> "; 
+	    print color 'red';
+	    print "FAILED";
+	    print color 'reset';
+	    ERROR(": [$basename] Differences found: $basename requires partial syncing\n");
 
 	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
 
