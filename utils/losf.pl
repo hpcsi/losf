@@ -79,6 +79,7 @@ sub usage {
     print "     delpkg     [package]         Remove previously added OS package\n";
 #    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
     print "     addgroup   [group]           Add new OS group (and dependencies)\n";
+    print "     updatepkg  [package]         Update specific OS packages (and dependencies)\n";
     print "     updatepkgs                   Update all local OS packages (and dependencies)\n";
     print "\n";
 
@@ -205,6 +206,7 @@ sub add_node  {
     my $name_server        = query_cluster_config_name_servers        ($node_cluster,$node_type);
     my $name_server_search = query_cluster_config_name_servers_search ($node_cluster,$node_type);
     my $kernel_options     = query_cluster_config_kernel_boot_options ($node_cluster,$node_type);
+    my $kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
     my $dns_options        = query_cluster_config_dns_options         ($node_cluster,$node_type);
 
     print "\n";
@@ -217,7 +219,12 @@ sub add_node  {
 
     if( $kernel_options ne "" ) {
 	print "   --> Kernel Options = $kernel_options\n";
-	$kopts = "--kopts=$kernel_options --kopts-post=$kernel_options";
+	$kopts = " --kopts=$kernel_options";
+    }
+
+    if( $kernel_options_post ne "" ) {
+	print "   --> Kernel Post Options = $kernel_options_post\n";
+	$kopts = "$kopts --kopts-post=$kernel_options_post";
     }
 
     if ($dns_options eq "yes" ) {
@@ -267,12 +274,17 @@ sub del_node {
 
 }
 
-sub update_all_distro_packages {
+sub update_distro_packages {
 
     begin_routine();
+    my $package = shift;
 
-    INFO("\n** Requesting update for all local OS pacakges\n");
-    SYSLOG("Requesting update for all local OS pacakges");
+    INFO("\n** Requesting update for local OS pacakge: $package\n");
+    SYSLOG("Requesting update for local OS pacakge: $package");
+
+    if( "$package" eq "ALL" ) {
+	$package = "";
+    }
 
     # the yum-plugin-downloadonly package is required to support
     # auto-addition of distro packages...
@@ -287,7 +299,7 @@ sub update_all_distro_packages {
     my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
-    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir update >& /dev/null";
+    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir --skip-broken update $package >& /dev/null";
     DEBUG("   --> Running yum command \"$cmd\"\n");
 
    `$cmd`;
@@ -1189,10 +1201,11 @@ switch ($command) {
     case "del"        { del_node($argument) };
     case "delete"     { del_node($argument) };
 
-    case "addpkg"     { add_distro_package($argument) };
-    case "addgroup"   { add_distro_group  ($argument) };
-    case "showalias"  { show_defined_aliases()        };
-    case "updatepkgs" { update_all_distro_packages() };
+    case "addpkg"     { add_distro_package($argument)     };
+    case "addgroup"   { add_distro_group  ($argument)     };
+    case "showalias"  { show_defined_aliases()            };
+    case "updatepkg"  { update_distro_packages($argument) };
+    case "updatepkgs" { update_distro_packages("ALL")     };
 
 ###    case "addalias" { 
 ###
