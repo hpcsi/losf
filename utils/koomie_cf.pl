@@ -3,7 +3,7 @@
 use POSIX;
 require "getopts.pl";
 
-do Getopts("r:i:m:t:h:w:c:");
+do Getopts("r:i:m:t:h:w:c:x:");
 
 $timeout = 5*60;
 $n = @ARGV;
@@ -26,6 +26,7 @@ OPTIONS:
   -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
   -m <max_ssh>            maximum number of commands to run in parallel (default = 288)
   -t <timout>             timeout period for command completion in seconds (default = 5 minutes)
+  -x <regex>              operate on hosts which match supplied regex
   -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
 
 EOF
@@ -91,8 +92,8 @@ if ( $opt_r ne "" ) {
 	    $rack_begin = $1;
 	    $rack_end   = $2;
 	    
-	    print "rack_begin = $rack_begin\n";
-	    print "rack_end   = $rack_end\n";
+#	    print "rack_begin = $rack_begin\n";
+#	    print "rack_end   = $rack_end\n";
 
 	    if($rack_end < $rack_begin) {
 		die ("Ending rack number is less than beginning rack number ($rack_begin,$rack_end)");
@@ -116,7 +117,9 @@ if ( $opt_r ne "" ) {
 	$racks_desired = login;
     }
 
-    print "rack_desired = $racks_desired\n";
+
+
+#    print "rack_desired = $racks_desired\n";
 #   exit(1);
 
 }
@@ -124,8 +127,20 @@ if ( $opt_r ne "" ) {
 # Scan the host list and mark desired hosts.
 
 open(input, "/etc/hosts");
+
+my $rnk_count = 0;
+
 while(<input>) {
 
+    if ( $opt_x ne "" ) {
+	if (/(\S+)\s+(\b$opt_x)\./) {
+	    $hosts{$2} = $rnk_count;
+	    $rnk_count++;
+	    next;
+	}
+    }
+
+	
     if (/\bc(\d\d\d)[-](\d)(\d\d)\b/) {
 	$myhost    = "c$1-$2"."$3"; # full hostname        (e.g. 301-105)
 	$myrack    = $1;	    # rack number          (e.g. 301)
