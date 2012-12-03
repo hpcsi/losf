@@ -216,6 +216,8 @@ sub verify_custom_rpms {
     my %rpms_to_install = ();
     my $num_rpms        = @rpm_list;
 
+
+
     if($num_rpms < 1) { return; }
 
     INFO("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
@@ -251,6 +253,10 @@ sub verify_custom_rpms {
 	if( $rpm =~ m/^@(\S+)/ ) { next; } # @groups names have already been expanded, skip this @group
 
 	my @rpm_array  = split(/\s+/,$rpm);
+
+	# init any non-rpm command-line options 
+
+	$losf_nomd5file = 0;
 
 	# Cull rpm install options for this package
 
@@ -317,7 +323,7 @@ sub verify_custom_rpms {
 	my $installed_versions = @installed_rpm / 4;
 
 	if( $installed_versions == 0 ) {
-	    verify_expected_md5sum($filename,$md5_desired);
+	    verify_expected_md5sum($filename,$md5_desired) unless ( $losf_nomd5file) ;
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    SYSLOG("Registering previously uninstalled $desired_rpm[0] for update");
 	    push(@{$rpms_to_install{$rpm_options}},$filename);
@@ -582,12 +588,16 @@ sub validate_rpm_option {
     } elsif ( $option eq "MULTI" ) {
 	end_routine;
 	return("--oldpackage ");
+    } elsif ( $option eq "NOMD5FILE" ) {
+	$losf_nomd5file = 1;
+	end_routine;
+	return("");
     } elsif ( $option =~ m/RELOCATE:(\S+):(\S+)/ ) {
 	end_routine;
 	return("--relocate $1=$2 ");
     } else {
 	end_routine;
-	WARN("   [WARN]: Ignoring unsupported RPM option type -> $option\n");
+	ERROR("   [WARN]: Ignoring unsupported RPM option type -> $option\n");
 	return("");
     }
 }
