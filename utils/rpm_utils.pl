@@ -497,7 +497,7 @@ sub verify_custom_rpms_removed {
 	print color 'red';
 	print "FAILED";
 	print color 'reset';
-	print ": A total of $count Custsom rpm(s) need to be removed for $appliance\n";
+	print ": A total of $count Custom rpm(s) need to be removed for $appliance\n";
     }
 
     # Remove unwanted packages called out by user.
