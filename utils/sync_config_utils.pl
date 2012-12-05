@@ -637,8 +637,16 @@ BEGIN {
 
 	    my $basename = basename($newfile);
 	    
-	    ERROR("   --> FAILED: [$basename] updating sync file permissions...\n") 
-		unless ($display_change_message == 0);
+#	    ERROR("   --> FAILED: [$basename] updating sync file permissions...\n") 
+#		unless ($display_change_message == 0);
+
+	    if ( $display_change_message != 0) {
+		print "   --> "; 
+		print color 'red';
+		print "FAILED";
+		print color 'reset';
+		print ": [$basename] updating sync file permissions...\n";
+	    }
 
 	    chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
 	}
