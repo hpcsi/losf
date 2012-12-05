@@ -398,6 +398,39 @@ BEGIN {
 	return(@rpms_defined);
     }
 
+    sub query_cluster_config_custom_packages_remove {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $node_type     = shift;
+		          
+	my $logr          = get_logger();
+	my @rpms_defined  = ();
+
+	my $section       = "Custom Packages/uninstall";
+
+	INFO("   --> Looking for Custom packages to remove...($cluster->$node_type)\n");
+
+	if ( ! $local_custom_cfg->SectionExists("$section") ) {
+	    MYERROR("No Input section found for cluster $cluster [$section]\n");
+	}
+
+	if($local_custom_cfg->exists($section,$node_type)) {
+	    DEBUG("   --> Custom packages for removal defined for node type = $node_type\n");
+	    @rpms_defined = $local_custom_cfg->val($section,$node_type);
+
+	    foreach $rpm (@rpms_defined) {
+		INFO("       --> Read $rpm from config for deletion\n");
+	    }
+
+	}
+
+	end_routine();
+
+	return(@rpms_defined);
+    }
+
     sub query_cluster_config_custom_packages {
 
 	begin_routine();

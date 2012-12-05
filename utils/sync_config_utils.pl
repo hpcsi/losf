@@ -812,9 +812,27 @@ BEGIN {
 	%custom_aliases = query_cluster_config_custom_aliases($node_cluster);
 	DEBUG("   --> number of custom aliases defined = ".keys(%custom_aliases)."\n");
 
-	# (1) verify packages for ALL node types
-
 	my $ALL_type = "ALL";
+
+	# verify *non* existence of desired packages for ALL node types
+
+	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$ALL_type);
+	foreach my $rpm (@custom_rpms_remove) {
+	    DEBUG("   --> Custom rpm removal requested for ALL = $rpm\n");
+	}
+
+	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
+
+	# verify *non* existence of desired packages current  node type
+
+	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$node_type);
+	foreach my $rpm (@custom_rpms_remove) {
+	    DEBUG("   --> Custom rpm removal requested for ALL = $rpm\n");
+	}
+
+	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
+
+	# verify packages for ALL node types
 
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$ALL_type);
 	foreach my $rpm (@custom_rpms) {
@@ -823,7 +841,7 @@ BEGIN {
 
 	verify_custom_rpms(\$ALL_type,\@custom_rpms,\%custom_aliases);
 
-	# (2) verify packages for current node types
+	# verify packages for current node types
 	
 	INFO("\n");
 

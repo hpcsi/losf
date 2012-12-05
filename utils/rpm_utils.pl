@@ -417,6 +417,107 @@ sub verify_custom_rpms {
     end_routine();
 }
 
+sub verify_custom_rpms_removed {
+    begin_routine();
+
+    my $appliance_ref = shift;
+    my $rpm_ref       = shift;
+    my $alias_ref     = shift;
+
+    my $appliance     = $$appliance_ref;
+    my @rpm_list      = @$rpm_ref;
+    my %aliases       = %$alias_ref;
+
+#    my @rpm_list        = @_;
+
+    my @rpms_to_remove = ();
+    my $num_rpms       = @rpm_list;
+
+    if($num_rpms < 1) { return; }
+
+    INFO("   --> Verifying desired Custom RPMs are *not* installed ($num_rpms total)...\n");
+
+    # Resolve any group aliases, we pop to the end of the array, so
+    # that multiple levels of alias resolution can be resolved (ie. an
+    # alias might include another alias)
+
+    foreach $rpm (@rpm_list) {
+	if( $rpm =~ m/^@(\S+)/ ) {
+	    my $group = $1;
+	    DEBUG("   --> rpm group requested -> $group\n");
+
+	    if( ! exists $aliases{$group} ) {
+		MYERROR("   --> Alias $group requested but not defined\n");
+	    }
+
+	    # replace  @group with defined rpms
+
+	    foreach $rpm_group (@{$aliases{$group}}) {
+		INFO("   --> $group expansion - adding $rpm_group for $appliance\n");
+		push(@rpm_list,$rpm_group);
+	    }
+	}
+    }
+
+    # reset num_rpms to account for alias expansion
+
+    $num_rpms = @rpm_list;    
+
+    foreach $rpm (@rpm_list) {
+	DEBUG("   --> Checking $rpm\n");
+	INFO("   --> Checking $rpm\n");
+
+	if( $rpm =~ m/^@(\S+)/ ) { next; } # @groups names have already been expanded, skip this @group
+
+	my @rpm_array  = split(/\s+/,$rpm);
+
+	my $arch       = rpm_arch_from_filename($rpm_array[0]);
+
+	# return array format = (name,version,release,arch)
+
+	my @installed_rpm = is_rpm_installed     ($rpm_array[0],$arch);
+
+	if( @installed_rpm ne 0 ) {
+	    print "   --> $installed_rpm[0] is installed....registering for removal\n";
+	    SYSLOG("Registering locally installed $installed_rpm[0] for removal");
+
+	    push(@rpms_to_remove,$rpm_array[0]);
+	}
+
+    }
+
+    # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
+
+    my $count = @rpms_to_remove;
+
+    if( $count eq 0 ) {
+	return;
+    } else {
+	print "   --> ";
+	print color 'red';
+	print "FAILED";
+	print color 'reset';
+	print ": A total of $count Custsom rpm(s) need to be removed for $appliance\n";
+    }
+
+    # Remove unwanted packages called out by user.
+
+    my $cmd = "rpm -ev "."@rpms_to_remove";
+    
+    system($cmd);
+
+    my $ret = $?;
+
+    if ( $ret != 0 ) {
+	SYSLOG("** Local RPM removal unsuccessful (ret=$ret)");
+	MYERROR("Unable to remove desired OS package RPMs (status = $ret)\n");
+    } else {
+	SYSLOG("RPM uninstall(s) successful");
+    }
+
+    end_routine();
+}
+
 # --------------------------------------------------------
 # is_rpm_installed (packagename)
 # 
