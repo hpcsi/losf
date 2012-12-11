@@ -835,7 +835,7 @@ BEGIN {
 
 	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$node_type);
 	foreach my $rpm (@custom_rpms_remove) {
-	    DEBUG("   --> Custom rpm removal requested for ALL = $rpm\n");
+	    DEBUG("   --> Custom rpm removal requested for node:$node_type = $rpm\n");
 	}
 
 	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
