@@ -673,7 +673,7 @@ sub add_distro_group {
     my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
-    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir groupinstall $package >& /dev/null";
+    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir groupinstall \"$package\" >& /dev/null";
     DEBUG("   --> Running yum command \"$cmd\"\n");
 
    `$cmd`;
@@ -1176,7 +1176,8 @@ GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$u
 if (@ARGV >= 1) {
     $command  = shift@ARGV;
     if(@ARGV >= 1) {
-	$argument = shift@ARGV;
+#	$argument = shift@ARGV;
+	$argument = "@ARGV";
     }
 } else {
     usage();
