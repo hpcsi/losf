@@ -71,22 +71,41 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	print "** Syncing configuration files ($node_cluster:$node_type)\n";
 
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
-	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
-	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
+
+	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
+	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
+	my %perm_files    = query_cluster_config_sync_permissions($node_cluster,$node_type);
+
+	# note: if the user supplies a partial config request for a
+	# particular appliance, this should override a const file
+	# request. We do this to allow a user to have a const file
+	# which is completely synced for one node type, but only
+	# partially synced for a second node type. Long story short,
+	# we now unmark any const files for the host which have the
+	# extra partial_file (sacrifice an extra hash for this purpose).
+
+	my %partial_file_hash = ();
+
+	foreach(@partial_files) {
+	    $partial_file_hash{$_} = 1;
+	}
+
+	# Sync const files
+
+	print "** Syncing configuration files ($node_cluster:$node_type)\n";
 
 	foreach(@sync_files) {
-	    sync_const_file("$_");
+	    if( !exists $partial_file_hash{$_} ) {
+		sync_const_file("$_");
+	    }
 	}
 
 	# Now, sync partial contents...
 
 	INFO("** Syncing configuration files (partial contents))\n\n");
 	
-	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
-
 	foreach(@partial_files) {
 	    sync_partial_file("$_");
 	}
@@ -385,6 +404,13 @@ BEGIN {
 	# Look for delimiter to define portion of file to sync and embed sync contents
 
 	(my $fh_tmp, my $new_file) = tempfile();
+
+	# 
+
+	if ( ! -e "$file" ) {
+	    WARN("   --> Warning: partial const_file $file not present, ignoring sync request\n");
+	    return 0;
+	}
 
 	open(IN,     "+<$file")     || die "Cannot open $file\n";
 	open(REF,    "<$ref_file")  || die "Cannot open $ref_file\n";
