@@ -79,17 +79,29 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
-	my @sync_files = query_cluster_config_const_sync_files($node_cluster,$node_type);
+	my @sync_files         = query_cluster_config_const_sync_files($node_cluster,$node_type);
+	my @sync_files_partial = query_cluster_config_partial_sync_files($node_cluster,$node_type);
 
 	my $found=0;
 
-	foreach(@sync_files) {
-	    if( "$_" eq "$file" ) {
-		$found=1;
-		sync_const_file($file);
-		exit(0);
-	    }
+	# partially synced file? we do this first as a partial sync
+	# request trumps a normal sync request.
+
+	if (grep {$_ eq $file } @sync_files_partial ) {
+	    $found=1;
+	    sync_partial_file($file);
+	    exit(0);  
 	}
+
+	# normal const file?
+
+	if (grep {$_ eq $file } @sync_files ) {
+	    $found=1;
+	    sync_const_file($file);
+	    exit(0);  
+	}
+
+
 
 	if (! $found) { 
 	    MYERROR("$file not under LosF control - not syncing");

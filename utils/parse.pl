@@ -503,13 +503,13 @@ BEGIN {
 	my $logr          = get_logger();
 	my @sync_partials = ();
 
-	INFO("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
+	INFO("   --> Looking for defined files to perform partial sync...($cluster->ALL)\n");
 
-	if ( ! $local_cfg->SectionExists("ConfigFiles") ) {
-	    MYERROR("No Input section found for cluster $cluster [ConfigFiles]\n");
+	if ( ! $local_cfg->SectionExists("PartialConfigFiles") ) {
+	    WARN("No Input section found for cluster $cluster [PartialConfigFiles]\n");
 	}
 
-	my @defined_files = $local_cfg->Parameters("ConfigFiles");
+	my @defined_files = $local_cfg->Parameters("PartialConfigFiles");
 
 	my $num_files = @defined_files;
 
@@ -517,10 +517,37 @@ BEGIN {
 
 	foreach(@defined_files) {
 	    DEBUG("   --> Read value for $_\n");
-	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
+	    if (defined ($myval = $local_cfg->val("PartialConfigFiles",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
-		if ( "$myval" eq "partial" ) {
-		    DEBUG("   --> Partial sync defined for $_\n");
+		if ( "$myval" eq "partial" || "$myval" eq "yes" ) {
+		    INFO("   --> Partial sync defined for $_\n");
+		    push(@sync_partials,$_);
+		}
+	    } else {
+		MYERROR("ConfigFile defined with no value ($_)");
+	    }
+	}
+
+	# Now, check node-type specific configuration
+
+	INFO("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("PartialConfigFiles/$host") ) {
+	    WARN("No Input section found for cluster $cluster [PartialConfigFiles/$host]\n");
+	}
+
+	my @defined_files = $local_cfg->Parameters("PartialConfigFiles/$host");
+
+	my $num_files = @defined_files;
+
+	INFO("   --> \# of files defined = $num_files\n");
+
+	foreach(@defined_files) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("PartialConfigFiles/$host",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		if ( "$myval" eq "partial" || "$myval" eq "yes" ) {
+		    INFO("   --> Partial sync defined for $_\n");
 		    push(@sync_partials,$_);
 		}
 	    } else {
