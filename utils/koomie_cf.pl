@@ -112,7 +112,6 @@ if ( $opt_r ne "" ) {
 # Hostfile Options
 
 if ( $opt_f ne "" ) {
-    print "Using hosts from file -> $opt_f\n";
 
     if ( ! -s $opt_f ) {
 	die("Empty or unavailalbe hostfile -> $opt_f");
