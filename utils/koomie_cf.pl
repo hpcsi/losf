@@ -3,14 +3,15 @@
 use POSIX;
 require "getopts.pl";
 
-do Getopts("r:i:m:t:h:w:c:x:");
+do Getopts("r:i:m:t:h:w:c:x:f:");
 
 $timeout = 5*60;
 $n = @ARGV;
+
 if ($n == 0) {
     print <<EOF
 
-Usage: koomie_cf -r <1,2,...n>,<2-5> [OPTIONS] command
+Usage: koomie_cf [OPTIONS] command
 
 where "command" is a command to spawn in parallel across one or more
 cluster hosts using ssh. Results of the commands from each host are
@@ -24,10 +25,12 @@ OPTIONS:
   -r <1,2,..n>|<2-5>      operate on a subset list of racks (e.g. -r 101-105); this option
                           can also accept a special rack types (e.g. -r login)
   -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
+  -f <hostfile>           operate on hosts specified in provided hostfile
   -m <max_ssh>            maximum number of commands to run in parallel (default = 288)
   -t <timout>             timeout period for command completion in seconds (default = 5 minutes)
   -x <regex>              operate on hosts which match supplied regex
   -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
+
 
 EOF
 ;
@@ -37,24 +40,6 @@ EOF
 if ($opt_t) {
      $timeout = $opt_t;
 }
-
-# if ($opt_h) {
-#     @list = split(/,/,$opt_h);
-#     foreach $host (@list) {
-# 	if ($host =~ /c(\d\d*)[-](\d)(\d\d)/) {
-# 	    $c{$1 . "_" . $2} = 1;
-# 	    $h{$1 . "_" . $2 . $3} = 1;
-# 	} elsif ($host =~ /compute[-](\d\d*)[-](\d)(\d\d)/) {
-# 	    $c{$1 . "_" . $2} = 1;
-# 	    $h{$1 . "_" . $2 . $3} = 1;
-# 	} elsif ($host =~ /oss(\d+?)\b/) {
-# 	    print "found valid oss $1\n";
-# 	    $oss_nodes{$1} = 1;
-# 	} else {
-# 	}
-#     }
-# }
-
 
 
 $max_ssh = 288;
@@ -124,55 +109,76 @@ if ( $opt_r ne "" ) {
 
 }
 
-# Scan the host list and mark desired hosts.
+# Hostfile Options
 
-open(input, "/etc/hosts");
+if ( $opt_f ne "" ) {
+    print "Using hosts from file -> $opt_f\n";
 
-my $rnk_count = 0;
-
-while(<input>) {
-
-    if ( $opt_x ne "" ) {
-	if (/(\S+)\s+(\b$opt_x)\./) {
-	    $hosts{$2} = $rnk_count;
-	    $rnk_count++;
-	    next;
-	}
+    if ( ! -s $opt_f ) {
+	die("Empty or unavailalbe hostfile -> $opt_f");
     }
 
+    my $rnk_count = 0;
+
+    open(input,$opt_f) || die("Unable to open $opt_f");
+    while(<input>) {
+	chomp;
+	$hosts{$_} = $rnk_count;
+	$rnk_count++;
+    }
+
+} else {
+
+    # Scan the host list and mark desired hosts.
+
+    open(input, "/etc/hosts");
+
+    my $rnk_count = 0;
+
+    while(<input>) {
 	
-    if (/\bc(\d\d\d)[-](\d)(\d\d)\b/) {
-	$myhost    = "c$1-$2"."$3"; # full hostname        (e.g. 301-105)
-	$myrack    = $1;	    # rack number          (e.g. 301)
-	$myblade   = $2.$3;	    # chassis/host number  (e.g. 105)
-	$mychassis = "$1-$2";	    # chassis number       (e.g. 301-1)
-
-#	print "Checking on host $myhost\n";
-
-	if ( $opt_r ne "" ) {
-	    if ( $myrack =~ /$racks_desired/ ) {
-		$hosts{$myhost} = $myrack*10000 + $myblade;
+	if ( $opt_x ne "" ) {
+	    if (/(\S+)\s+(\b$opt_x)\./) {
+		$hosts{$2} = $rnk_count;
+		$rnk_count++;
+		next;
 	    }
-	} elsif ( $opt_c ne "" ) {
-	    
-	    if ( $mychassis =~ /$racks_desired/ ) {
-		$hosts{$myhost} = $myrack*10000 + $myblade;
-	    }		
-
 	}
-    } elsif ( /\boss(\d+?)\b/ && $opt_r eq "oss" ) {
-	$rank   = $1;
-	$myhost = "oss$rank";
-
+	
+	
+	if (/\bc(\d\d\d)[-](\d)(\d\d)\b/) {
+	    $myhost    = "c$1-$2"."$3"; # full hostname        (e.g. 301-105)
+	    $myrack    = $1;	    # rack number          (e.g. 301)
+	    $myblade   = $2.$3;	    # chassis/host number  (e.g. 105)
+	    $mychassis = "$1-$2";	    # chassis number       (e.g. 301-1)
+	    
+#	print "Checking on host $myhost\n";
+	    
+	    if ( $opt_r ne "" ) {
+		if ( $myrack =~ /$racks_desired/ ) {
+		    $hosts{$myhost} = $myrack*10000 + $myblade;
+		}
+	    } elsif ( $opt_c ne "" ) {
+		
+		if ( $mychassis =~ /$racks_desired/ ) {
+		    $hosts{$myhost} = $myrack*10000 + $myblade;
+		}		
+		
+	    }
+	} elsif ( /\boss(\d+?)\b/ && $opt_r eq "oss" ) {
+	    $rank   = $1;
+	    $myhost = "oss$rank";
+	    
 #	print "Checking on oss host $myhost\n";
-	$hosts{$myhost} = $rank;
-
-    } elsif ( /\blogin(\d+?)\b/ && $opt_r eq "login" ) {
-	$rank   = $1;
-	$myhost = "login$rank";
-	$hosts{$myhost} = $rank;
-    } 
-
+	    $hosts{$myhost} = $rank;
+	    
+	} elsif ( /\blogin(\d+?)\b/ && $opt_r eq "login" ) {
+	    $rank   = $1;
+	    $myhost = "login$rank";
+	    $hosts{$myhost} = $rank;
+	} 
+	
+    }
 }
 
 @hosts = sort {$hosts{$a} <=> $hosts{$b}} keys%hosts;
