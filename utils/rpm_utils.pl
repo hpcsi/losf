@@ -176,7 +176,7 @@ sub verify_rpms_removed {
 	print ": A total of $count OS rpm(s) need to be removed $appliance\n";
     }
 
-    # Remove unwanted os packages called out by user.
+    # Remove unwanted os packages called out by user
 
     my $cmd = "rpm -ev "."@rpms_to_remove";
     
@@ -502,7 +502,7 @@ sub verify_custom_rpms_removed {
 
     # Remove unwanted packages called out by user.
 
-    my $cmd = "rpm -ev "."@rpms_to_remove";
+    my $cmd = "rpm -ev --nodeps "."@rpms_to_remove";
     
     system($cmd);
 
