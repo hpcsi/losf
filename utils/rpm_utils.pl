@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2012 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -56,9 +56,45 @@ sub verify_rpms {
     if($num_rpms < 1) { return; }
 
     INFO("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
-    foreach $rpm (@rpm_list) {
+
+    foreach $entry (@rpm_list) {
+
+	my @rpm_array  = split(/\s+/,$entry);
+	my $rpm = $rpm_array[0];
+
 	DEBUG("   --> Checking $rpm\n");
 
+	# Determine desired rpm versionioning from options in config file
+
+	my $desired_version = "";
+	my $desired_release = "";
+
+	shift @rpm_array;
+	my $num_options = @rpm_array;
+
+	foreach $option (@rpm_array) {
+	    DEBUG("       --> Option = $option\n");
+	    if( $option =~ m/version=(\S+)/ ) { 
+		$desired_version = $1;
+		DEBUG("            --> found version = $1\n");
+	    } elsif ( $option =~ m/release=(\S+)/ ) { 
+		$desired_release = $1;
+		DEBUG("            --> found release = $1\n");
+	    }
+	}
+
+	if( $desired_version eq "" || $desired_release eq "" ) {
+	    ERROR("\n");
+	    ERROR("[ERROR]: Configuration error detected:\n");
+	    ERROR("[ERROR]: --> $entry\n");
+	    ERROR("\n");
+	    ERROR("[ERROR]: As of LosF v. 0.41, OS package definitions must include specific version and release\n");
+	    ERROR("[ERROR]: options for each desired package. \"losf addpkg\" will automatically include these\n");
+	    ERROR("[ERROR]: options for new additions, but config files from earlier versions need to be upgraded.\n");
+	    ERROR("[ERROR]: for compatability\n");
+	    exit (1);
+	}
+	    
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
@@ -87,20 +123,18 @@ sub verify_rpms {
 
 	# return array format = (name,version,release,arch)
 
-	my @desired_rpm   = rpm_version_from_file($filename);
+#	my @desired_rpm   = rpm_version_from_file($filename);
 	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
 
 	if( @installed_rpm eq 0 ) {
-
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
-	} elsif( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]") {
+	} elsif( "$desired_version-$desired_release" ne "$installed_rpm[1]-$installed_rpm[2]") {
 	    INFO("   --> version mismatch - registering for update...\n");
 	    push(@rpms_to_install,$filename);
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
 	}
-
     }
 
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
@@ -215,7 +249,6 @@ sub verify_custom_rpms {
 
     my %rpms_to_install = ();
     my $num_rpms        = @rpm_list;
-
 
 
     if($num_rpms < 1) { return; }

@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2012 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -77,10 +77,11 @@ sub usage {
 
     print "     addpkg     [package]         Add new OS package (and dependencies)\n";
     print "     delpkg     [package]         Remove previously added OS package\n";
-#    print "     updatepkg [package] Check for newly available distro package (NOT YET SUPPORTED)\n";
     print "     addgroup   [group]           Add new OS group (and dependencies)\n";
     print "     updatepkg  [package]         Update specific OS packages (and dependencies)\n";
+    print "     config-upgrade               Upgrade existing packages.config to latest configuration format\n";
     print "     updatepkgs                   Update all local OS packages (and dependencies)\n";
+
     print "\n";
 
     print color 'bold blue';
@@ -92,7 +93,6 @@ sub usage {
     print "\n";
 
     print "     addrpm    <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
-#    print "     addalias  <OPTIONS> [alias] Add a new alias for current node type\n";
     print "     showalias                   Show all currently defined aliases\n";
     print "\n";
     print "     OPTIONS:\n";
@@ -274,6 +274,135 @@ sub del_node {
 
 }
 
+sub update_os_config {
+
+    begin_routine();
+
+    print "** Upgrading OS package config file format to latest version (1.1)\n";
+    my $section = "OS Packages";
+
+    INFO("   Reading OS package config file -> $osf_config_dir/os-packages/"."$node_cluster/packages.config\n");
+    my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
+
+    # Check and update all OS packages for all currently defined node types
+
+    if(! $local_os_cfg->SectionExists($section) ) {
+	INFO("   --> No OS Packages currently defined - ignoring config upgrade request\n");
+	return;
+    }
+
+    my @node_types_in   = $local_os_cfg->Parameters($section);
+
+    # Don't bother with packages defined for removal
+
+    my @node_types      = ();
+
+    foreach $type (@node_types_in) {
+	if ( $type =~ /(\S+)_remove\b/ ) {
+	    print "Skipping $type...\n";
+	} else {
+	    push(@node_types,$type);
+	}
+    }
+
+    my @rpm_array       = ();
+    my $rpm             = "";
+    my $desired_version = "";
+    my $desired_release = "";
+    
+    foreach $type (@node_types) {
+	INFO("   --> Checking node type: $type\n");
+
+	@rpms_defined = ();
+	@rpms_defined = $local_os_cfg->val($section,$type);
+
+	$num_rpms = @rpms_defined;
+
+	DEBUG("       --> # of RPMs = $num_rpms\n");
+
+	$local_os_cfg->delval($section,$type);
+
+	foreach $entry (@rpms_defined) {
+
+	    $desired_version = "";
+	    $desired_release = "";
+
+	    @rpm_array = ();
+	    @rpm_array = split(/\s+/,$entry);
+	    $rpm       = $rpm_array[0];
+	    
+	    INFO("   --> Checking $type=$rpm\n");
+
+	    shift @rpm_array;
+
+	    foreach $option (@rpm_array) {
+		if( $option =~ m/version=(\S+)/ ) { 
+		    $desired_version = $1;
+		    DEBUG("            --> found version = $1\n");
+		} elsif ( $option =~ m/release=(\S+)/ ) { 
+		    $desired_release = $1;
+		    DEBUG("            --> found release = $1\n");
+		}
+	    }
+
+	    if( $desired_version eq "" || $desired_release eq "" ) {
+		INFO("   --> Needs upgrade\n");
+
+		my $arch      = rpm_arch_from_filename($rpm);
+		my $filename  = "$rpm_topdir/$arch/$rpm.rpm";
+
+		my @desired_rpm   = rpm_version_from_file($filename);
+		INFO("Upgrading: $rpm version=$desired_rpm[1] release=$desired_rpm[2]\n");
+
+		if($local_os_cfg->exists($section,$type)) {
+		    $local_os_cfg->push($section,$type,"$rpm version=$desired_rpm[1] release=$desired_rpm[2]");
+		} else {
+		    $local_os_cfg->newval($section,$type,"$rpm version=$desired_rpm[1] release=$desired_rpm[2]");
+		}
+	    } else {
+		if($local_os_cfg->exists($section,$type)) {
+		    $local_os_cfg->push($section,$type,"$rpm @rpm_array");
+		} else {
+		    $local_os_cfg->newval($section,$type,"$rpm @rpm_array");
+		}
+	    }
+	}
+
+    }  # end loop over all node types
+
+    my $new_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions";
+
+    $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+    
+    if ( compare($new_file,$ref_file) != 0 ) {
+	
+	if ( ! -d "$hist_dir") {
+	    mkdir("$hist_dir",0700);
+	}
+
+	my $timestamp=`date +%F:%H:%M`;
+	chomp($timestamp);
+	print "   --> Updating OS config file...\n";
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+	    MYERROR("Unable to save previous OS config file\n");
+	rename($new_file,$ref_file)                 || 
+	    MYERROR("Unaable to update OS config file\n");
+	print "Copy of original configuration file stored in $hist_dir....\n";
+    } else {
+	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+    }
+
+    print "\n\nOS config file upgrage complete\n";
+
+    end_routine();
+}
+
+
 sub update_distro_packages {
 
     begin_routine();
@@ -345,7 +474,6 @@ sub update_distro_packages {
 
     # Upgrade: since we are using arrays for input values, upgrade
     # means removing all values, and re-inserting desired values.
-
 
     my $section = "OS Packages";
     my $name    = $node_type;
@@ -432,7 +560,7 @@ sub update_distro_packages {
 
     my $new_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
     my $ref_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions/packages.config";
+    my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions";
 
     $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -584,9 +712,11 @@ sub add_distro_package {
 		INFO("       --> Adding $file ($node_type)\n");
 
 		if($local_os_cfg->exists("OS Packages","$node_type")) {
-		    $local_os_cfg->push("OS Packages",$node_type,$rpm_package);
+		    $local_os_cfg->push("OS Packages",$node_type,
+					"$rpm_package version=$version_info[1] release=$version_info[2]");
 		} else {
-		    $local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
+		    $local_os_cfg->newval("OS Packages",$node_type,
+					  "$rpm_package version=$version_info[1] release=$version_info[2]");
 		}
 
 		# Stage downloaded RPM files into LosF repository
@@ -1198,35 +1328,17 @@ switch ($command) {
 
     # Do the deed
     
-    case "add"        { add_node($argument) };
-    case "del"        { del_node($argument) };
-    case "delete"     { del_node($argument) };
+    case "add"            { add_node($argument) };
+    case "del"            { del_node($argument) };
+    case "delete"         { del_node($argument) };
+		          
+    case "addpkg"         { add_distro_package($argument)     };
+    case "addgroup"       { add_distro_group  ($argument)     };
+    case "showalias"      { show_defined_aliases()            };
+    case "updatepkg"      { update_distro_packages($argument) };
+    case "updatepkgs"     { update_distro_packages("ALL")     };
+    case "config-upgrade" { update_os_config()                };
 
-    case "addpkg"     { add_distro_package($argument)     };
-    case "addgroup"   { add_distro_group  ($argument)     };
-    case "showalias"  { show_defined_aliases()            };
-    case "updatepkg"  { update_distro_packages($argument) };
-    case "updatepkgs" { update_distro_packages("ALL")     };
-
-###    case "addalias" { 
-###
-###	# parse any additional options used with addalias
-###
-###	my $nodetype = "local";
-###
-###	if($all) {
-###	    $nodetype = "ALL";
-###	}
-###
-###	if($assume_yes) {
-###	    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
-###	}
-###
-###	print "my argument = $argument\n";
-###
-###	register_alias  ($argument,$nodetype);
-###
-###    }
     case "addrpm"   { 
 
 	# parse any additional options used with addrpm

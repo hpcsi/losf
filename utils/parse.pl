@@ -342,7 +342,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
 
-	INFO("   --> Looking for OS packages to sync...($cluster->$node_type)\n");
+	INFO("   --> Reading config for OS packages to sync...($cluster->$node_type)\n");
 
 	if ( ! $local_os_cfg->SectionExists("OS Packages") ) {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
@@ -363,7 +363,6 @@ BEGIN {
 	}
 
 	end_routine();
-
 	return(@rpms_defined);
     }
 

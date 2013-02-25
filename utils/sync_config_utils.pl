@@ -61,7 +61,7 @@ BEGIN {
     my $osf_sync_custom_packages = 0;
     
     sub parse_and_sync_const_files {
-
+	
 	verify_sw_dependencies();
 	begin_routine();
 	
@@ -69,9 +69,9 @@ BEGIN {
 	    #INFO("** Syncing configuration files (const)\n\n");
 	    $osf_sync_const_file = 1;
 	}
-
+	
 	(my $node_cluster, my $node_type) = determine_node_membership();
-
+	
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
 	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
@@ -819,7 +819,6 @@ BEGIN {
 
 	end_routine();
     }
-
 
     sub parse_and_sync_custom_packages {
 
