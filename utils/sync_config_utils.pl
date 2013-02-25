@@ -53,6 +53,7 @@ require "$osf_utils_dir/rpm_utils.pl";
 
 BEGIN {
 
+    my $osf_cached_rpms          = 0;
     my $osf_sync_const_file      = 0;
     my $osf_sync_soft_links      = 0;
     my $osf_sync_services        = 0;

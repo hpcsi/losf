@@ -126,6 +126,14 @@ sub verify_rpms {
 #	my @desired_rpm   = rpm_version_from_file($filename);
 	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
 
+#	print "is_rpm_installed = @installed_rpm\n";
+#	my @installed     = split(' ',$installed_rpm);
+
+#	print "   1 = $installed[0]\n";
+#	print "   2 = $installed[1]\n";
+#	print "   3 = $installed[2]\n";
+#	print "   4 = $installed[3]\n";
+
 	if( @installed_rpm eq 0 ) {
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
@@ -133,7 +141,8 @@ sub verify_rpms {
 	    INFO("   --> version mismatch - registering for update...\n");
 	    push(@rpms_to_install,$filename);
 	} else {
-	    DEBUG("   --> $desired_rpm[0] is already installed\n");
+	    INFO("   --> $desired_rpm[0] is already installed\n");
+#	    DEBUG("   --> $desired_rpm[0] is already installed\n");
 	}
     }
 
@@ -352,7 +361,6 @@ sub verify_custom_rpms {
 	# installed have different options specified. This uses a perl
 	# array of hashes, so the syntax is slightly gnarly.
 
-
 	my $installed_versions = @installed_rpm / 4;
 
 	if( $installed_versions == 0 ) {
@@ -552,6 +560,37 @@ sub verify_custom_rpms_removed {
 }
 
 # --------------------------------------------------------
+# query_all_installed_rpms
+# 
+# Caches all currently installed rpms along with version
+# and release number information.  We do this once and 
+# cache for speed so that other utilities can query 
+# against it (added 2/25/13)
+# --------------------------------------------------------
+
+sub query_all_installed_rpms {
+    begin_routine();
+
+    my @empty_list              = ();
+    @losf_global_rpms_installed = ();
+
+    INFO("   --> Caching all currently installed RPMs...\n");
+
+    @losf_global_rpms_installed = split('LOSF_DELIM_AA',
+					`rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}LOSF_DELIM_AA'`);
+
+#		     `rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}LOSF_DELIM_AA'`);
+# abrt-2.0.8-6.el6.centos.x86_64
+
+    if( $? != 0) {
+	@losf_global_rpms_installed = @empty_list;
+    }
+
+    $osf_cached_rpms = 1;
+    end_routine();
+}
+
+# --------------------------------------------------------
 # is_rpm_installed (packagename)
 # 
 # Checks to see if packagename is installed and returns
@@ -561,19 +600,53 @@ sub verify_custom_rpms_removed {
 sub is_rpm_installed {
     begin_routine();
 
+    # 2/23/13 - performance optimization: we now query against a cached
+    # version of all locally installed rpms. Verify that cache has been generated.
+    
+    if(! $osf_cached_rpms ) {
+	query_all_installed_rpms()
+    }
+
     my $packagename   = shift;
     my @matching_rpms = ();
     my @empty_list    = ();
 
+#    print "looking for $packagename\n";
+
     DEBUG("   --> Checking if $packagename RPM is installed locally\n");
 
-    @matching_rpms  = 
-	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
+    # 2/23/13 - performance optimization: query against cached array
 
-    if( $? != 0) {
-	@matching_rpms = @empty_list;
-#	return(@empty_list);
+    foreach $entry (@losf_global_rpms_installed) {
+	@installed = split(' ',$entry);
+#	print "installed = $entry\n";
+#	print "   1 = $installed[0]\n";
+#	print "   2 = $installed[1]\n";
+#	print "   3 = $installed[2]\n";
+#	print "   4 = $installed[3]\n";
+
+	$key = $installed[0]."-".$installed[1]."-".$installed[2].".".$installed[3];
+
+#	print "     packagename = $packagename, key = $key\n";
+
+#	if( "$packagename" =~ "$key" ) {
+	if( "$packagename" eq "$key" ) {
+#	    push(@matching_rpms,$entry);
+	    push(@matching_rpms,$installed[0]);
+	    push(@matching_rpms,$installed[1]);
+	    push(@matching_rpms,$installed[2]);
+	    push(@matching_rpms,$installed[3]);
+	}
     }
+
+#    @matching_rpms = grep(/^$packagename/,@losf_global_rpms_installed);
+ 
+#    @matching_rpms  = 
+#	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
+
+#    if( $? != 0) {
+#	@matching_rpms = @empty_list;
+#    }
 
     end_routine();
 
