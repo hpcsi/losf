@@ -68,6 +68,7 @@ sub verify_rpms {
 
 	my $desired_version = "";
 	my $desired_release = "";
+	my $desired_arch    = "";
 
 	shift @rpm_array;
 	my $num_options = @rpm_array;
@@ -80,30 +81,37 @@ sub verify_rpms {
 	    } elsif ( $option =~ m/release=(\S+)/ ) { 
 		$desired_release = $1;
 		DEBUG("            --> found release = $1\n");
+	    } elsif ( $option =~ m/arch=(\S+)/ ) { 
+		$desired_arch = $1;
+		DEBUG("            --> found arch = $1\n");
 	    }
 	}
 
-	if( $desired_version eq "" || $desired_release eq "" ) {
+	# Feb 2013: New config requirement with version 0.41 
+
+	if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "" ) {
 	    ERROR("\n");
 	    ERROR("[ERROR]: Configuration error detected:\n");
 	    ERROR("[ERROR]: --> $entry\n");
 	    ERROR("\n");
-	    ERROR("[ERROR]: As of LosF v. 0.41, OS package definitions must include specific version and release\n");
-	    ERROR("[ERROR]: options for each desired package. \"losf addpkg\" will automatically include these\n");
+	    ERROR("[ERROR]: As of LosF v. 0.41, OS package definitions must include specific version, release and\n");
+	    ERROR("[ERROR]: arch options for each desired package. \"losf addpkg\" will automatically include these\n");
 	    ERROR("[ERROR]: options for new additions, but config files from earlier versions need to be upgraded.\n");
 	    ERROR("[ERROR]: for compatability\n");
 	    exit (1);
 	}
+
+	my $full_rpm_name = "$rpm-$desired_version-$desired_release.$desired_arch";
 	    
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
-	my $arch     = rpm_arch_from_filename($rpm);
+###	my $arch     = rpm_arch_from_filename($rpm);
 
 	if ( "$MODE" eq "PXE" ) {
-	    $filename = "$SRC_DIR/$arch/$rpm.rpm";
+	    $filename = "$SRC_DIR/$desired_arch/$full_rpm_name.rpm";
 	} else {
-	    $filename = "$rpm_topdir/$arch/$rpm.rpm";
+	    $filename = "$rpm_topdir/$desired_arch/$full_rpm_name.rpm";
 	}
 
 	if ( ! -s "$filename" ) {
@@ -115,24 +123,23 @@ sub verify_rpms {
 	# it. Otherwise, we revert to the standard rpm_topdir.
 
 	if( $rpm_cachedir ne "NONE" ) {
-	    if ( -s "$rpm_cachedir/$arch/$rpm.rpm" ) {
-		DEBUG("Using cached rpm in $rpm_cachedir/$arch/$rpm.rpm");
-		$filename="$rpm_cachedir/$arch/$rpm.rpm";
+	    my $cache_file = "$rpm_cachedir/$arch/$full_rpm_name.rpm";
+	    if ( -s $cache_file ) {
+		DEBUG("Using cached rpm in $cache_file");
+		$filename=$cache_file;
 	    }
 	}
 
 	# return array format = (name,version,release,arch)
 
-#	my @desired_rpm   = rpm_version_from_file($filename);
-	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
+###	my @desired_rpm   = rpm_version_from_file($filename);
+###	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
+###	my @installed_rpm = is_rpm_installed     ($full_rpm_name);
 
-#	print "is_rpm_installed = @installed_rpm\n";
-#	my @installed     = split(' ',$installed_rpm);
+	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
 
-#	print "   1 = $installed[0]\n";
-#	print "   2 = $installed[1]\n";
-#	print "   3 = $installed[2]\n";
-#	print "   4 = $installed[3]\n";
+###	print "is_rpm_installed = @installed_rpm\n";
+###	my @installed     = split(' ',$installed_rpm);
 
 	if( @installed_rpm eq 0 ) {
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
@@ -141,8 +148,7 @@ sub verify_rpms {
 	    INFO("   --> version mismatch - registering for update...\n");
 	    push(@rpms_to_install,$filename);
 	} else {
-	    INFO("   --> $desired_rpm[0] is already installed\n");
-#	    DEBUG("   --> $desired_rpm[0] is already installed\n");
+	    DEBUG("   --> $desired_rpm[0] is already installed\n");
 	}
     }
 
@@ -264,7 +270,7 @@ sub verify_custom_rpms {
 
     INFO("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
 
-    # Resolve any group aliases, we pop to the end of the array, so
+    # Resolve any group aliases: we pop to the end of the array, so
     # that multiple levels of alias resolution can be resolved (ie. an
     # alias might include another alias)
 
@@ -571,23 +577,53 @@ sub verify_custom_rpms_removed {
 sub query_all_installed_rpms {
     begin_routine();
 
-    my @empty_list              = ();
-    @losf_global_rpms_installed = ();
+    my @rpms_installed          = ();
+    %losf_global_rpms_installed = ();
 
     INFO("   --> Caching all currently installed RPMs...\n");
 
-    @losf_global_rpms_installed = split('LOSF_DELIM_AA',
-					`rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}LOSF_DELIM_AA'`);
+###    @losf_global_rpms_installed = split('LOSF_DELIM_AA',
+
+    @rpms_installed = split('_LOSF_DELIM',`rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
+
+    # we now have all the rpms and their associated version,
+    # release, and arch. cache the results in a global hash table for
+    # later use (hash key is of the form "rpmname.arch")
+
+    foreach $entry (@rpms_installed) {
+	my @rpm_array  = split(/\s+/,$entry);
+	my $key = "$rpm_array[0].$rpm_array[3]";
+
+	@{$losf_global_rpms_installed{$key}} = @rpm_array;
+    }
 
 #		     `rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}LOSF_DELIM_AA'`);
 # abrt-2.0.8-6.el6.centos.x86_64
 
-    if( $? != 0) {
-	@losf_global_rpms_installed = @empty_list;
-    }
-
     $osf_cached_rpms = 1;
     end_routine();
+}
+
+sub is_os_rpm_installed {
+    begin_routine();
+
+    my $packagename   = shift;    # package keyname of the form "rpmname.arch"
+    my @matching_rpms = ();
+
+    # 2/23/13 - performance optimization: we now query against a cached
+    # version of all locally installed rpms. Verify that cache has been generated.
+    
+    if(! $osf_cached_rpms ) {
+	query_all_installed_rpms()
+    }
+
+    if (exists $losf_global_rpms_installed{$packagename} ) {
+	@matching_rpms = @{$losf_global_rpms_installed{$packagename}};
+    } 
+
+#    print "matching rpms = @matching_rpms\n";
+    return(@matching_rpms);
+
 }
 
 # --------------------------------------------------------
@@ -611,7 +647,7 @@ sub is_rpm_installed {
     my @matching_rpms = ();
     my @empty_list    = ();
 
-#    print "looking for $packagename\n";
+    print "looking for $packagename\n";
 
     DEBUG("   --> Checking if $packagename RPM is installed locally\n");
 
@@ -650,7 +686,8 @@ sub is_rpm_installed {
 
     end_routine();
 
-#    print "matching rpms = @matching_rpms\n";
+    print "matching rpms = @matching_rpms\n";
+    exit 1;
     return(@matching_rpms);
 }
 

@@ -875,6 +875,8 @@ BEGIN {
 
 	verify_custom_rpms(\$ALL_type,\@custom_rpms,\%custom_aliases);
 
+	exit 1;
+
 	# verify packages for current node types
 	
 	INFO("\n");

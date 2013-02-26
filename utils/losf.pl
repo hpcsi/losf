@@ -278,6 +278,8 @@ sub update_os_config {
 
     begin_routine();
 
+#   FORMAT 1.1
+
     print "** Upgrading OS package config file format to latest version (1.1)\n";
     my $section = "OS Packages";
 
@@ -305,6 +307,134 @@ sub update_os_config {
 	}
     }
 
+    my @rpm_array       = ();
+    my $rpm             = "";
+    my $desired_version = "";
+    my $desired_release = "";
+    
+    foreach $type (@node_types) {
+	INFO("   --> Checking node type: $type\n");
+
+	@rpms_defined = ();
+	@rpms_defined = $local_os_cfg->val($section,$type);
+
+	$num_rpms = @rpms_defined;
+
+	DEBUG("       --> # of RPMs = $num_rpms\n");
+
+	$local_os_cfg->delval($section,$type);
+
+	foreach $entry (@rpms_defined) {
+
+	    $desired_version = "";
+	    $desired_release = "";
+	    $desired_arch    = "";
+
+	    @rpm_array = ();
+	    @rpm_array = split(/\s+/,$entry);
+	    $rpm       = $rpm_array[0];
+	    
+	    INFO("   --> Checking $type=$rpm\n");
+
+	    shift @rpm_array;
+
+	    foreach $option (@rpm_array) {
+		if( $option =~ m/version=(\S+)/ ) { 
+		    $desired_version = $1;
+		    DEBUG("            --> found version = $1\n");
+		} elsif ( $option =~ m/release=(\S+)/ ) { 
+		    $desired_release = $1;
+		    DEBUG("            --> found release = $1\n");
+		} elsif ( $option =~ m/arch=(\S+)/ ) {
+		    $desired_arch = $1;
+		}
+	    }
+
+	    if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "" ) {
+		INFO("   --> Needs upgrade\n");
+
+		my $arch        = rpm_arch_from_filename($rpm);
+		my $filename    = "$rpm_topdir/$arch/$rpm.rpm";
+		my @desired_rpm = rpm_version_from_file($filename);
+
+		my $updated_fmt = "$desired_rpm[0] version=$desired_rpm[1] release=$desired_rpm[2] arch=$desired_rpm[3]";
+
+		INFO("Upgrading: $updated_fmt\n");
+
+		if($local_os_cfg->exists($section,$type)) {
+		    $local_os_cfg->push($section,$type,$updated_fmt);
+		} else {
+		    $local_os_cfg->newval($section,$type,$updated_fmt);
+		}
+	    } else {
+		if($local_os_cfg->exists($section,$type)) {
+		    $local_os_cfg->push($section,$type,"$rpm @rpm_array");
+		} else {
+		    $local_os_cfg->newval($section,$type,"$rpm @rpm_array");
+		}
+	    }
+	}
+
+    }  # end loop over all node types
+
+    my $new_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions";
+
+    $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+    update_losf_config_file($new_file,$ref_file,$hist_dir,"OS");
+
+#    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
+#    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+    
+#    if ( compare($new_file,$ref_file) != 0 ) {
+#	
+#	if ( ! -d "$hist_dir") {
+#	    mkdir("$hist_dir",0700);
+#	}
+#
+#	my $timestamp=`date +%F:%H:%M`;
+#	chomp($timestamp);
+#	print "   --> Updating OS config file...\n";
+#	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+#	    MYERROR("Unable to save previous OS config file\n");
+#	rename($new_file,$ref_file)                 || 
+#	    MYERROR("Unaable to update OS config file\n");
+#	print "Copy of original configuration file stored in $hist_dir....\n";
+#    } else {
+#	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+#    }
+#
+    print "\n\nOS config file upgrage complete\n";
+
+    end_routine();
+
+} # end update_os_config
+
+sub update_custom_config {
+
+    begin_routine();
+
+    print "** Upgrading Custom RPM package config file format to latest version (1.1)\n";
+    my $section = "Custom Packages";
+
+    INFO("   Reading OS package config file -> $osf_config_dir/custom-packages/"."$node_cluster/packages.config\n");
+
+    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
+
+    # Check and update all OS packages for all currently defined node types
+
+    if(! $local_os_cfg->SectionExists($section) ) {
+	INFO("   --> No [$section] section currently defined - ignoring config upgrade request\n");
+	return;
+    }
+    
+    my @node_types = ();
+#    my @node_types = $local_custom_cfg->Parameters($section);
+    
+    push(@node_types,"ALL");
+    
     my @rpm_array       = ();
     my $rpm             = "";
     my $desired_version = "";
@@ -400,7 +530,8 @@ sub update_os_config {
     print "\n\nOS config file upgrage complete\n";
 
     end_routine();
-}
+
+} # end update_os_config
 
 
 sub update_distro_packages {
@@ -1293,6 +1424,41 @@ sub show_defined_aliases {
     return;
 } # end sub show_defined_aliases()
 
+sub update_losf_config_file {
+    begin_routine();
+    
+    my $new_file = shift;
+    my $ref_file = shift;
+    my $hist_dir = shift;
+    my $name     = shift;
+
+    if ( ! -s $new_file ) { MYERROR("Error accessing new config file during update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing orig config file for update: $ref_file"); }
+    
+    if ( compare($new_file,$ref_file) != 0 ) {
+	
+	if ( ! -d "$hist_dir") {
+	    mkdir("$hist_dir",0700);
+	}
+	
+	my $timestamp=`date +%F:%H:%M`;
+	chomp($timestamp);
+
+	print "   --> Updating $name config file...\n";
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+	    MYERROR("Unable to save previous $name config file\n");
+	rename($new_file,$ref_file)                 || 
+	    MYERROR("Unaable to update $name config file\n");
+
+	print "Copy of original configuration file stored in $hist_dir....\n";
+    } else {
+	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
+    }
+
+    end_routine();
+    return;
+}
+
 #-------------------------------------------
 # Main front-end for losf command-line tool
 #-------------------------------------------
@@ -1337,7 +1503,10 @@ switch ($command) {
     case "showalias"      { show_defined_aliases()            };
     case "updatepkg"      { update_distro_packages($argument) };
     case "updatepkgs"     { update_distro_packages("ALL")     };
-    case "config-upgrade" { update_os_config()                };
+    case "config-upgrade" { 
+	update_os_config();
+#	update_custom_config();
+    };
 
     case "addrpm"   { 
 
