@@ -597,6 +597,7 @@ sub query_all_installed_rpms {
 	my @rpm_array  = split(/\s+/,$entry);
 	my $key = "$rpm_array[0].$rpm_array[3]";
 
+
 	@{$losf_global_rpms_installed{$key}} = @rpm_array;
     }
 
@@ -639,58 +640,21 @@ sub is_os_rpm_installed {
 sub is_rpm_installed {
     begin_routine();
 
-    # 2/23/13 - performance optimization: we now query against a cached
-    # version of all locally installed rpms. Verify that cache has been generated.
-    
-    if(! $osf_cached_rpms ) {
-	query_all_installed_rpms()
-    }
-
     my $packagename   = shift;
     my @matching_rpms = ();
     my @empty_list    = ();
 
-    print "looking for $packagename\n";
-
     DEBUG("   --> Checking if $packagename RPM is installed locally\n");
 
-    # 2/23/13 - performance optimization: query against cached array
+    @matching_rpms  = 
+	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
 
-    foreach $entry (@losf_global_rpms_installed) {
-	@installed = split(' ',$entry);
-#	print "installed = $entry\n";
-#	print "   1 = $installed[0]\n";
-#	print "   2 = $installed[1]\n";
-#	print "   3 = $installed[2]\n";
-#	print "   4 = $installed[3]\n";
-
-	$key = $installed[0]."-".$installed[1]."-".$installed[2].".".$installed[3];
-
-#	print "     packagename = $packagename, key = $key\n";
-
-#	if( "$packagename" =~ "$key" ) {
-	if( "$packagename" eq "$key" ) {
-#	    push(@matching_rpms,$entry);
-	    push(@matching_rpms,$installed[0]);
-	    push(@matching_rpms,$installed[1]);
-	    push(@matching_rpms,$installed[2]);
-	    push(@matching_rpms,$installed[3]);
-	}
+    if( $? != 0) {
+	@matching_rpms = @empty_list;
     }
-
-#    @matching_rpms = grep(/^$packagename/,@losf_global_rpms_installed);
- 
-#    @matching_rpms  = 
-#	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
-
-#    if( $? != 0) {
-#	@matching_rpms = @empty_list;
-#    }
 
     end_routine();
 
-    print "matching rpms = @matching_rpms\n";
-    exit 1;
     return(@matching_rpms);
 }
 
