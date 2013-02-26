@@ -141,13 +141,16 @@ sub verify_rpms {
 
 	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
 
-###	print "is_rpm_installed = @installed_rpm\n";
-###	my @installed     = split(' ',$installed_rpm);
+	if (@installed_rpm > 1) {
+	    MYERROR("Multiple OS package versions detected ($rpm). Invalid configuration.\n");
+	}
 
-	if( @installed_rpm eq 0 ) {
+	my @installed  = split(' ',$installed_rpm[0]);
+
+	if( @installed_rpm == 0 ) {
 	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
-	} elsif( "$desired_version-$desired_release" ne "$installed_rpm[1]-$installed_rpm[2]") {
+	} elsif( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]") {
 	    INFO("   --> version mismatch - registering for update...\n");
 	    push(@rpms_to_install,$filename);
 	} else {
@@ -585,8 +588,6 @@ sub query_all_installed_rpms {
 
     INFO("   --> Caching all currently installed RPMs...\n");
 
-###    @losf_global_rpms_installed = split('LOSF_DELIM_AA',
-
     @rpms_installed = split('_LOSF_DELIM',`rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
 
     # we now have all the rpms and their associated version,
@@ -597,12 +598,16 @@ sub query_all_installed_rpms {
 	my @rpm_array  = split(/\s+/,$entry);
 	my $key = "$rpm_array[0].$rpm_array[3]";
 
+###	@{$losf_global_rpms_installed{$key}} = @rpm_array;
 
-	@{$losf_global_rpms_installed{$key}} = @rpm_array;
+	# data structure is a hash -> array. Each array entry is a
+	# string with 4 values separated by whitespace corresponding
+	# to name, version, release, and arch respectively.  An array
+	# is used here to allow for tracking of multiple versions of
+	# the same rpm name being installed.
+
+	push(@{$losf_global_rpms_installed{$key}},"@rpm_array");
     }
-
-#		     `rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}LOSF_DELIM_AA'`);
-# abrt-2.0.8-6.el6.centos.x86_64
 
     $osf_cached_rpms = 1;
     end_routine();
@@ -625,7 +630,12 @@ sub is_os_rpm_installed {
 	@matching_rpms = @{$losf_global_rpms_installed{$packagename}};
     } 
 
-#    print "matching rpms = @matching_rpms\n";
+###    @matching_rpms = @{$losf_global_rpms_installed{"intel-mpi.noarch"}};
+###    @matching_rpms = @{$losf_global_rpms_installed{"tmux.x86_64"}};
+
+###    print "num matches   = ".@matching_rpms."\n";
+###    print "matching rpms = @matching_rpms\n";
+
     return(@matching_rpms);
 
 }
