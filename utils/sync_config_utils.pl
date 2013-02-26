@@ -827,7 +827,8 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_custom_packages == 0 ) {
-	    INFO("\n** Syncing Custom packages\n\n");
+#	    INFO("\n** Syncing Custom packages\n\n");
+	    print "** Syncing Custom packages\n\n";
 	    $osf_sync_custom_packages = 1;
 	} else {
 	    return;
@@ -874,8 +875,6 @@ BEGIN {
 	}
 
 	verify_custom_rpms(\$ALL_type,\@custom_rpms,\%custom_aliases);
-
-	exit 1;
 
 	# verify packages for current node types
 	
