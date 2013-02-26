@@ -64,7 +64,7 @@ sub verify_rpms {
 
 	DEBUG("   --> Checking $rpm\n");
 
-	# Determine desired rpm versionioning from options in config file
+	# Determine desired rpm versionioning from options in config file; 
 
 	my $desired_version = "";
 	my $desired_release = "";
@@ -98,6 +98,9 @@ sub verify_rpms {
 	    ERROR("[ERROR]: arch options for each desired package. \"losf addpkg\" will automatically include these\n");
 	    ERROR("[ERROR]: options for new additions, but config files from earlier versions need to be upgraded.\n");
 	    ERROR("[ERROR]: for compatability\n");
+	    ERROR("\n");
+	    ERROR("[ERROR]: Consider running \"losf config-upgrade\" to update your local copy to the latest\n");
+	    ERROR("[ERROR]: configuration format.\n");
 	    exit (1);
 	}
 

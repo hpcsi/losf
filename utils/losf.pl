@@ -278,7 +278,17 @@ sub update_os_config {
 
     begin_routine();
 
-#   FORMAT 1.1
+# 
+#   FORMAT 1.1 - February 2013
+#
+#   Example format below (rpmname version release arch)....
+#
+#   compute=libxml2 version=2.7.6 release=8.el6_3.4 arch=x86_64
+#   compute=libxml2-python version=2.7.6 release=8.el6_3.4 arch=x86_64
+#   compute=abrt version=2.0.8 release=6.el6.centos arch=x86_64
+#   compute=abrt-addon-ccpp version=2.0.8 release=6.el6.centos arch=x86_64
+#   compute=abrt-addon-kerneloops version=2.0.8 release=6.el6.centos arch=x86_64
+#   compute=abrt-addon-python version=2.0.8 release=6.el6.centos arch=x86_64
 
     print "** Upgrading OS package config file format to latest version (1.1)\n";
     my $section = "OS Packages";
