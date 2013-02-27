@@ -395,27 +395,6 @@ sub update_os_config {
 
     update_losf_config_file($new_file,$ref_file,$hist_dir,"OS");
 
-#    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
-#    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
-    
-#    if ( compare($new_file,$ref_file) != 0 ) {
-#	
-#	if ( ! -d "$hist_dir") {
-#	    mkdir("$hist_dir",0700);
-#	}
-#
-#	my $timestamp=`date +%F:%H:%M`;
-#	chomp($timestamp);
-#	print "   --> Updating OS config file...\n";
-#	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
-#	    MYERROR("Unable to save previous OS config file\n");
-#	rename($new_file,$ref_file)                 || 
-#	    MYERROR("Unaable to update OS config file\n");
-#	print "Copy of original configuration file stored in $hist_dir....\n";
-#    } else {
-#	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
-#    }
-#
     print "\n\nOS config file upgrage complete\n";
 
     end_routine();
