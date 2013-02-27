@@ -299,7 +299,7 @@ sub update_os_config {
     # Check and update all OS packages for all currently defined node types
 
     if(! $local_os_cfg->SectionExists($section) ) {
-	INFO("   --> No OS Packages currently defined - ignoring config upgrade request\n");
+	INFO("   --> No [$section] Packages currently defined - ignoring config upgrade request\n");
 	return;
     }
 
@@ -321,6 +321,8 @@ sub update_os_config {
     my $rpm             = "";
     my $desired_version = "";
     my $desired_release = "";
+    my $desired_arch    = "";
+    my $file_upgraded   = 0;
     
     foreach $type (@node_types) {
 	INFO("   --> Checking node type: $type\n");
@@ -361,6 +363,7 @@ sub update_os_config {
 	    }
 
 	    if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "" ) {
+		$file_upgraded = 1;
 		INFO("   --> Needs upgrade\n");
 
 		my $arch        = rpm_arch_from_filename($rpm);
@@ -395,56 +398,65 @@ sub update_os_config {
 
     update_losf_config_file($new_file,$ref_file,$hist_dir,"OS");
 
-    print "\n\nOS config file upgrage complete\n";
+    if($file_upgraded) {
+	print "\n\nOS config file upgrade complete\n";
+    } else {
+	print "\n\nOS config file check complete - no format changes required\n";
+    }
 
     end_routine();
 
 } # end update_os_config
 
-sub update_custom_config {
-
+sub update_custom_config_section {
+    my $section = shift;
     begin_routine();
 
-    print "** Upgrading Custom RPM package config file format to latest version (1.1)\n";
-    my $section = "Custom Packages";
+    # Check and update all Custom RPM packages for all currently defined node types
 
-    INFO("   Reading OS package config file -> $osf_config_dir/custom-packages/"."$node_cluster/packages.config\n");
-
-    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
-
-    # Check and update all OS packages for all currently defined node types
-
-    if(! $local_os_cfg->SectionExists($section) ) {
+    if(! $local_custom_cfg->SectionExists($section) ) {
 	INFO("   --> No [$section] section currently defined - ignoring config upgrade request\n");
 	return;
     }
     
     my @node_types = ();
-#    my @node_types = $local_custom_cfg->Parameters($section);
-    
-    push(@node_types,"ALL");
+    my @node_types = $local_custom_cfg->Parameters($section);
     
     my @rpm_array       = ();
     my $rpm             = "";
     my $desired_version = "";
     my $desired_release = "";
+    my $desired_arch    = "";
+    my $file_upgraded   = 0;
     
     foreach $type (@node_types) {
 	INFO("   --> Checking node type: $type\n");
 
 	@rpms_defined = ();
-	@rpms_defined = $local_os_cfg->val($section,$type);
+	@rpms_defined = $local_custom_cfg->val($section,$type);
 
 	$num_rpms = @rpms_defined;
 
-	DEBUG("       --> # of RPMs = $num_rpms\n");
+	INFO("       --> # of RPMs = $num_rpms\n");
 
-	$local_os_cfg->delval($section,$type);
+	$local_custom_cfg->delval($section,$type);
 
 	foreach $entry (@rpms_defined) {
 
+	    # Skip any updates for package aliases (those that begin with @).
+
+	    if ( $entry =~ m/^@(\S+)/ ) {
+		if($local_custom_cfg->exists($section,$type)) {
+		    $local_custom_cfg->push($section,$type,$entry);
+		} else {
+		    $local_custom_cfg->newval($section,$type,$entry);
+		}
+		next;
+	    }
+
 	    $desired_version = "";
 	    $desired_release = "";
+	    $desired_arch    = "";
 
 	    @rpm_array = ();
 	    @rpm_array = split(/\s+/,$entry);
@@ -452,51 +464,208 @@ sub update_custom_config {
 	    
 	    INFO("   --> Checking $type=$rpm\n");
 
-	    shift @rpm_array;
+	    # Expected file format:
+	    # 
+	    # nodetype=rpmname version=rpmversion release=rpmrelease arch=rpmarch md5sum [optional rpm install options]
 
-	    foreach $option (@rpm_array) {
-		if( $option =~ m/version=(\S+)/ ) { 
-		    $desired_version = $1;
-		    DEBUG("            --> found version = $1\n");
-		} elsif ( $option =~ m/release=(\S+)/ ) { 
-		    $desired_release = $1;
-		    DEBUG("            --> found release = $1\n");
+	    shift @rpm_array;
+	    if ( $rpm_array[0] =~ m/version=(\S+)/ ) {
+		$desired_version = $1;
+	    }
+
+	    if ( $rpm_array[1] =~ m/release=(\S+)/ ) {
+		$desired_release = $1;
+	    }
+
+	    if ( $rpm_array[2] =~ m/arch=(\S+)/ ) {
+		$desired_arch = $1;
+	    }
+
+	    # Remove any of the above options
+
+	    my @remaining_options = ();
+	    foreach $value (@rpm_array) {
+		if ( $value !~ m/version=(\S+)/ &&
+		     $value !~ m/release=(\S+)/ &&
+		     $value !~ m/arch=(\S+)/ ) {
+		    push(@remaining_options,$value);
 		}
 	    }
 
-	    if( $desired_version eq "" || $desired_release eq "" ) {
+	    if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "") {
+		$file_upgraded = 1;
 		INFO("   --> Needs upgrade\n");
 
-		my $arch      = rpm_arch_from_filename($rpm);
-		my $filename  = "$rpm_topdir/$arch/$rpm.rpm";
+		my $arch        = rpm_arch_from_filename($rpm);
+		my $filename    = "$rpm_topdir/$arch/$rpm.rpm";
+		my @desired_rpm = rpm_version_from_file($filename);
 
-		my @desired_rpm   = rpm_version_from_file($filename);
-		INFO("Upgrading: $rpm version=$desired_rpm[1] release=$desired_rpm[2]\n");
+		my $updated_fmt = "$desired_rpm[0] version=$desired_rpm[1] release=$desired_rpm[2] arch=$desired_rpm[3]";
+		INFO("Upgrading: $updated_fmt\n");
 
-		if($local_os_cfg->exists($section,$type)) {
-		    $local_os_cfg->push($section,$type,"$rpm version=$desired_rpm[1] release=$desired_rpm[2]");
+		# append md5sum and any remaining options
+
+		foreach $option (@remaining_options) {
+		    $updated_fmt = "$updated_fmt $option";
+		}
+
+		if($local_custom_cfg->exists($section,$type)) {
+		    $local_custom_cfg->push($section,$type,$updated_fmt);
 		} else {
-		    $local_os_cfg->newval($section,$type,"$rpm version=$desired_rpm[1] release=$desired_rpm[2]");
+		    $local_custom_cfg->newval($section,$type,$updated_fmt);
 		}
 	    } else {
-		if($local_os_cfg->exists($section,$type)) {
-		    $local_os_cfg->push($section,$type,"$rpm @rpm_array");
+		if($local_custom_cfg->exists($section,$type)) {
+		    $local_custom_cfg->push($section,$type,"$rpm @rpm_array");
 		} else {
-		    $local_os_cfg->newval($section,$type,"$rpm @rpm_array");
+		    $local_custom_cfg->newval($section,$type,"$rpm @rpm_array");
 		}
 	    }
 	}
 
     }  # end loop over all node types
 
-    my $new_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_config_dir/os-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_config_dir/os-packages/$node_cluster/previous_revisions";
+    end_routine();
+    return;
+}
 
-    $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+sub update_custom_config {
 
-    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
-    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+    begin_routine();
+
+    print "** Upgrading Custom RPM package config file format to latest version (1.1)\n";
+#    my $section = "Custom Packages";
+
+    INFO("   Reading Custom RPM  package config file -> $osf_config_dir/custom-packages/"."$node_cluster/packages.config\n");
+
+    my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
+
+    # Update all custom packages and alias definitions to latest format
+
+    update_custom_config_section("Custom Packages");
+    update_custom_config_section("Custom Packages/Aliases");
+
+###   if(! $local_custom_cfg->SectionExists($section) ) {
+###	INFO("   --> No [$section] section currently defined - ignoring config upgrade request\n");
+###	return;
+###   }
+###   
+###   my @node_types = ();
+###   my @node_types = $local_custom_cfg->Parameters($section);
+###   
+###    push(@node_types,"ALL");
+###   
+###   my @rpm_array       = ();
+###   my $rpm             = "";
+###   my $desired_version = "";
+###   my $desired_release = "";
+###   my $desired_arch    = "";
+###   my $file_upgraded   = 0;
+###   
+###   foreach $type (@node_types) {
+###	INFO("   --> Checking node type: $type\n");
+###
+###	@rpms_defined = ();
+###	@rpms_defined = $local_custom_cfg->val($section,$type);
+###
+###	$num_rpms = @rpms_defined;
+###
+###	INFO("       --> # of RPMs = $num_rpms\n");
+###
+###	$local_custom_cfg->delval($section,$type);
+###
+###	foreach $entry (@rpms_defined) {
+###
+###	    # Skip any updates for package aliases (those that begin with @).
+###
+###	    if ( $entry =~ m/^@(\S+)/ ) {
+###		if($local_custom_cfg->exists($section,$type)) {
+###		    $local_custom_cfg->push($section,$type,$entry);
+###		} else {
+###		    $local_custom_cfg->newval($section,$type,$entry);
+###		}
+###		next;
+###	    }
+###
+###	    $desired_version = "";
+###	    $desired_release = "";
+###	    $desired_arch    = "";
+###
+###	    @rpm_array = ();
+###	    @rpm_array = split(/\s+/,$entry);
+###	    $rpm       = $rpm_array[0];
+###	    
+###	    INFO("   --> Checking $type=$rpm\n");
+###
+###	    # Expected file format:
+###	    # 
+###	    # nodetype=rpmname version=rpmversion release=rpmrelease arch=rpmarch md5sum [optional rpm install options]
+###
+###	    shift @rpm_array;
+###	    if ( $rpm_array[0] =~ m/version=(\S+)/ ) {
+###		$desired_version = $1;
+###	    }
+###
+###	    if ( $rpm_array[1] =~ m/release=(\S+)/ ) {
+###		$desired_release = $1;
+###	    }
+###
+###	    if ( $rpm_array[2] =~ m/arch=(\S+)/ ) {
+###		$desired_arch = $1;
+###	    }
+###
+###	    # Remove any of the above options
+###
+###	    my @remaining_options = ();
+###	    foreach $value (@rpm_array) {
+###		if ( $value !~ m/version=(\S+)/ &&
+###		     $value !~ m/release=(\S+)/ &&
+###		     $value !~ m/arch=(\S+)/ ) {
+###		    push(@remaining_options,$value);
+###		}
+###	    }
+###
+###	    if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "") {
+###		$file_upgraded = 1;
+###		INFO("   --> Needs upgrade\n");
+###
+###		my $arch        = rpm_arch_from_filename($rpm);
+###		my $filename    = "$rpm_topdir/$arch/$rpm.rpm";
+###		my @desired_rpm = rpm_version_from_file($filename);
+###
+###		my $updated_fmt = "$desired_rpm[0] version=$desired_rpm[1] release=$desired_rpm[2] arch=$desired_rpm[3]";
+###		INFO("Upgrading: $updated_fmt\n");
+###
+###		# append md5sum and any remaining options
+###
+###		foreach $option (@remaining_options) {
+###		    $updated_fmt = "$updated_fmt $option";
+###		}
+###
+###		if($local_custom_cfg->exists($section,$type)) {
+###		    $local_custom_cfg->push($section,$type,$updated_fmt);
+###		} else {
+###		    $local_custom_cfg->newval($section,$type,$updated_fmt);
+###		}
+###	    } else {
+###		if($local_custom_cfg->exists($section,$type)) {
+###		    $local_custom_cfg->push($section,$type,"$rpm @rpm_array");
+###		} else {
+###		    $local_custom_cfg->newval($section,$type,"$rpm @rpm_array");
+###		}
+###	    }
+###	}
+###
+###   }  # end loop over all node types
+###
+    my $new_file  = "$osf_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$osf_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$osf_config_dir/custom-packages/$node_cluster/previous_revisions";
+
+    $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid Custom RPM file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid Custom RPM file for update: $ref_file"); }
     
     if ( compare($new_file,$ref_file) != 0 ) {
 	
@@ -506,17 +675,21 @@ sub update_custom_config {
 
 	my $timestamp=`date +%F:%H:%M`;
 	chomp($timestamp);
-	print "   --> Updating OS config file...\n";
+	print "   --> Updating Custom RPM config file...\n";
 	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
 	    MYERROR("Unable to save previous OS config file\n");
 	rename($new_file,$ref_file)                 || 
-	    MYERROR("Unaable to update OS config file\n");
+	    MYERROR("Unaable to update Custom RPM config file\n");
 	print "Copy of original configuration file stored in $hist_dir....\n";
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
 
-    print "\n\nOS config file upgrage complete\n";
+    if ( $file_upgraded) {
+	print "\n\nCustom RPM config file upgrage complete\n";
+    } else {
+	print "\n\nCustom RPM config file check complete - no format changes required\n";
+    }
 
     end_routine();
 
@@ -1497,7 +1670,7 @@ switch ($command) {
     case "updatepkgs"     { update_distro_packages("ALL")     };
     case "config-upgrade" { 
 	update_os_config();
-#	update_custom_config();
+	update_custom_config();
     };
 
     case "addrpm"   { 
