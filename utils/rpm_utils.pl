@@ -135,10 +135,6 @@ sub verify_rpms {
 
 	# return array format = (name,version,release,arch)
 
-###	my @desired_rpm   = rpm_version_from_file($filename);
-###	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
-###	my @installed_rpm = is_rpm_installed     ($full_rpm_name);
-
 	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
 
 	if (@installed_rpm > 1) {
@@ -358,26 +354,16 @@ sub verify_custom_rpms {
 	    exit (1);
 	} 
 
-
-	# Pop off the version,release,arch options we just parsed
-
-#	shift @rpm_array;	# version
-#	shift @rpm_array;	# release
-#	shift @rpm_array;	# arch
-	    
-#	my $full_rpm_name = "$rpm-$desired_version-$desired_release.$desired_arch";
 	my $full_rpm_name = "$rpm";
 
 	# Cull rpm install options for this package
 
-#	my $md5_desired    = $rpm_array[1];  # <- required option for all custom packages (all others are optional)
 	my $md5_desired    = $rpm_array[5];  # <- required option for all custom packages (all others are optional)
 	my $num_options    = @rpm_array;
 
 	my $rpm_options    = "";
 	my $install_method = "--upgrade ";   # we default to upgrade, may be overridden by parsing options below
 
-#	for(my $count = 2; $count < $num_options; $count++) {
 	for(my $count = 6; $count < $num_options; $count++) {
 	    $rpm_options = $rpm_options . validate_rpm_option($rpm_array[$count]);
 	    if ( $rpm_array[$count] eq "INSTALL" ) {
@@ -398,13 +384,10 @@ sub verify_custom_rpms {
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
-###	my $arch     = rpm_arch_from_filename($rpm_array[0]);
 
 	if ( "$MODE" eq "PXE" ) {
-#	    $filename = "$SRC_DIR/$arch/$rpm_array[0].rpm";
 	    $filename = "$SRC_DIR/$desired_arch/$full_rpm_name.rpm";
 	} else {
-#	    $filename = "$rpm_topdir/$arch/$rpm_array[0].rpm";
 	    $filename = "$rpm_topdir/$desired_arch/$full_rpm_name.rpm";
 	}
 
@@ -423,13 +406,7 @@ sub verify_custom_rpms {
 	    }
 	}
 
-#	my @desired_rpm   = rpm_version_from_file($filename);
-#	my @installed_rpm = is_rpm_installed     ("$desired_rpm[0]-$desired_rpm[1].$arch");
-
-#	my @installed_rpms = is_os_rpm_installed("$rpm.$desired_arch");
 	my @installed_rpms = is_os_rpm_installed("$desired_name.$desired_arch");
-
-
 
 	# Decide if we need to install. Note that we build up arrays
 	# of rpms to install on a per-rpm-option-combination basis.
@@ -438,27 +415,21 @@ sub verify_custom_rpms {
 	# installed have different options specified. This uses a perl
 	# array of hashes, so the syntax is slightly gnarly.
 
-#	my $installed_versions = @installed_rpm / 4;
 	my $installed_versions = @installed_rpms;
 
 	if( $installed_versions == 0 ) {
 	    verify_expected_md5sum($filename,$md5_desired) unless ( $losf_nomd5file) ;
-#	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    INFO("   --> $rpm is not installed - registering for add...\n");
 	    SYSLOG("Registering previously uninstalled $rpm for update");
-#	    SYSLOG("Registering previously uninstalled $desired_rpm[0] for update");
 	    push(@{$rpms_to_install{$rpm_options}},$filename);
 	} elsif( ($installed_versions == 1 ) ) {
 	    my @installed = split(' ',$installed_rpms[0]);
-#	    if ( "$desired_rpm[1]-$desired_rpm[2]" ne "$installed_rpm[1]-$installed_rpm[2]" )  {
 	    if ( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]" )  {
 		verify_expected_md5sum($filename,$md5_desired);
 		INFO("   --> version mismatch - registering for update...\n");
-#		SYSLOG("Registering locally installed $desired_rpm[0] for update");
 		SYSLOG("Registering locally installed $rpm for update");
 		push(@{$rpms_to_install{$rpm_options}},$filename);
 	    } else {
-#		DEBUG("   --> $desired_rpm[0] is already installed\n");
 		DEBUG("   --> $rpm is already installed\n");
 	    }
 	} else {
@@ -478,8 +449,6 @@ sub verify_custom_rpms {
 		my $installed_ver = $installed[1];
 		my $installed_rel = $installed[2];
 
-#		my $installed_ver = $installed_rpm[1+$count*4];
-#		my $installed_rel = $installed_rpm[2+$count*4];
 		if ( "$desired_version-$desired_release" eq "$installed_ver-$installed_rel" )  {
 		    $desired_installed = 1;
 		}
@@ -639,8 +608,6 @@ sub verify_custom_rpms_removed {
 
 	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
 
-###	my @installed_rpm = is_rpm_installed     ($rpm_array[0],$arch);
-
 	if( @installed_rpm ne 0 ) {
 	    print "   --> $installed_rpm[0] is installed....registering for removal\n";
 	    SYSLOG("Registering locally installed $installed_rpm[0] for removal");
@@ -740,9 +707,6 @@ sub is_os_rpm_installed {
     if (exists $losf_global_rpms_installed{$packagename} ) {
 	@matching_rpms = @{$losf_global_rpms_installed{$packagename}};
     } 
-
-###    @matching_rpms = @{$losf_global_rpms_installed{"intel-mpi.noarch"}};
-###    @matching_rpms = @{$losf_global_rpms_installed{"tmux.x86_64"}};
 
 ###    print "num matches   = ".@matching_rpms."\n";
 ###    print "matching rpms = @matching_rpms\n";
