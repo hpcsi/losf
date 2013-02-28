@@ -874,6 +874,7 @@ BEGIN {
 	    DEBUG("   --> Custom rpm for ALL = $rpm\n");
 	}
 
+
 	verify_custom_rpms(\$ALL_type,\@custom_rpms,\%custom_aliases);
 
 	# verify packages for current node types

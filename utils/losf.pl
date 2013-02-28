@@ -420,7 +420,7 @@ sub update_custom_config_section {
     }
     
     my @node_types = ();
-    my @node_types = $local_custom_cfg->Parameters($section);
+    @node_types = $local_custom_cfg->Parameters($section);
     
     my @rpm_array       = ();
     my $rpm             = "";
@@ -454,6 +454,7 @@ sub update_custom_config_section {
 		next;
 	    }
 
+	    $desired_name    = "";
 	    $desired_version = "";
 	    $desired_release = "";
 	    $desired_arch    = "";
@@ -469,30 +470,38 @@ sub update_custom_config_section {
 	    # nodetype=rpmname version=rpmversion release=rpmrelease arch=rpmarch md5sum [optional rpm install options]
 
 	    shift @rpm_array;
-	    if ( $rpm_array[0] =~ m/version=(\S+)/ ) {
-		$desired_version = $1;
-	    }
 
-	    if ( $rpm_array[1] =~ m/release=(\S+)/ ) {
-		$desired_release = $1;
-	    }
-
-	    if ( $rpm_array[2] =~ m/arch=(\S+)/ ) {
-		$desired_arch = $1;
+	    if(@rpm_array gt 0 ) {
+		if ( $rpm_array[0] =~ m/name=(\S+)/ ) {
+		    $desired_name = $1;
+		}
+		if ( $rpm_array[1] =~ m/version=(\S+)/ ) {
+		    $desired_version = $1;
+		}
+		
+		if ( $rpm_array[2] =~ m/release=(\S+)/ ) {
+		    $desired_release = $1;
+		}
+		
+		if ( $rpm_array[3] =~ m/arch=(\S+)/ ) {
+		    $desired_arch = $1;
+		}
 	    }
 
 	    # Remove any of the above options
 
 	    my @remaining_options = ();
 	    foreach $value (@rpm_array) {
-		if ( $value !~ m/version=(\S+)/ &&
+		if ( $value !~ m/name=(\S+)/ &&
+		     $value !~ m/version=(\S+)/ &&
 		     $value !~ m/release=(\S+)/ &&
 		     $value !~ m/arch=(\S+)/ ) {
 		    push(@remaining_options,$value);
 		}
 	    }
 
-	    if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "") {
+	    if( $desired_version eq "" || $desired_release eq "" || 
+		$desired_arch    eq "" || $desired_name    eq "" ) {
 		$file_upgraded = 1;
 		INFO("   --> Needs upgrade\n");
 
@@ -500,7 +509,7 @@ sub update_custom_config_section {
 		my $filename    = "$rpm_topdir/$arch/$rpm.rpm";
 		my @desired_rpm = rpm_version_from_file($filename);
 
-		my $updated_fmt = "$desired_rpm[0] version=$desired_rpm[1] release=$desired_rpm[2] arch=$desired_rpm[3]";
+		my $updated_fmt = "$rpm name=$desired_rpm[0] version=$desired_rpm[1] release=$desired_rpm[2] arch=$desired_rpm[3]";
 		INFO("Upgrading: $updated_fmt\n");
 
 		# append md5sum and any remaining options
@@ -534,8 +543,6 @@ sub update_custom_config {
     begin_routine();
 
     print "** Upgrading Custom RPM package config file format to latest version (1.1)\n";
-#    my $section = "Custom Packages";
-
     INFO("   Reading Custom RPM  package config file -> $osf_config_dir/custom-packages/"."$node_cluster/packages.config\n");
 
     my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
@@ -544,6 +551,7 @@ sub update_custom_config {
 
     update_custom_config_section("Custom Packages");
     update_custom_config_section("Custom Packages/Aliases");
+    update_custom_config_section("Custom Packages/uninstall");
 
     my $new_file  = "$osf_config_dir/custom-packages/$node_cluster/packages.config.new";
     my $ref_file  = "$osf_config_dir/custom-packages/$node_cluster/packages.config";
@@ -1141,7 +1149,7 @@ sub add_custom_rpm {
 	
     INFO("\n** Checking on possible addition of custom RPM package: $basename\n");
 
-    print "package = $package\n";
+#    print "package = $package\n";
 
     if ( ! -s $package ) {
 	MYERROR("Unable to access requested RPM -> $basename\n");
@@ -1205,6 +1213,8 @@ sub add_custom_rpm {
     INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
 
     my $rpm_name    = $version_info[0];
+    my $rpm_version = $version_info[1];
+    my $rpm_release = $version_info[2];
     my $rpm_arch    = $version_info[3];
 
 #    my $is_configured = 0;
@@ -1261,6 +1271,10 @@ sub add_custom_rpm {
     if ($basename =~ m/(\S+).rpm$/ ) {
 	$config_name = $1;
     }
+
+    # 2/28/13: add additional required elements to delineate name/version/release/arch
+
+    $config_name = "$config_name name=$rpm_name version=$rpm_version release=$rpm_release arch=$rpm_arch";
     
     # Update config file with new or upgraded package
     
@@ -1290,9 +1304,9 @@ sub add_custom_rpm {
 		} else {
 		    $local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
 		}
-		    INFO("       --> Configured update for $config_name (previously $old_rpm)\n");
+		    INFO("       --> Configured update for $rpm_name (previously $old_rpm)\n");
 	    } else {
-		DEBUG("       --> Restoring entry for $name ($rpm_entry)\n");
+		DEBUG("       --> Restoring entry for $rpm_name ($rpm_entry)\n");
 		if($local_custom_cfg->exists($section,$name)) {
 		    $local_custom_cfg->push($section,$name,$rpm_entry); 
 		} else { 
