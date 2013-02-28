@@ -549,6 +549,8 @@ sub update_custom_config {
 
     # Update all custom packages and alias definitions to the latest format
 
+    $file_upgraded = 0;
+
     update_custom_config_section("Custom Packages");
     update_custom_config_section("Custom Packages/Aliases");
     update_custom_config_section("Custom Packages/uninstall");
