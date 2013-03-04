@@ -302,7 +302,7 @@ BEGIN {
 	my @sync_files    = ();
 	my @sync_partials = ();
 
-	INFO("   --> Looking for defined files to sync...($cluster->$host)\n");
+	DEBUG("   --> Looking for defined files to sync...($cluster->$host)\n");
 
 	if ( ! $local_cfg->SectionExists("ConfigFiles") ) {
 	    MYERROR("No Input section found for cluster $cluster [ConfigFiles]\n");
@@ -312,14 +312,14 @@ BEGIN {
 
 	my $num_files = @defined_files;
 
-	INFO("   --> \# of files defined = $num_files\n");
+	DEBUG("   --> \# of files defined = $num_files\n");
 
 	foreach(@defined_files) {
-	    DEBUG("   --> Read value for $_\n");
+	    TRACE("   --> Read value for $_\n");
 	    if (defined ($myval = $local_cfg->val("ConfigFiles",$_)) ) {
-		DEBUG("   --> Value = $myval\n");
+		TRACE("   --> Value = $myval\n");
 		if ( "$myval" eq "yes" ) {
-		    DEBUG("   --> Sync defined for $_\n");
+		    TRACE("   --> Sync defined for $_\n");
 		    push(@sync_files,$_);
 		}
 	    } else {
@@ -612,7 +612,7 @@ BEGIN {
 	my @defined_files  = ();
 	my $section        = ();
 
-	INFO("   --> Looking for defined soft links to sync...($cluster->$host)\n");
+	DEBUG("   --> Looking for defined soft links to sync...($cluster->$host)\n");
 
 	if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
 	    $section = "SoftLinks";
@@ -627,7 +627,7 @@ BEGIN {
 	    $section = "SoftLinks/$host";
 
 	    if ( ! $local_cfg->SectionExists($section) ) {
-		WARN("No node type specific softlinks defined for cluster $cluster ($host)\n");
+		WARN("   --> No node type specific softlinks defined for cluster $cluster ($host)\n");
 		return(%sync_softlinks);
 	    }
 
@@ -636,14 +636,13 @@ BEGIN {
 
 	my $num_files = @defined_files;
 
-	INFO("   --> \# of soft links defined = $num_files\n");
+	DEBUG("   --> \# of soft links defined = $num_files\n");
 
 	foreach(@defined_files) {
-	    INFO("   --> Read value for $_\n");
+	    TRACE("   --> Read value for $_\n");
 	    if (defined ($myval = $local_cfg->val($section,$_)) ) {
-		INFO("   --> Value = $myval\n");
+		TRACE("   --> Value = $myval\n");
 		$sync_softlinks{$_} = $myval;
-#		push(@sync_softlinks,$_);
 	    }
 	}
 
@@ -707,7 +706,7 @@ BEGIN {
 
 	my %inputs  = ();
 
-	INFO("   --> Looking for defined files to sync...($cluster->$host)\n");
+	DEBUG("   --> Looking for defined files to sync...($cluster->$host)\n");
 
 	if ( ! $local_cfg->SectionExists("Services") ) {
 	    MYERROR("No Input section found for cluster $cluster [Services]\n");
@@ -737,12 +736,12 @@ BEGIN {
 
 	my $num_entries = @defined_services;
 
-	INFO("   --> \# of services defined = $num_entries\n");
+	DEBUG("   --> \# of services defined = $num_entries\n");
 
 	foreach(@defined_services) {
-	    DEBUG("   --> Read value for $_\n");
+	    TRACE("   --> Read value for $_\n");
 	    if (defined ($myval = $local_cfg->val($section,$_)) ) {
-		DEBUG("   --> Value = $myval\n");
+		TRACE("   --> Value = $myval\n");
 		$inputs{$_} = $myval;
 	    } else {
 		MYERROR("Services defined with no value ($_)");

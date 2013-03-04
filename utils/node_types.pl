@@ -39,7 +39,7 @@ require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
-my $output_mode = $ENV{'OSF_ECHO_MODE'};
+my $output_mode = $ENV{'LOSF_LOG_MODE'};
 
 determine_node_membership();  
 

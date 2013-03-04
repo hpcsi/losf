@@ -146,19 +146,20 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_soft_links == 0 ) {
-	    #INFO("** Syncing soft links\n\n");
 	    $osf_sync_soft_links = 1;
+	} else {
+	    return;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	print "** Syncing soft links ($node_cluster:$node_type)\n";
+	INFO("** Syncing soft links ($node_cluster:$node_type)\n");
 
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%sync_files) ) {
-	    INFO("   --> $key => $value\n");
+	    TRACE("   --> $key => $value\n");
 	    sync_soft_link_file($key,$value);
 	}
 
@@ -168,7 +169,7 @@ BEGIN {
 	my %sync_files_global = query_cluster_config_softlink_sync_files($node_cluster,"LosF-GLOBAL-NODE-TYPE");
 
 	while ( my ($key,$value) = each(%sync_files_global) ) {
-	    INFO("   --> $key => $value\n");
+	    TRACE("   --> $key => $value\n");
 	    if ( ! exists $sync_files{$key} ) {
 		sync_soft_link_file($key,$value);
 	    }
@@ -185,10 +186,12 @@ BEGIN {
 	if ( $osf_sync_services == 0 ) {
 #	    INFO("\n** Syncing runlevel services\n\n");
 	    $osf_sync_services = 1;
+	} else {
+	    return;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	print "** Syncing runlevel services ($node_cluster:$node_type)\n";
+	INFO("** Syncing runlevel services ($node_cluster:$node_type)\n");
 
 	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
 
@@ -198,7 +201,7 @@ BEGIN {
 	my %sync_services_custom = query_cluster_config_services($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%sync_services_custom) ) {
-	    DEBUG("   --> $key => $value\n");
+	    TRACE("   --> $key => $value\n");
 	    sync_chkconfig_services($key,$value);
 	}
 
@@ -208,7 +211,7 @@ BEGIN {
 	my %sync_services = query_cluster_config_services($node_cluster,"LosF-GLOBAL-NODE-TYPE");
 
 	while ( my ($key,$value) = each(%sync_services) ) {
-	    DEBUG("   --> $key => $value\n");
+	    TRACE("   --> $key => $value\n");
 
 	    if ( ! exists $sync_services_custom{$key} ) {
 		sync_chkconfig_services($key,$value);
@@ -543,13 +546,15 @@ BEGIN {
 # 
 	if ( ! -s $target ) {
 	    if ( ! -s "$link_parent_dir/$target" ) {
-		WARN("   --> Soft link target is not available ($target)\n");
+		print_warn_in_yellow("WARN:");
+		WARN("Soft link target is not available ($target)\n");
+#		WARN("   --> Soft link target is not available ($target)\n");
 		end_routine();
 		return;
 	    }
 	}
 	
-	INFO("   --> Checking symbolic link\n");
+	TRACE("   --> Checking symbolic link\n");
 	my $basename = basename($file);
 
 	if( -e $file && ! -l $file ) {
@@ -579,18 +584,20 @@ BEGIN {
 		symlink("$target","$file") || 
 		    MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
 	    } else {
-		print "   --> "; 
-		print color 'green';
-		print "OK";
-		print color 'reset';
-		print ": $file softlink in sync\n";
+		print_info_in_green("OK");
+#		print "   --> "; 
+#		print color 'green';
+#		print "OK";
+#		print color 'reset';
+		INFO(": $file softlink in sync\n");
 	    }
 	} else {
-	    print "   --> "; 
-	    print color 'red';
-	    print "FAILED";
-	    print color 'reset';
-	    print ": Creating link between $file -> $target\n";
+	    print_error_in_red("FAILED");
+#	    print "   --> "; 
+#	    print color 'red';
+#	    print "FAILED";
+#	    print color 'reset';
+	    ERROR(": Creating link between $file -> $target\n");
 	    symlink("$target","$file") || 
 		MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
 	}
@@ -708,7 +715,7 @@ BEGIN {
 
 	(my $cluster, my $type) = determine_node_membership();
 
-	INFO("   --> Syncing run-level services for: $service\n");
+	DEBUG("   --> Syncing run-level services for: $service\n");
 
 	if ( "$setting" eq "on" || "$setting" eq "ON" ) {
 	    $enable_service = 1;
@@ -719,9 +726,9 @@ BEGIN {
 	# NOOP if init.d script is not present
 
 	if ( ! -s "/etc/init.d/$service" ) {
-		DEBUG("   --> NOOP: $service not installed, ignoring sync request\n");
-		return;
-	    }
+	    TRACE("   --> NOOP: $service not installed, ignoring sync request\n");
+	    return;
+	}
 
 	DEBUG("   --> Desired setting = $enable_service\n");
 
@@ -745,18 +752,11 @@ BEGIN {
 	if ( $setting =~ m/3:on/ ) {
 	    DEBUG("   --> $service is ON\n");
 	    if($enable_service) {
-		print "   --> "; 
-		print color 'green';
-		print "OK";
-		print color 'reset';
-		print ": $service is ON\n";
-#		print "   --> OK: $service is ON\n";
+		print_info_in_green("OK");
+		INFO( ": $service is ON\n");
 	    } else {
-		print "   --> "; 
-		print color 'red';
-		print "FAILED";
-		print color 'reset';
-		print ": disabling $service\n";
+		print_error_in_red("FAILED");
+		ERROR( ": disabling $service\n");
 		`/sbin/chkconfig $service off`;
 		`/etc/init.d/$service stop`;
 		chomp(my $setting=`/sbin/chkconfig --list $service`);
@@ -767,11 +767,8 @@ BEGIN {
 	} elsif ( $setting =~ m/3:off/ ) {
 	    DEBUG("   --> $service is OFF\n");
 	    if($enable_service) {
-		print "   --> "; 
-		print color 'red';
-		print "FAILED";
-		print color 'reset';
-		print ": enabling $service\n";
+		print_error_in_red("FAILED");
+		ERROR(": enabling $service\n");
 		`/sbin/chkconfig $service on`;
 		`/etc/init.d/$service start`;
 		chomp(my $setting=`/sbin/chkconfig --list $service`);
@@ -779,12 +776,8 @@ BEGIN {
 		    MYERROR("Unable to chkconfig $service on");
 		}
 	    } else {
-		print "   --> "; 
-		print color 'green';
-		print "OK";
-		print color 'reset';
-		print ": $service is OFF\n";
-#		print "   --> OK: $service is OFF\n";
+		print_info_in_green("OK");
+		INFO (": $service is OFF\n");
 	    }
 	}
 
@@ -894,6 +887,35 @@ BEGIN {
 
 
 
+}
+
+sub print_error_in_red {
+    my $text = shift;
+
+    ERROR( "   --> ");     
+    print color 'red';
+    ERROR($text);
+    print color 'reset';
+    return;
+}
+
+sub print_info_in_green {
+    my $text = shift;
+
+    INFO( "   --> ");     
+    print color 'green';
+    INFO($text);
+    print color 'reset';
+    return;
+}
+
+sub print_warn_in_yellow {
+    my $text = shift;
+    WARN( "   --> ");     
+    print color 'yellow';
+    WARN($text);
+    print color 'reset';
+    return;
 }
 
 1;
