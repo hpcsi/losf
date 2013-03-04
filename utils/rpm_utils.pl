@@ -287,7 +287,7 @@ sub verify_custom_rpms {
 	    # replace  @group with defined rpms
 	    
 	    foreach $rpm_group (@{$aliases{$group}}) {
-		INFO("   --> $group expansion - adding $rpm_group for $appliance\n");
+		TRACE("   --> $group expansion - adding $rpm_group for $appliance\n");
 		push(@rpm_list,$rpm_group);
 	    }
 	}
@@ -460,7 +460,7 @@ sub verify_custom_rpms {
 		SYSLOG("Registering locally installed $rpm for new multi-version");
 		push(@{$rpms_to_install{$rpm_options}},$filename);
 	    } else {
-		INFO("   --> desired multi-rpm version is installed\n");
+		DEBUG("   --> desired multi-rpm version is installed\n");
 	    }
 	}
     }
@@ -552,7 +552,7 @@ sub verify_custom_rpms_removed {
 	    # replace  @group with defined rpms
 
 	    foreach $rpm_group (@{$aliases{$group}}) {
-		INFO("   --> $group expansion - adding $rpm_group for $appliance\n");
+		TRACE("   --> $group expansion - adding $rpm_group for $appliance\n");
 		push(@rpm_list,$rpm_group);
 	    }
 	}
@@ -567,7 +567,7 @@ sub verify_custom_rpms_removed {
 	my @rpm_array  = split(/\s+/,$entry);
 	my $rpm = $rpm_array[0];
 
-	INFO("   --> Checking $rpm\n");
+	DEBUG("   --> Checking $rpm\n");
 
 	if( $rpm =~ m/^@(\S+)/ ) { next; } # @groups names have already been expanded, skip this @group
 

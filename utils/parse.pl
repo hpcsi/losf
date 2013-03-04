@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2012 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -420,7 +420,7 @@ BEGIN {
 	    @rpms_defined = $local_custom_cfg->val($section,$node_type);
 
 	    foreach $rpm (@rpms_defined) {
-		INFO("       --> Read $rpm from config for deletion\n");
+		TRACE("       --> Read $rpm from config for deletion\n");
 	    }
 
 	}
@@ -512,7 +512,7 @@ BEGIN {
 
 	my $num_files = @defined_files;
 
-	INFO("   --> \# of files defined = $num_files\n");
+	DEBUG("   --> \# of files defined = $num_files\n");
 
 	foreach(@defined_files) {
 	    DEBUG("   --> Read value for $_\n");

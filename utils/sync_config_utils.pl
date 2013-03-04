@@ -95,7 +95,7 @@ BEGIN {
 
 	# Sync const files
 
-	print "** Syncing configuration files ($node_cluster:$node_type)\n";
+	INFO(print "** Syncing configuration files ($node_cluster:$node_type)\n");
 
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
@@ -237,7 +237,7 @@ BEGIN {
 	my %perm_files          = query_cluster_config_sync_permissions($cluster,$type);
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
-	    WARN("   --> Warning: production file $file not found - adding new sync file\n");
+	    DEBUG("   --> Warning: production file $file not found - adding new sync file\n");
 	}
 
 	my $basename = basename($file);
@@ -261,7 +261,7 @@ BEGIN {
 	}
 	
 	if ( ! -s $sync_file ) {
-	    WARN("   --> Warning: config/const_files/$cluster/$type/$basename not " .
+	    DEBUG("   --> Warning: config/const_files/$cluster/$type/$basename not " .
 		 "found - not syncing...\n");
 	    end_routine();
 	    return;
@@ -280,16 +280,17 @@ BEGIN {
 	# Deal with non-symbolic link and diff directly.
 	    
 	if ( compare($file,$ref_file) == 0 ) {
-	    print "   --> "; 
-	    print color 'green';
-	    print "OK";
-	    print color 'reset';
-	    print ": $file in sync ";;
+	    print_info_in_green("OK");
+#	    print "   --> "; 
+#	    print color 'green';
+#	    print "OK";
+#	    print color 'reset';
+	    INFO(": $file in sync ");
 	    #print "   --> OK: $file in sync ";
 	    if($customized) { 
-		print "(using customized config for $host_name)\n";
+		INFO("(using customized config for $host_name)\n");
 	    } else { 
-		print "\n"; 
+		INFO("\n"); 
 	    }
 	} else {
 	    print "   --> "; 
