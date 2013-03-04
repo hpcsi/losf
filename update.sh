@@ -34,11 +34,48 @@ export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 export PERL5LIB=$TOP_DIR/utils
 export MYHOST=`hostname -s`
 
+usage()
+{
+  cat <<EOF
+
+ LosF update utility: used to bring local node to latest LosF
+ configuration status (via the installation/removal of desired
+ packages and synchronization of configuration files and services).
+
+ usage: update [OPTIONS]
+
+ OPTIONS:
+    -h          Show help message.
+    -p [path]   Overide configured RPM source directory to prefer provided path instead.
+
+EOF
+}
+
+RPM_OVERRIDE=
+
+while getopts "hp:" OPTION
+do
+    case $OPTION in
+	h)
+	    usage
+	    exit 1
+	    ;;
+	p)
+	    RPM_OVERRIDE=$OPTARG
+#	    echo "** Using $RPM_OVERRIDE as preferential RPM source path"
+	    ;;
+	?)
+	    usage
+	    exit
+	    ;;
+	esac
+done
+
 #----------------------------------------------------------------
-# Perform LosF updates (todo, handle PXE arguments appropriately)
+# Perform LosF updates
 #----------------------------------------------------------------
 
-$TOP_DIR/utils/update.pl 
+$TOP_DIR/utils/update.pl $RPM_OVERRIDE
 
 #-------------------
 # Query node type
@@ -57,17 +94,16 @@ if [ x"$BASENAME" == "x" -o x"$CLUSTER" == "x" ];then
     echo "**"
     echo " "
     exit 1
-else
+fi
+###else
+###    if [ -x $TOP_DIR/update.$CLUSTER ];then
+###	echo " "
+###	echo "Running update.$CLUSTER to perform local customizations for $BASENAME node type"
+###	echo " "
 
+###	$TOP_DIR/update.$CLUSTER $@
+###    fi
 
-
-    if [ -x $TOP_DIR/update.$CLUSTER ];then
-	echo " "
-	echo "Running update.$CLUSTER to perform local customizations for $BASENAME node type"
-	echo " "
-
-	$TOP_DIR/update.$CLUSTER $@
-    fi
 ###    else
 ###	echo " "
 ###	echo "[Warning]: Unable to perform updates"
@@ -77,7 +113,7 @@ else
 ###	echo " "
 ###	exit 1
 ###    fi
-fi
+###fi
 
 
 
