@@ -88,5 +88,19 @@ parse_and_sync_softlinks();
 parse_and_sync_services();
 parse_and_sync_permissions();
 
+# (Optionally) run custom site-specific utility for the cluster
+
+(my $node_cluster, my $node_type) = determine_node_membership();
+
+my $custom_file = "$osf_top_dir/update.$node_cluster";
+
+if ( -x $custom_file ) {
+    INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
+
+    TRACE("Running cmd $custom_file\n");
+    system($custom_file);
+    
+}
+
 1;
 

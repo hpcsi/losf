@@ -52,7 +52,7 @@ BEGIN {
 
 	#$logr->level($DEBUG);
 
-	INFO("   --> Looking for DNS domainname match...($domain)\n");
+	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
 	foreach(@Clusters) {
 
@@ -69,7 +69,7 @@ BEGIN {
 		    if($loc_domain =~ m/$domain/ ) {
 
 			DEBUG("      --> Found a matching domain ($loc_domain)\n");
-			INFO ("   --> Domain found: Looking for host match...($host)\n");
+			DEBUG("   --> Domain found: Looking for host match...($host)\n");
 
 			my @params = $global_cfg->Parameters($loc_cluster);
 			my $num_params = @params;
@@ -125,8 +125,8 @@ BEGIN {
 		    "Please verify global configuration settings and local domainname configuration.\n");
 	} else {
 	    
-	    INFO("   --> Node type determination successful\n");
-	    INFO("\n");
+	    DEBUG("   --> Node type determination successful\n");
+#	    INFO("\n");
 	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
 	    INFO("\n");
 	}
@@ -148,7 +148,7 @@ BEGIN {
 	my $logr      = get_logger();
 	my $shortname = fileparse($infile);
 
-	INFO("   --> Initializing input config_parsing ($shortname)\n");
+	DEBUG("   --> Initializing input config file parsing ($shortname)\n");
 	
 	verify_file_exists($infile);
 	
@@ -161,7 +161,7 @@ BEGIN {
 	my $section="Cluster-Names";
 
 	if ( $global_cfg->SectionExists($section ) ) {
-	    INFO("   --> Reading global cluster names\n");
+	    DEBUG("   --> Reading global cluster names\n");
 
 	    @Clusters = split(' ',$global_cfg->val($section,"clusters"));
 	    DEBUG(" clusters = @Clusters\n");
@@ -172,8 +172,8 @@ BEGIN {
 		INFO("Exiting.\n\n");
 		exit(0);
 	    }
-	    INFO ("   --> $num_clusters clusters defined:\n");
-	    foreach(@Clusters) { INFO("       --> ".$_."\n"); }
+	    DEBUG ("   --> $num_clusters clusters defined:\n");
+	    foreach(@Clusters) { DEBUG("       --> ".$_."\n"); }
 	    
 	} else {
 	    MYERROR("Corrupt configuration: [$section] section not found");
@@ -197,7 +197,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    INFO("   --> Initializing input config_parsing ($shortname)\n");
+	    DEBUG("   --> Initializing input file config parsing ($shortname)\n");
 	    
 	    verify_file_exists($infile);
 	    
@@ -225,7 +225,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    INFO("   --> Initializing OS config_parsing ($shortname)\n");
+	    DEBUG("   --> Initializing OS config_parsing ($shortname)\n");
 	    
 	    verify_file_exists($infile);
 	    
@@ -253,7 +253,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    INFO("   --> Initializing Custom config_parsing ($shortname)\n");
+	    DEBUG("   --> Initializing Custom config_parsing ($shortname)\n");
 	    
 	    verify_file_exists($infile);
 	    
@@ -342,7 +342,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
 
-	INFO("   --> Reading config for OS packages to sync...($cluster->$node_type)\n");
+	DEBUG("   --> Reading config for OS packages to sync...($cluster->$node_type)\n");
 
 	if ( ! $local_os_cfg->SectionExists("OS Packages") ) {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
@@ -376,7 +376,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
 
-	INFO("   --> Looking for OS packages to remove...($cluster->$node_type)\n");
+	DEBUG("   --> Looking for OS packages to remove...($cluster->$node_type)\n");
 
 	if ( ! $local_os_cfg->SectionExists("OS Packages") ) {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
@@ -409,7 +409,7 @@ BEGIN {
 
 	my $section       = "Custom Packages/uninstall";
 
-	INFO("   --> Looking for Custom packages to remove...($cluster->$node_type)\n");
+	DEBUG("   --> Looking for Custom packages to remove...($cluster->$node_type)\n");
 
 	if ( ! $local_custom_cfg->SectionExists("$section") ) {
 	    MYERROR("No Input section found for cluster $cluster [$section]\n");
@@ -440,7 +440,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @rpms_defined  = ();
 
-	INFO("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
+	DEBUG("   --> Looking for Custom packages to sync...($cluster->$node_type)\n");
 
 	if ( ! $local_custom_cfg->SectionExists("Custom Packages") ) {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
@@ -502,10 +502,10 @@ BEGIN {
 	my $logr          = get_logger();
 	my @sync_partials = ();
 
-	INFO("   --> Looking for defined files to perform partial sync...($cluster->ALL)\n");
+	DEBUG("   --> Looking for defined files to perform partial sync...($cluster->ALL)\n");
 
 	if ( ! $local_cfg->SectionExists("PartialConfigFiles") ) {
-	    WARN("No Input section found for cluster $cluster [PartialConfigFiles]\n");
+	    DEBUG("No Input section found for cluster $cluster [PartialConfigFiles]\n");
 	}
 
 	my @defined_files = $local_cfg->Parameters("PartialConfigFiles");
@@ -519,7 +519,7 @@ BEGIN {
 	    if (defined ($myval = $local_cfg->val("PartialConfigFiles",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		if ( "$myval" eq "partial" || "$myval" eq "yes" ) {
-		    INFO("   --> Partial sync defined for $_\n");
+		    DEBUG("   --> Partial sync defined for $_\n");
 		    push(@sync_partials,$_);
 		}
 	    } else {
@@ -529,17 +529,17 @@ BEGIN {
 
 	# Now, check node-type specific configuration
 
-	INFO("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
+	DEBUG("   --> Looking for defined files to perform partial sync...($cluster->$host)\n");
 
 	if ( ! $local_cfg->SectionExists("PartialConfigFiles/$host") ) {
-	    WARN("No Input section found for cluster $cluster [PartialConfigFiles/$host]\n");
+	    DEBUG("No Input section found for cluster $cluster [PartialConfigFiles/$host]\n");
 	}
 
 	my @defined_files = $local_cfg->Parameters("PartialConfigFiles/$host");
 
 	my $num_files = @defined_files;
 
-	INFO("   --> \# of files defined = $num_files\n");
+	DEBUG("   --> \# of files defined = $num_files\n");
 
 	foreach(@defined_files) {
 	    DEBUG("   --> Read value for $_\n");
@@ -569,7 +569,7 @@ BEGIN {
 	my $logr          = get_logger();
 	my @sync_partials = ();
 
-	INFO("   --> Looking for defined files to remove...($cluster->$host)\n");
+	DEBUG("   --> Looking for defined files to remove...($cluster->$host)\n");
 
 	if ( ! $local_cfg->SectionExists("ConfigFiles") ) {
 	    MYERROR("No Input section found for cluster $cluster [ConfigFiles]\n");
@@ -579,7 +579,7 @@ BEGIN {
 
 	my $num_files = @defined_files;
 
-	INFO("   --> \# of files defined = $num_files\n");
+	DEBUG("   --> \# of files defined = $num_files\n");
 
 	foreach(@defined_files) {
 	    DEBUG("   --> Read value for $_\n");
@@ -627,7 +627,7 @@ BEGIN {
 	    $section = "SoftLinks/$host";
 
 	    if ( ! $local_cfg->SectionExists($section) ) {
-		WARN("   --> No node type specific softlinks defined for cluster $cluster ($host)\n");
+		DEBUG("   --> No node type specific softlinks defined for cluster $cluster ($host)\n");
 		return(%sync_softlinks);
 	    }
 
@@ -766,7 +766,7 @@ BEGIN {
 	    
 	    %osf_file_perms  = ();
 
-	    INFO("   --> Looking for specific permissions to sync...($cluster->$host)\n");
+	    DEBUG("   --> Looking for specific permissions to sync...($cluster->$host)\n");
 	    
 	    if ( ! $local_cfg->SectionExists("Permissions") ) {
 		MYERROR("No Input section found for cluster $cluster [Permissions]\n");
@@ -776,7 +776,7 @@ BEGIN {
 	    
 	    my $num_entries = @perms;
 	    
-	    INFO("   --> \# of file permissions to sync = $num_entries\n");
+	    DEBUG("   --> \# of file permissions to sync = $num_entries\n");
 	    
 	    foreach(@perms) {
 		DEBUG("   --> Read value for $_\n");
@@ -804,7 +804,7 @@ BEGIN {
 	my $logr    = get_logger();
 	my $found   = 0;
 
-	INFO("   --> Looking for top-level rpm dir...($cluster)\n");
+	DEBUG("   --> Looking for top-level rpm dir...($cluster)\n");
 
 	if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir_$type")) ) {
 	    DEBUG("--> Read node specific topdir = $rpm_topdir\n");

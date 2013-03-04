@@ -55,7 +55,7 @@ sub verify_rpms {
 
     if($num_rpms < 1) { return; }
 
-    INFO("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
+    DEBUG("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
 
     foreach $entry (@rpm_list) {
 
@@ -157,11 +157,13 @@ sub verify_rpms {
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
 
     if( @rpms_to_install eq 0 ) {
-	print "   --> "; 
-	print color 'green';
-	print "OK";
-	print color 'reset';
-	print ": OS packages in sync ($num_rpms rpms checked)\n";
+	print_info_in_green("OK");
+#	print "   --> "; 
+#	print color 'green';
+#	print "OK";
+#	print color 'reset';
+#	print ": OS packages in sync ($num_rpms rpms checked)\n";
+	INFO(": OS packages in sync ($num_rpms rpms checked)\n");
 #	INFO("   --> OK: OS packages in sync ($num_rpms rpms checked)\n");
 	return;
     }
@@ -192,7 +194,7 @@ sub verify_rpms_removed {
 
     if($num_rpms < 1) { return; }
 
-    INFO("   --> Verifying desired OS RPMs are *not* installed ($num_rpms total)...\n");
+    DEBUG("   --> Verifying desired OS RPMs are *not* installed ($num_rpms total)...\n");
     foreach $rpm (@rpm_list) {
 	DEBUG("   --> Checking $rpm\n");
 
@@ -269,7 +271,7 @@ sub verify_custom_rpms {
 
     if($num_rpms < 1) { return; }
 
-    INFO("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
+    DEBUG("   --> Verifying desired Custom RPMs are installed ($num_rpms total)...\n");
 
     # Resolve any group aliases: we pop to the end of the array, so
     # that multiple levels of alias resolution can be resolved (ie. an
@@ -475,18 +477,23 @@ sub verify_custom_rpms {
     }
 
     if( $count == 0 ) {
-	print "   --> "; 
-	print color 'green';
-	print "OK";
-	print color 'reset';
-	print ": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
+	print_info_in_green("OK");
+#	print "   --> "; 
+#	print color 'green';
+#	print "OK";
+#	print color 'reset';
+#	print ": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
+	INFO(": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n");
 	return;
     } else {
-	print "   --> ";
-	print color 'red';
-	print "FAILED";
-	print color 'reset';
-	print ": A total of $count custom rpm(s) need updating for $appliance\n";
+	print_error_in_red("FAILED");
+	
+#	print "   --> ";
+#	print color 'red';
+#	print "FAILED";
+#	print color 'reset';
+#	print ": A total of $count custom rpm(s) need updating for $appliance\n";
+	ERROR(": A total of $count custom rpm(s) need updating for $appliance\n");
     }
 
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
@@ -533,7 +540,7 @@ sub verify_custom_rpms_removed {
 
     if($num_rpms < 1) { return; }
 
-    INFO("   --> Verifying desired Custom RPMs are *not* installed ($num_rpms total)...\n");
+    DEBUG("   --> Verifying desired Custom RPMs are *not* installed ($num_rpms total)...\n");
 
     # Resolve any group aliases, we pop to the end of the array, so
     # that multiple levels of alias resolution can be resolved (ie. an
@@ -664,7 +671,7 @@ sub query_all_installed_rpms {
     my @rpms_installed          = ();
     %losf_global_rpms_installed = ();
 
-    INFO("   --> Caching all currently installed RPMs...\n");
+    DEBUG("   --> Caching all currently installed RPMs...\n");
 
     @rpms_installed = split('_LOSF_DELIM',`rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
 

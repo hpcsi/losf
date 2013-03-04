@@ -67,7 +67,6 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_const_file == 0 ) {
-	    #INFO("** Syncing configuration files (const)\n\n");
 	    $osf_sync_const_file = 1;
 	}
 	
@@ -95,7 +94,8 @@ BEGIN {
 
 	# Sync const files
 
-	INFO(print "** Syncing configuration files ($node_cluster:$node_type)\n");
+
+	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
@@ -105,7 +105,7 @@ BEGIN {
 
 	# Now, sync partial contents...
 
-	INFO("** Syncing configuration files (partial contents))\n\n");
+	INFO("** Syncing configuration files (partial contents))\n");
 	
 	foreach(@partial_files) {
 	    sync_partial_file("$_");
@@ -113,7 +113,9 @@ BEGIN {
 
 	# Now, verify non-existence of certain files
 
-	INFO("** Syncing non-existence of configuration files\n\n");
+	INFO("** Syncing non-existence of configuration files\n");
+
+
 
 	my @delete_files = query_cluster_config_delete_sync_files($node_cluster,$node_type);
 
@@ -122,18 +124,22 @@ BEGIN {
 	    my $basename = basename("$_");
 
 	    if ( -e "$_") {
-		print "   --> "; 
-		print color 'red';
-		print "FAILED";
-		print color 'reset';
-		print ": [$basename] File present: deleting\n";
+		print_error_in_red("FAILED");
+#		print "   --> "; 
+#		print color 'red';
+#		print "FAILED";
+#		print color 'reset';
+#		print ": [$basename] File present: deleting\n";
+		print_error_in_red(": [$basename] File present: deleting\n");
 		unlink("$_") || MYERROR("Unable to remove file: $_");
 	    } else {
-		print "   --> "; 
-		print color 'green';
-		print "OK";
-		print color 'reset';
-		print ": $_ not present\n";
+		print_info_in_green("OK");
+#		print "   --> "; 
+#		print color 'green';
+#		print "OK";
+#		print color 'reset';
+#		print ": $_ not present\n";
+		INFO(": $_ not present\n");
 	    }
 	}
 	    
@@ -224,6 +230,8 @@ BEGIN {
     sub sync_const_file {
 
 	begin_routine();
+
+
 	
 	my $file       = shift;	# input filename to sync
 	my $logr       = get_logger();
@@ -239,6 +247,9 @@ BEGIN {
 	if ( ! -s "$file" && ! -l "$file" ) {
 	    DEBUG("   --> Warning: production file $file not found - adding new sync file\n");
 	}
+
+
+	    
 
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to sync file: $file\n");
@@ -278,7 +289,7 @@ BEGIN {
 	expand_text_macros($sync_file,$ref_file,$cluster);
 	    
 	# Deal with non-symbolic link and diff directly.
-	    
+
 	if ( compare($file,$ref_file) == 0 ) {
 	    print_info_in_green("OK");
 #	    print "   --> "; 
@@ -347,7 +358,7 @@ BEGIN {
 
 	    mirrorPermissions("$sync_file","$file",0);
 	    
-	    INFO("   --> [$basename] Sync successful\n");
+	    INFO("      --> [$basename] Sync successful\n");
 	} # end if difference was found	
 
 	unlink($ref_file);
@@ -473,16 +484,19 @@ BEGIN {
 	# Check if we have any changes?
 
 	if ( compare($file,$new_file) == 0 ) {
-	    print "   --> "; 
-	    print color 'green';
-	    print "OK";
-	    print color 'reset';
-	    print ": $file in (partial) sync\n";
+	    print_info_in_green("OK");
+#	    print "   --> "; 
+#	    print color 'green';
+#	    print "OK";
+#	    print color 'reset';
+	    INFO(": $file in (partial) sync\n");
+#	    print ": $file in (partial) sync\n";
 	} else {
-	    print "   --> "; 
-	    print color 'red';
-	    print "FAILED";
-	    print color 'reset';
+	    print_error_in_red("FAILED");
+#	    print "   --> "; 
+#	    print color 'red';
+#	    print "FAILED";
+#	    print color 'reset';
 	    ERROR(": [$basename] Differences found: $basename requires partial syncing\n");
 
 	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
@@ -547,8 +561,8 @@ BEGIN {
 # 
 	if ( ! -s $target ) {
 	    if ( ! -s "$link_parent_dir/$target" ) {
-		print_warn_in_yellow("WARN:");
-		WARN("Soft link target is not available ($target)\n");
+		print_debug_in_yellow("WARN:");
+		DEBUG("Soft link target is not available ($target)\n");
 #		WARN("   --> Soft link target is not available ($target)\n");
 		end_routine();
 		return;
@@ -611,7 +625,7 @@ BEGIN {
 	begin_routine();
 
 	if ( $osf_sync_permissions == 0 ) {
-	    INFO("** Syncing file/directory permissions\n\n");
+	    DEBUG("** Syncing file/directory permissions\n\n");
 	    $osf_sync_permissions = 1;
 	}
 
@@ -796,7 +810,7 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	print "** Syncing OS packages ($node_cluster:$node_type)\n";
+	INFO("** Syncing OS packages ($node_cluster:$node_type)\n");
 
 	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
 
@@ -821,8 +835,7 @@ BEGIN {
 	begin_routine();
 	
 	if ( $osf_sync_custom_packages == 0 ) {
-#	    INFO("\n** Syncing Custom packages\n\n");
-	    print "** Syncing Custom packages\n\n";
+	    INFO("** Syncing Custom packages\n");
 	    $osf_sync_custom_packages = 1;
 	} else {
 	    return;
@@ -834,7 +847,7 @@ BEGIN {
 	my %custom_aliases = ();
 	my @custom_rpms    = ();
 
-	INFO("\n");
+###	INFO("\n");
 
 	# (0) read aliases for later use in custom rpms
 
@@ -868,12 +881,11 @@ BEGIN {
 	    DEBUG("   --> Custom rpm for ALL = $rpm\n");
 	}
 
-
 	verify_custom_rpms(\$ALL_type,\@custom_rpms,\%custom_aliases);
 
 	# verify packages for current node types
 	
-	INFO("\n");
+###	INFO("\n");
 
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
@@ -915,6 +927,15 @@ sub print_warn_in_yellow {
     WARN( "   --> ");     
     print color 'yellow';
     WARN($text);
+    print color 'reset';
+    return;
+}
+
+sub print_debug_in_yellow {
+    my $text = shift;
+    DEBUG( "   --> ");     
+    print color 'yellow';
+    DEBUG($text);
     print color 'reset';
     return;
 }

@@ -67,7 +67,8 @@ BEGIN {
 	     "$output_mode" eq "DEBUG" ) {
 	    $logr->level($output_mode);
 	} else {
-	    $logr->level($ERROR);
+#	    $logr->level($ERROR);
+	    $logr->level($INFO);
 	}
 
 	#$logr->level($DEBUG);
@@ -82,7 +83,7 @@ BEGIN {
         #---------------
 
 	print_header();
-	INFO("** Node Type Determination\n\n");
+	DEBUG("** Node Type Determination\n");
 	
 	chomp($host_name=`hostname -s`);
 	chomp($domain_name=`dnsdomainname`);
