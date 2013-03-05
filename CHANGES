@@ -1,14 +1,20 @@
-Version 0.40.0  (In Progress)
+Version 0.41.0  (In Progress)
+  * performance optimization - locally installed RPMS queried once and cached
+  * OS and custom package config file format update: "losf config-upgrade" can be used
+    to migrate old format to latest version
 
-  * addition new options to losf command-line utility (see "losf --help" for more info)
+Version 0.40.0  (15 February 2013)
+
+  * addition of new options to losf command-line utility (see "losf --help" for more info)
   * re-factorization of OS packages, use "losf addpkg" to register OS distro packages
-  * re-facttorization of custom packages, use "losf addrpm" to add custom RPMs
+  * re-factorization of custom packages, use "losf addrpm" to add custom RPMs
   * added support for customization of relocatable rpms
-  * added top-level update alias, can extend normal funnctionality with the presence 
-    of a update.<Cluster> shell script
+  * added top-level update alias, can extend normal functionality with the presence 
+    of an update.<Cluster> shell script for local site customization
   * added support for custom rpm aliases which can be reused across various node types
   * added capability to define local rpm source repositories on a per-appliance basis
   * bug fix for chassis-only koomie_cf command launching
+  * new "-f" option to koomie_cf to read desired launch hosts from file
 
 Version 0.32.0  (07 August 2011)
 
@@ -27,4 +33,4 @@ Version 0.30.0 (23 October 2009)
 
   * os-update mechanism upgraded to support yum
   * bug fix for rpm queries with arithmetic characters included
-  * infrastucture updates to support multiple machines
+  * infrastructure updates to support multiple machines
