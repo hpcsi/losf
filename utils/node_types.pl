@@ -1,32 +1,34 @@
 #!/usr/bin/perl
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
+# 
+# LosF - a Linux operating system Framework for HPC clusters
+#
+# Copyright (C) 2007-2013 Karl W. Schulz
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
+# Determine cluster/node membership based on LosF runtime config
 #
 # $Id$
-#
-#-----------------------------------------------------------------------
-# Routines for determining cluster node types and software production
-# dates for any general OS revisions.  Definitions are based on inputs
-# provided in global configuration file(s).
-# 
-# See config.global for top-level input variables.
-#
-# Typical node types for an HPC cluster are:
-#
-# master, login, Lustre oss/mds, and compute.
-# 
-# Syntax for the designation is "node_type:hostname". For convenience, 
-# the hostname designation can be replaced by a regular expression.
-#
-# Originally: 04-15-2007 -> Lonestar3 version
-#             06-21-2007 -> Ranger    version
-#             10-19-2009 -> Longhorn2 version (with more generality)
-#
-# Questions/Problems?: karl@tacc.utexas.edu
-# Texas Advanced Computing Center 
-#-----------------------------------------------------------------------
+#--------------------------------------------------------------------------
 
 #package node_types;
 use strict;
-use OSF_paths;
+use LosF_paths;
 use utils;
 
 use lib "$osf_log4perl_dir";

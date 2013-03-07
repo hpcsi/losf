@@ -29,7 +29,7 @@
 #--------------------------------------------------------------------------
 
 use strict;
-use OSF_paths;
+use LosF_paths;
 
 use File::Basename;
 use File::Compare;
@@ -105,7 +105,7 @@ BEGIN {
 
 	# Now, sync partial contents...
 
-	INFO("** Syncing configuration files (partial contents))\n");
+	INFO("** Syncing configuration files (partial contents)\n");
 	
 	foreach(@partial_files) {
 	    sync_partial_file("$_");
@@ -114,8 +114,6 @@ BEGIN {
 	# Now, verify non-existence of certain files
 
 	INFO("** Syncing non-existence of configuration files\n");
-
-
 
 	my @delete_files = query_cluster_config_delete_sync_files($node_cluster,$node_type);
 
@@ -405,7 +403,7 @@ BEGIN {
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {
-	    WARN("   --> Warning: config/const_files/$cluster/$type/$basename not " .
+	    DEBUG("   --> Warning: config/const_files/$cluster/$type/$basename not " .
 		 "found - not syncing...\n");
 	    end_routine();
 	    return;
@@ -424,7 +422,7 @@ BEGIN {
 	# 
 
 	if ( ! -e "$file" ) {
-	    WARN("   --> Warning: partial const_file $file not present, ignoring sync request\n");
+	    DEBUG("   --> Warning: partial const_file $file not present, ignoring sync request\n");
 	    return 0;
 	}
 

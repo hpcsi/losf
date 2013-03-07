@@ -33,7 +33,7 @@
 
 use warnings;
 use Switch;
-use OSF_paths;
+use LosF_paths;
 
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";

@@ -27,11 +27,11 @@
 # $Id$
 #--------------------------------------------------------------------------
 
-use OSF_paths;
+use LosF_paths;
 
 use lib "$osf_log4perl_dir";
-use lib "$osf_rpm2_dir";
-use lib "$osf_rpm2_arch_dir";
+###use lib "$osf_rpm2_dir";
+###use lib "$osf_rpm2_arch_dir";
 
 use rpm_topdir;
 use Sys::Syslog;  

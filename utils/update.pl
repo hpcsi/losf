@@ -29,7 +29,7 @@
 #--------------------------------------------------------------------------
 
 use strict;
-use OSF_paths;
+use LosF_paths;
 
 use File::Basename;
 use File::Compare;

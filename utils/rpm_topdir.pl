@@ -9,7 +9,7 @@
 #-------------------------------------------------------------------
 
 use strict;
-use OSF_paths;
+use LosF_paths;
 use node_types;
 
 use lib "$osf_log4perl_dir";
