@@ -90,12 +90,19 @@ BEGIN {
 	chomp($host_name=`hostname -s`);
 	chomp($domain_name=`dnsdomainname`);
 
+
+
         #---------------
         # Global Parsing
         #---------------
 	
 	init_config_file_parsing("$osf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
+
+	if($osf_custom_config) {
+	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
+	    INFO("LosF Config Dir     = $osf_config_dir\n");
+	}
 	
        # All Done.
 	

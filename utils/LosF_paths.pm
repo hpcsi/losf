@@ -23,8 +23,7 @@
 # Configuration paths definitions.
 #
 # $Id$
-#
-#-----------------------------------------------------------------------
+#--------------------------------------------------------------------------
 
 package LosF_paths;
 use strict;
@@ -33,6 +32,7 @@ use File::Basename;
 
 our @EXPORT            = qw($osf_top_dir 
 			    $osf_config_dir
+                            $osf_custom_config
 		            $osf_utils_dir
 		            $osf_log4perl_dir
 		            $osf_ini4perl_dir
@@ -45,6 +45,7 @@ our @EXPORT            = qw($osf_top_dir
 # Determine full path to LsoF install
 		       
 our $osf_top_dir       = "";
+our $osf_custom_config = 0;
 
 my ($filename,$basename) = fileparse($0);
 
@@ -66,8 +67,8 @@ my $config_dir = $ENV{'LOSF_CONFIG_DIR'};
 
 if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
     if ( -d $config_dir ) {
-###	INFO("--> Using $config_dir for LosF configuration path\n");
-	our $osf_config_dir = $config_dir;
+	our $osf_config_dir    = $config_dir;
+	our $osf_custom_config = 1;
     } else {
 	MYERROR("LOSF_CONFIG_DIR provided path does not exist ($config_dir)");
     }

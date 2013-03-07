@@ -124,11 +124,7 @@ BEGIN {
 	    MYERROR("Unable to determine node type for this host/domainname ($host/$domain)",
 		    "Please verify global configuration settings and local domainname configuration.\n");
 	} else {
-	    
 	    DEBUG("   --> Node type determination successful\n");
-#	    INFO("\n");
-	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
-	    INFO("\n");
 	}
 
 	return ($node_cluster,$node_type);
