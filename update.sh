@@ -62,7 +62,6 @@ do
 	    ;;
 	p)
 	    RPM_OVERRIDE=$OPTARG
-#	    echo "** Using $RPM_OVERRIDE as preferential RPM source path"
 	    ;;
 	?)
 	    usage
@@ -86,40 +85,4 @@ export NODE_TYPE_SILENT=1
 RESULT=`$TOP_DIR/node_types | grep Node_Type | awk '{print $3}'`
 CLUSTER=`echo $RESULT | awk -F : '{print $1}'`
 BASENAME=`echo $RESULT | awk -F : '{print $2}'`
-
-if [ x"$BASENAME" == "x" -o x"$CLUSTER" == "x" ];then
-    echo " "
-    echo "**"
-    echo "** Error: unable to ascertain Cluster node type for host ($MYHOST)"
-    echo "**"
-    echo " "
-    exit 1
-fi
-###else
-###    if [ -x $TOP_DIR/update.$CLUSTER ];then
-###	echo " "
-###	echo "Running update.$CLUSTER to perform local customizations for $BASENAME node type"
-###	echo " "
-
-###	$TOP_DIR/update.$CLUSTER $@
-###    fi
-
-###    else
-###	echo " "
-###	echo "[Warning]: Unable to perform updates"
-###	echo "[Warning]: $TOP_DIR/update.$CLUSTER is not present or executable"
-###	echo " "
-###	echo "Please create necessary file to perform desired software updates."
-###	echo " "
-###	exit 1
-###    fi
-###fi
-
-
-
-
-
-
-
-
 
