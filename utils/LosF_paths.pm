@@ -67,6 +67,12 @@ my $config_dir = $ENV{'LOSF_CONFIG_DIR'};
 
 if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
     if ( -d $config_dir ) {
+	# remove trailing slash if present
+
+	if($config_dir =~ /(.*)\/$/) {
+	    chop($config_dir);
+	}
+
 	our $osf_config_dir    = $config_dir;
 	our $osf_custom_config = 1;
     } else {

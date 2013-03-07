@@ -1,5 +1,7 @@
 Version 0.41.0  (In Progress)
-  * performance optimization - locally installed RPMS queried once and cached
+
+  * alternate config directory support using LOSF_CONFIG_DIR environment variable
+  * performance optimizations - locally installed RPMS now queried once and cached
   * OS and custom package config file format update: "losf config-upgrade" can be used
     to migrate old format to latest version
 

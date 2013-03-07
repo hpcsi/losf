@@ -98,6 +98,7 @@ BEGIN {
 	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
 	foreach(@sync_files) {
+
 	    if( !exists $partial_file_hash{$_} ) {
 		sync_const_file("$_");
 	    }
@@ -123,20 +124,10 @@ BEGIN {
 
 	    if ( -e "$_") {
 		print_error_in_red("FAILED");
-#		print "   --> "; 
-#		print color 'red';
-#		print "FAILED";
-#		print color 'reset';
-#		print ": [$basename] File present: deleting\n";
-		print_error_in_red(": [$basename] File present: deleting\n");
+		ERROR(": [$basename] File present: deleting\n");
 		unlink("$_") || MYERROR("Unable to remove file: $_");
 	    } else {
 		print_info_in_green("OK");
-#		print "   --> "; 
-#		print color 'green';
-#		print "OK";
-#		print color 'reset';
-#		print ": $_ not present\n";
 		INFO(": $_ not present\n");
 	    }
 	}
@@ -229,8 +220,6 @@ BEGIN {
 
 	begin_routine();
 
-
-	
 	my $file       = shift;	# input filename to sync
 	my $logr       = get_logger();
 	my $found      = 0;
@@ -246,9 +235,6 @@ BEGIN {
 	    DEBUG("   --> Warning: production file $file not found - adding new sync file\n");
 	}
 
-
-	    
-
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to sync file: $file\n");
 	
@@ -258,11 +244,11 @@ BEGIN {
 	# files.  If a configfile.<hostname> exists, we choose this
 	# file to sync in favor of the default configfile.
 
-	my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename.$host_name";
+	my $sync_file = "$osf_config_dir/const_files/$cluster/$type/$basename.$host_name";
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {
-	    $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
+	    $sync_file = "$osf_config_dir/const_files/$cluster/$type/$basename";
 	    DEBUG("   --> Looking for file $sync_file\n");
 	} else {
 	    $customized = 1;
@@ -290,24 +276,15 @@ BEGIN {
 
 	if ( compare($file,$ref_file) == 0 ) {
 	    print_info_in_green("OK");
-#	    print "   --> "; 
-#	    print color 'green';
-#	    print "OK";
-#	    print color 'reset';
 	    INFO(": $file in sync ");
-	    #print "   --> OK: $file in sync ";
 	    if($customized) { 
 		INFO("(using customized config for $host_name)\n");
 	    } else { 
 		INFO("\n"); 
 	    }
 	} else {
-	    print "   --> "; 
-	    print color 'red';
-	    print "FAILED";
-	    print color 'reset';
-	    print ": [$basename] Differences found: requires syncing";
-#	    ERROR("   --> FAILED: [$basename] Differences found: requires syncing ");
+	    print_error_in_red("FAILED");
+	    ERROR(": [$basename] Differences found: requires syncing");
 
 	    if($customized) { 
 		print "(using custom config for $host_name)\n";
@@ -399,7 +376,7 @@ BEGIN {
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to partially sync file: $file\n");
 	
-	my $sync_file = "$osf_top_dir/config/const_files/$cluster/$type/$basename";
+	my $sync_file = "$osf_config_dir/const_files/$cluster/$type/$basename";
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {
@@ -483,18 +460,9 @@ BEGIN {
 
 	if ( compare($file,$new_file) == 0 ) {
 	    print_info_in_green("OK");
-#	    print "   --> "; 
-#	    print color 'green';
-#	    print "OK";
-#	    print color 'reset';
 	    INFO(": $file in (partial) sync\n");
-#	    print ": $file in (partial) sync\n";
 	} else {
 	    print_error_in_red("FAILED");
-#	    print "   --> "; 
-#	    print color 'red';
-#	    print "FAILED";
-#	    print color 'reset';
 	    ERROR(": [$basename] Differences found: $basename requires partial syncing\n");
 
 	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
@@ -598,18 +566,10 @@ BEGIN {
 		    MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
 	    } else {
 		print_info_in_green("OK");
-#		print "   --> "; 
-#		print color 'green';
-#		print "OK";
-#		print color 'reset';
 		INFO(": $file softlink in sync\n");
 	    }
 	} else {
 	    print_error_in_red("FAILED");
-#	    print "   --> "; 
-#	    print color 'red';
-#	    print "FAILED";
-#	    print color 'reset';
 	    ERROR(": Creating link between $file -> $target\n");
 	    symlink("$target","$file") || 
 		MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	

@@ -90,8 +90,6 @@ BEGIN {
 	chomp($host_name=`hostname -s`);
 	chomp($domain_name=`dnsdomainname`);
 
-
-
         #---------------
         # Global Parsing
         #---------------
@@ -101,7 +99,7 @@ BEGIN {
 
 	if($osf_custom_config) {
 	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
-	    INFO("LosF Config Dir     = $osf_config_dir\n");
+	    INFO("LosF Config Dir     = $osf_config_dir\n\n");
 	}
 	
        # All Done.
