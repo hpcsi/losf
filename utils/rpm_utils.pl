@@ -144,7 +144,7 @@ sub verify_rpms {
 	my @installed  = split(' ',$installed_rpm[0]);
 
 	if( @installed_rpm == 0 ) {
-	    DEBUG("   --> $desired_rpm[0] is not installed - registering for add...\n");
+	    DEBUG("   --> $rpm is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
 	} elsif( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]") {
 	    DEBUG("   --> version mismatch - registering for update...\n");
@@ -156,11 +156,16 @@ sub verify_rpms {
 
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
 
+    my $count = @rpms_to_install;
+
     if( @rpms_to_install eq 0 ) {
 	print_info_in_green("OK");
 	INFO(": OS packages in sync ($num_rpms rpms checked)\n");
 	return;
-    } 
+    } else {
+	print_error_in_red("FAILED");
+	ERROR(": A total of $count OS distro rpm(s) need updating\n");
+    }
 
     $losf_os_packages += @rpms_to_install;
 
@@ -417,7 +422,7 @@ sub verify_custom_rpms {
 
 	if( $installed_versions == 0 ) {
 	    verify_expected_md5sum($filename,$md5_desired) unless ( $losf_nomd5file) ;
-	    INFO("   --> $rpm is not installed - registering for add...\n");
+	    DEBUG("   --> $rpm is not installed - registering for add...\n");
 	    SYSLOG("Registering previously uninstalled $rpm for update");
 	    push(@{$rpms_to_install{$rpm_options}},$filename);
 	} elsif( ($installed_versions == 1 ) ) {
@@ -474,21 +479,10 @@ sub verify_custom_rpms {
 
     if( $count == 0 ) {
 	print_info_in_green("OK");
-#	print "   --> "; 
-#	print color 'green';
-#	print "OK";
-#	print color 'reset';
-#	print ": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n";
 	INFO(": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n");
 	return;
     } else {
 	print_error_in_red("FAILED");
-	
-#	print "   --> ";
-#	print color 'red';
-#	print "FAILED";
-#	print color 'reset';
-#	print ": A total of $count custom rpm(s) need updating for $appliance\n";
 	ERROR(": A total of $count custom rpm(s) need updating for $appliance\n");
     }
 
