@@ -548,7 +548,7 @@ BEGIN {
 	    if (defined ($myval = $local_cfg->val("PartialConfigFiles/$host",$_)) ) {
 		DEBUG("   --> Value = $myval\n");
 		if ( "$myval" eq "partial" || "$myval" eq "yes" ) {
-		    INFO("   --> Partial sync defined for $_\n");
+		    DEBUG("   --> Partial sync defined for $_\n");
 		    push(@sync_partials,$_);
 		}
 	    } else {
