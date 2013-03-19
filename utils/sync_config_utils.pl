@@ -51,6 +51,12 @@ require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 require "$osf_utils_dir/rpm_utils.pl";
 
+# Global vars to count any detected changes
+
+use vars qw($losf_const_updated     $losf_const_total);
+use vars qw($losf_softlinks_updated $losf_softlinks_total);
+use vars qw($losf_services_updated  $losf_services_total);
+
 BEGIN {
 
     my $osf_cached_rpms          = 0;
@@ -98,7 +104,6 @@ BEGIN {
 
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
-###		$losf_const_total++;
 		sync_const_file("$_");
 	    }
 	}
@@ -108,7 +113,6 @@ BEGIN {
 	INFO("** Syncing configuration files (partial contents)\n");
 	
 	foreach(@partial_files) {
-###	    $losf_const_total++;
 	    sync_partial_file("$_");
 	}
 
@@ -119,11 +123,12 @@ BEGIN {
 	my @delete_files = query_cluster_config_delete_sync_files($node_cluster,$node_type);
 
 	foreach(@delete_files) {
-###	    $losf_const_total++;
+	    $losf_const_total++;
 
 	    my $basename = basename("$_");
 
 	    if ( -e "$_") {
+		$losf_const_updated++;
 		print_error_in_red("FAILED");
 		ERROR(": [$basename] File present: deleting\n");
 		unlink("$_") || MYERROR("Unable to remove file: $_");
@@ -263,6 +268,8 @@ BEGIN {
 	    return;
 	}
 
+	$losf_const_total++;
+
 	#--------------------------------------
 	# Look for file differences and fix 'em
 	#--------------------------------------
@@ -284,6 +291,7 @@ BEGIN {
 		INFO("\n"); 
 	    }
 	} else {
+	    $losf_const_updated++;
 	    print_error_in_red("FAILED");
 	    ERROR(": [$basename] Differences found: requires syncing");
 
@@ -463,6 +471,7 @@ BEGIN {
 	    print_info_in_green("OK");
 	    INFO(": $file in (partial) sync\n");
 	} else {
+	    $losf_const_updated++;
 	    print_error_in_red("FAILED");
 	    ERROR(": [$basename] Differences found: $basename requires partial syncing\n");
 
@@ -516,25 +525,16 @@ BEGIN {
 	my $link_parent_dir   = dirname($file);
 	my $target_parent_dir = dirname($target);
 
-# 	if( $target_parent_dir eq "." && ! -e ) {
-# 	    if ( ! -s "$link_parent_dir/$target" ) {
-# 		MYERROR("   --> Soft link target is not available ($link_parent_dir/$target)\n");
-# 	    }
-# 	} else {
-# 	    if ( ! -s $target ) {
-# 		MYERROR("   --> Soft link target is not available ($target)\n");
-# 	    }
-# 	}
-# 
 	if ( ! -s $target ) {
 	    if ( ! -s "$link_parent_dir/$target" ) {
 		print_debug_in_yellow("WARN:");
 		DEBUG("Soft link target is not available ($target)\n");
-#		WARN("   --> Soft link target is not available ($target)\n");
 		end_routine();
 		return;
 	    }
 	}
+
+	$losf_softlinks_total++;
 	
 	TRACE("   --> Checking symbolic link\n");
 	my $basename = basename($file);
@@ -552,8 +552,6 @@ BEGIN {
 	    return;
 	}
        
-#	chdir($link_parent_dir) or die "Cannot chdir to $link_parent_dir $!";
-
 	my @ParentDir = split(/\//, $link_parent_dir);
         my $notice_string  = $ParentDir[$#ParentDir]; pop(@ParentDir);
 	my $notice_string  = $ParentDir[$#ParentDir]."/$notice_string"; 
@@ -561,6 +559,7 @@ BEGIN {
 	if ( -l $file ) {
 	    my $resolved_file = readlink("$file");
 	    if ( "$resolved_file" ne "$target" ) {
+		$losf_softlinks_updated++;
 		ERROR("   --> FAILED [...$notice_string/$basename] Soft link difference found: updating...\n");
 		unlink("$file") || MYERROR("[$basename] Unable to remove $file");
 		symlink("$target","$file") || 
@@ -570,6 +569,7 @@ BEGIN {
 		INFO(": $file softlink in sync\n");
 	    }
 	} else {
+	    $losf_softlinks_updated++;
 	    print_error_in_red("FAILED");
 	    ERROR(": Creating link between $file -> $target\n");
 	    symlink("$target","$file") || 
@@ -704,6 +704,8 @@ BEGIN {
 	    return;
 	}
 
+	$losf_services_total++;
+
 	DEBUG("   --> Desired setting = $enable_service\n");
 
 	# make sure chkconfig is setup - have to read stderr for this one....
@@ -729,6 +731,7 @@ BEGIN {
 		print_info_in_green("OK");
 		INFO( ": $service is ON\n");
 	    } else {
+		$losf_services_updated++;
 		print_error_in_red("FAILED");
 		ERROR( ": disabling $service\n");
 		`/sbin/chkconfig $service off`;
@@ -741,6 +744,7 @@ BEGIN {
 	} elsif ( $setting =~ m/3:off/ ) {
 	    DEBUG("   --> $service is OFF\n");
 	    if($enable_service) {
+		$losf_services_updated++;
 		print_error_in_red("FAILED");
 		ERROR(": enabling $service\n");
 		`/sbin/chkconfig $service on`;

@@ -114,7 +114,7 @@ parse_and_sync_permissions();
 INFO("\n");
 
 if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
-    $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated) {
+    $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
     print_error_in_red("FAILED");
     ERROR(":" );
 } else { 
@@ -128,6 +128,7 @@ print " Custom $losf_custom_packages_updated/$losf_custom_packages_total] ";
 print "[Files: $losf_const_updated/$losf_const_total] ";
 print "[Links: $losf_softlinks_updated/$losf_softlinks_total] ";
 print "[Services: $losf_services_updated/$losf_services_total] ";
+print "[Perms: $losf_permissions_updated/$losf_permissions_total]";
 
 print "\n";
 
