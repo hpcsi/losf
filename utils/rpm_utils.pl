@@ -144,10 +144,10 @@ sub verify_rpms {
 	my @installed  = split(' ',$installed_rpm[0]);
 
 	if( @installed_rpm == 0 ) {
-	    INFO("   --> $desired_rpm[0] is not installed - registering for add...\n");
+	    DEBUG("   --> $desired_rpm[0] is not installed - registering for add...\n");
 	    push(@rpms_to_install,$filename);
 	} elsif( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]") {
-	    INFO("   --> version mismatch - registering for update...\n");
+	    DEBUG("   --> version mismatch - registering for update...\n");
 	    push(@rpms_to_install,$filename);
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
@@ -424,7 +424,7 @@ sub verify_custom_rpms {
 	    my @installed = split(' ',$installed_rpms[0]);
 	    if ( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]" )  {
 		verify_expected_md5sum($filename,$md5_desired);
-		INFO("   --> version mismatch - registering for update...\n");
+		DEBUG("   --> version mismatch - registering for update...\n");
 		SYSLOG("Registering locally installed $rpm for update");
 		push(@{$rpms_to_install{$rpm_options}},$filename);
 	    } else {
