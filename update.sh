@@ -76,13 +76,3 @@ done
 
 $TOP_DIR/utils/update.pl $RPM_OVERRIDE
 
-#-------------------
-# Query node type
-#-------------------
-
-export NODE_TYPE_SILENT=1
-
-RESULT=`$TOP_DIR/node_types | grep Node_Type | awk '{print $3}'`
-CLUSTER=`echo $RESULT | awk -F : '{print $1}'`
-BASENAME=`echo $RESULT | awk -F : '{print $2}'`
-
