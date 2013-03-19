@@ -38,7 +38,7 @@ usage()
 {
   cat <<EOF
 
- LosF update utility: used to bring local node to latest LosF
+ LosF update utility: used to bring local node to latest 
  configuration status (via the installation/removal of desired
  packages and synchronization of configuration files and services).
 
@@ -46,14 +46,16 @@ usage()
 
  OPTIONS:
     -h          Show help message.
-    -p [path]   Overide configured RPM source directory to prefer provided path instead.
+    -q          Quiet logging mode; shows detected system changes only.
+    -p [path]   Override configured RPM source directory to prefer provided path instead.
+
 
 EOF
 }
 
 RPM_OVERRIDE=
 
-while getopts "hp:" OPTION
+while getopts "hqp:" OPTION
 do
     case $OPTION in
 	h)
@@ -61,7 +63,11 @@ do
 	    exit 1
 	    ;;
 	p)
+	    echo "found a p"
 	    RPM_OVERRIDE=$OPTARG
+	    ;;
+	q)
+	    export LOSF_LOG_MODE=ERROR
 	    ;;
 	?)
 	    usage
@@ -75,4 +81,8 @@ done
 #----------------------------------------------------------------
 
 $TOP_DIR/utils/update.pl $RPM_OVERRIDE
+
+#	q)
+#	    export TACC_LOG_MODE=ERROR
+#	    ;;
 

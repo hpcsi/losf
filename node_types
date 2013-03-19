@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2012 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -30,6 +30,6 @@
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 
 export PERL5LIB=$TOP_DIR/utils
-export OSF_ECHO_MODE="INFO"
+export LOSF_LOG_MODE="INFO"
 
 $TOP_DIR/utils/node_types.pl
