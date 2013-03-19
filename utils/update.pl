@@ -57,10 +57,12 @@ sub usage {
 	  
 }
 
+(my $node_cluster, my $node_type) = determine_node_membership();
+
 # Default logging is set to ERROR
 
 my $logr = get_logger();
-$logr->level($INFO);
+###$logr->level($INFO);
 
 # Allow for alternate RPM source paths
 
@@ -70,11 +72,11 @@ if (@ARGV >= 1) {
     my $indir  = shift@ARGV;
     if ( -d $indir) {
 	$alt_rpm = $indir;
-	ERROR("\n");
+	INFO("\n");
 	INFO("[update]: Using $alt_rpm as preferential RPM source path\n");
 	$ENV{'MODE'} = 'PXE';
 	$ENV{'SRC_DIR'} = $alt_rpm;
-	ERROR("\n");
+	INFO("\n");
     } else {
 	ERROR("\n");
 	ERROR("[update]: $indir directory not available, ignoring RPM path override request\n");
@@ -134,7 +136,7 @@ print "\n";
 
 # (Optionally) run custom site-specific utility for the cluster
 
-(my $node_cluster, my $node_type) = determine_node_membership();
+###(my $node_cluster, my $node_type) = determine_node_membership();
 
 my $custom_file = "$osf_top_dir/update.$node_cluster";
 
