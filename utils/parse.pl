@@ -145,9 +145,15 @@ BEGIN {
 	my $shortname = fileparse($infile);
 
 	DEBUG("   --> Initializing input config file parsing ($shortname)\n");
-	
-	verify_file_exists($infile);
-	
+
+	if ( ! -e $infile) {
+	    ERROR("[ERROR]: The following file is not accessible: $infile\n");
+	    ERROR("[ERROR]: Please verify LosF config/ directory is available locally\n\n");
+            ERROR("Alternatively, you can use the \"LOSF_CONFIG_DIR\" environment\n");
+	    ERROR("variable to override the default LosF config location.\n\n");
+	    exit(1);
+	}
+
 	$global_cfg = new Config::IniFiles( -file => "$infile" );
 
 	#--------------------------------
