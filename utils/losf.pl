@@ -906,10 +906,8 @@ sub add_distro_package {
 
 		if($local_os_cfg->exists("OS Packages","$node_type")) {
 		    $local_os_cfg->push("OS Packages",$node_type,$config_string);
-#			   "$rpm_package version=$version_info[1] release=$version_info[2] ");
 		} else {
 		    $local_os_cfg->newval("OS Packages",$node_type,$config_string);
-#					  "$rpm_package version=$version_info[1] release=$version_info[2]");
 		}
 
 		# Stage downloaded RPM files into LosF repository
@@ -1078,10 +1076,12 @@ sub add_distro_group {
 		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
 		INFO("       --> Adding $file ($node_type)\n");
 
+		my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+
 		if($local_os_cfg->exists("OS Packages","$node_type")) {
-		    $local_os_cfg->push("OS Packages",$node_type,$rpm_package);
+		    $local_os_cfg->push("OS Packages",$node_type,$config_string);
 		} else {
-		    $local_os_cfg->newval("OS Packages",$node_type,$rpm_package);
+		    $local_os_cfg->newval("OS Packages",$node_type,$config_string);
 		}
 
 		# Stage downloaded RPM files into LosF repository
