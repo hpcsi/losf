@@ -96,12 +96,9 @@ BEGIN {
 	
 	init_config_file_parsing("$osf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
+	INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
+	INFO("LosF Config Dir     = $osf_config_dir\n\n");
 
-	if($osf_custom_config) {
-	    INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
-	    INFO("LosF Config Dir     = $osf_config_dir\n\n");
-	}
-	
        # All Done.
 	
 	$osf_membership_init = 1;
