@@ -158,15 +158,11 @@ sub verify_rpms {
 
     if( @rpms_to_install eq 0 ) {
 	print_info_in_green("OK");
-#	print "   --> "; 
-#	print color 'green';
-#	print "OK";
-#	print color 'reset';
-#	print ": OS packages in sync ($num_rpms rpms checked)\n";
 	INFO(": OS packages in sync ($num_rpms rpms checked)\n");
-#	INFO("   --> OK: OS packages in sync ($num_rpms rpms checked)\n");
 	return;
-    }
+    } 
+
+    $losf_os_packages += @rpms_to_install;
 
     # This is for OS packages, for which there can be only 1 version
     # installed; hence we always upgrade

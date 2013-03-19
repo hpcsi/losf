@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2012 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -35,6 +35,7 @@ use File::Basename;
 use File::Compare;
 use File::Copy;
 use File::Temp qw(tempfile);
+use Term::ANSIColor;
 
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
@@ -81,12 +82,53 @@ if (@ARGV >= 1) {
     }
 }
 
+# Initialize update tracking flags
+
+my $losf_os_packages_updated     = 0;
+my $losf_os_packages_total       = 0;
+
+my $losf_custom_packages_updated = 0;
+my $losf_custom_packages_total   = 0;
+
+my $losf_const_updated           = 0;
+my $losf_const_total             = 0;
+
+my $losf_softlinks_updated       = 0;
+my $losf_softlinks_total         = 0;
+
+my $losf_services_updated        = 0;
+my $losf_services_total          = 0;
+
+my $losf_permissions_updated     = 0;
+my $losf_permissions_total       = 0;
+
+# Check for any necessary updates
+
 parse_and_sync_os_packages();
 parse_and_sync_custom_packages();
 parse_and_sync_const_files();
 parse_and_sync_softlinks();
 parse_and_sync_services();
 parse_and_sync_permissions();
+
+INFO("\n");
+
+if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
+    $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated) {
+    print_error_in_red("FAILED: ");
+} else { 
+    print color 'green';
+    ERROR("OK: ");
+    print color 'reset';
+}
+
+print "[RPMs: OS $losf_os_packages_updated/$losf_os_packages_total ";
+print " Custom $losf_custom_packages_updated/$losf_custom_packages_total] ";
+print "[Files: $losf_const_updated/$losf_const_total] ";
+print "[Links: $losf_softlinks_updated/$losf_softlinks_total] ";
+print "[Services: $losf_services_updated/$losf_services_total] ";
+
+print "\n";
 
 # (Optionally) run custom site-specific utility for the cluster
 
