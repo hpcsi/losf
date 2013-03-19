@@ -140,6 +140,18 @@ sub verify_rpms {
 	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
 
 	if (@installed_rpm > 1) {
+	    if ($rpm eq "kernel" ) {
+		print "HACK - ignoring multiply installed kernel RPMs for the time being - need to fix OSSs\n";
+		next;
+	    } 
+	    if ($rpm eq "kernel-headers" ) {
+		print "HACK - ignoring multiply installed kernel-headers RPMs for the time being - need to fix OSSs\n";
+		next;
+	    } 
+	    if ($rpm eq "kernel-devel" ) {
+		print "HACK - ignoring multiply installed kernel-devel RPMs for the time being - need to fix OSSs\n";
+		next;
+	    } 
 	    MYERROR("Multiple OS package versions detected ($rpm). Invalid configuration.\n");
 	}
 
@@ -159,7 +171,7 @@ sub verify_rpms {
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
 
     my $count = @rpms_to_install;
-    $losf_os_packages_updated = $count; 
+    $losf_os_packages_updated += $count; 
 
     if( @rpms_to_install eq 0 ) {
 	print_info_in_green("OK");
@@ -302,8 +314,6 @@ sub verify_custom_rpms {
     # reset num_rpms to account for alias expansion
 
     $num_rpms = @rpm_list;    
-
-
 
     foreach $rpm (@rpm_list) {
 
@@ -577,30 +587,52 @@ sub verify_custom_rpms_removed {
 
 	if( $rpm =~ m/^@(\S+)/ ) { next; } # @groups names have already been expanded, skip this @group
 
-###	my @rpm_array  = split(/\s+/,$rpm);
-###	my $arch       = rpm_arch_from_filename($rpm_array[0]);
-
 	# Determine desired rpm versionioning from options in config file; 
 
+	my $desired_name    = "";
 	my $desired_version = "";
 	my $desired_release = "";
 	my $desired_arch    = "";
 
-	foreach $option (@rpm_array) {
-	    DEBUG("       --> Option = $option\n");
-	    if( $option =~ m/version=(\S+)/ ) { 
-		$desired_version = $1;
-		DEBUG("            --> found version = $1\n");
-	    } elsif ( $option =~ m/release=(\S+)/ ) { 
-		$desired_release = $1;
-		DEBUG("            --> found release = $1\n");
-	    } elsif ( $option =~ m/arch=(\S+)/ ) { 
-		$desired_arch = $1;
-		DEBUG("            --> found arch = $1\n");
-	    }
+	DEBUG("       --> Checking for version info for $rpm\n");
+
+###	foreach $option (@rpm_array) {
+###
+###	    DEBUG("       --> Option = $option\n");
+###	    if( $option =~ m/version=(\S+)/ ) { 
+###		$desired_version = $1;
+###		DEBUG("            --> found version = $1\n");
+###	    } elsif ( $option =~ m/release=(\S+)/ ) { 
+###		$desired_release = $1;
+###		DEBUG("            --> found release = $1\n");
+###	    } elsif ( $option =~ m/arch=(\S+)/ ) { 
+###		$desired_arch = $1;
+###		DEBUG("            --> found arch = $1\n");
+###	    }
+###	}
+###
+
+	if( $rpm_array[1] =~ m/name=(\S+)/ ) { 
+	    $desired_name = $1;
+	    DEBUG("            --> found version = $1\n");
+	} 
+
+	if( $rpm_array[2] =~ m/version=(\S+)/ ) { 
+	    $desired_version = $1;
+	    DEBUG("            --> found version = $1\n");
+	} 
+
+	if ( $rpm_array[3]  =~ m/release=(\S+)/ ) { 
+	    $desired_release = $1;
+	    DEBUG("            --> found release = $1\n");
+	} 
+
+	if ( $rpm_array[4] =~ m/arch=(\S+)/ ) { 
+	    $desired_arch = $1;
+	    DEBUG("            --> found arch = $1\n");
 	}
 
-	if( $desired_version eq "" || $desired_release eq "" || $desired_arch eq "" ) {
+	if( $desired_name eq "" || $desired_version eq "" || $desired_release eq "" || $desired_arch eq "" ) {
 	    ERROR("\n");
 	    ERROR("[ERROR]: Configuration error detected:\n");
 	    ERROR("[ERROR]: --> $entry\n");
@@ -612,13 +644,23 @@ sub verify_custom_rpms_removed {
 
 	# return array format = (name,version,release,arch)
 
-	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
+	my @installed_rpms     = is_os_rpm_installed("$desired_name.$desired_arch");
+	my $installed_versions = @installed_rpms;
 
-	if( @installed_rpm ne 0 ) {
-	    print "   --> $installed_rpm[0] is installed....registering for removal\n";
-	    SYSLOG("Registering locally installed $installed_rpm[0] for removal");
+	if( $installed_versions > 1 ) {
+	    MYERROR("Internal LosF assert triggered - more than 1 rpm to remove");
+	}
 
-	    push(@rpms_to_remove,$rpm_array[0]);
+	if( $installed_versions == 1 ) {
+	    my @installed = split(' ',$installed_rpms[0]);
+
+	    if( "$installed[1]-$installed[2]" eq "$desired_version-$desired_release" ) {
+		$losf_custom_packages_updated++;
+		print "   --> $installed[0] is installed....registering for removal\n";
+		SYSLOG("Registering locally installed $installed_rpm[0] for removal");
+
+		push(@rpms_to_remove,$rpm_array[0]);
+	    }
 	}
 
     }
@@ -628,12 +670,11 @@ sub verify_custom_rpms_removed {
     my $count = @rpms_to_remove;
 
     if( $count eq 0 ) {
+	print_info_in_green("OK");
+	INFO(": Verified desired Custom RPMs are *not* installed ($num_rpms total)...\n");
 	return;
     } else {
-	print "   --> ";
-	print color 'red';
-	print "FAILED";
-	print color 'reset';
+	print_error_in_red("FAILED");
 	print ": A total of $count Custom rpm(s) need to be removed for $appliance\n";
     }
 
