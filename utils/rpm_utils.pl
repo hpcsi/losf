@@ -53,6 +53,8 @@ sub verify_rpms {
     my @rpms_to_install = ();
     my $num_rpms        = @rpm_list;
 
+    $losf_os_packages_total = $num_rpms;
+
     if($num_rpms < 1) { return; }
 
     DEBUG("   --> Verifying desired OS RPMs are installed ($num_rpms total)...\n");
@@ -157,6 +159,7 @@ sub verify_rpms {
     # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
 
     my $count = @rpms_to_install;
+    $losf_os_packages_updated = $count; 
 
     if( @rpms_to_install eq 0 ) {
 	print_info_in_green("OK");
@@ -300,12 +303,16 @@ sub verify_custom_rpms {
 
     $num_rpms = @rpm_list;    
 
+
+
     foreach $rpm (@rpm_list) {
 
 	my @rpm_array  = split(/\s+/,$rpm);
 	my $rpm        = $rpm_array[0];
 
 	if( $rpm =~ m/^@(\S+)/ ) { next; } # @groups names have already been expanded, skip this @group
+
+	$losf_custom_packages_total++;
 
 	# init any non-rpm command-line options 
 
@@ -476,6 +483,8 @@ sub verify_custom_rpms {
 	    $count++;
 	}
     }
+
+    $losf_custom_packages_updated += $count;
 
     if( $count == 0 ) {
 	print_info_in_green("OK");

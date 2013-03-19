@@ -84,23 +84,23 @@ if (@ARGV >= 1) {
 
 # Initialize update tracking flags
 
-my $losf_os_packages_updated     = 0;
-my $losf_os_packages_total       = 0;
+our $losf_os_packages_updated     = 0;
+our $losf_os_packages_total       = 0;
 
-my $losf_custom_packages_updated = 0;
-my $losf_custom_packages_total   = 0;
+our $losf_custom_packages_updated = 0;
+our $losf_custom_packages_total   = 0;
 
-my $losf_const_updated           = 0;
-my $losf_const_total             = 0;
+our $losf_const_updated           = 0;
+our $losf_const_total             = 0;
 
-my $losf_softlinks_updated       = 0;
-my $losf_softlinks_total         = 0;
+our $losf_softlinks_updated       = 0;
+our $losf_softlinks_total         = 0;
 
-my $losf_services_updated        = 0;
-my $losf_services_total          = 0;
+our $losf_services_updated        = 0;
+our $losf_services_total          = 0;
 
-my $losf_permissions_updated     = 0;
-my $losf_permissions_total       = 0;
+our $losf_permissions_updated     = 0;
+our $losf_permissions_total       = 0;
 
 # Check for any necessary updates
 
@@ -115,7 +115,8 @@ INFO("\n");
 
 if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
     $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated) {
-    print_error_in_red("FAILED: ");
+    print_error_in_red("FAILED");
+    ERROR(":" );
 } else { 
     print color 'green';
     ERROR("OK: ");

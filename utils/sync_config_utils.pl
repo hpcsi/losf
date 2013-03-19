@@ -94,12 +94,11 @@ BEGIN {
 
 	# Sync const files
 
-
 	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
 	foreach(@sync_files) {
-
 	    if( !exists $partial_file_hash{$_} ) {
+###		$losf_const_total++;
 		sync_const_file("$_");
 	    }
 	}
@@ -109,6 +108,7 @@ BEGIN {
 	INFO("** Syncing configuration files (partial contents)\n");
 	
 	foreach(@partial_files) {
+###	    $losf_const_total++;
 	    sync_partial_file("$_");
 	}
 
@@ -119,6 +119,7 @@ BEGIN {
 	my @delete_files = query_cluster_config_delete_sync_files($node_cluster,$node_type);
 
 	foreach(@delete_files) {
+###	    $losf_const_total++;
 
 	    my $basename = basename("$_");
 
