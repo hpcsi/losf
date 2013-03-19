@@ -3,7 +3,7 @@
 use POSIX;
 require "getopts.pl";
 
-do Getopts("r:i:m:t:h:w:c:x:f:");
+do Getopts("r:i:m:t:h:w:c:x:f:v");
 
 $timeout = 5*60;
 $n = @ARGV;
@@ -27,10 +27,10 @@ OPTIONS:
   -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
   -f <hostfile>           operate on hosts specified in provided hostfile
   -m <max_ssh>            maximum number of commands to run in parallel (default = 288)
-  -t <timout>             timeout period for command completion in seconds (default = 5 minutes)
-  -x <regex>              operate on hosts which match supplied regex
+  -t <timeout>            timeout period for command completion in seconds (default = 5 minutes)
+  -x <regex>              operate on hosts which match supplied regex pattern
   -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
-
+  -v                      run LosF in verose mode 
 
 EOF
 ;
@@ -41,10 +41,11 @@ if ($opt_t) {
      $timeout = $opt_t;
 }
 
-
 $max_ssh = 288;
+$environment="LOSF_LOG_MODE=ERROR "; # default is to run in quiet mode
 
 if ($opt_m) { $max_ssh = $opt_m; }
+if ($opt_v) { $environment = ""; }
 
 #------------------------------------------------
 # Koomie'fied version of building up host lists:
@@ -196,7 +197,7 @@ foreach $host (@hosts) {
         open(STDOUT, ">$output");
 	close(STDERR);
         open(STDERR, ">$error");
-	exec  "ssh","-n",$host,@ARGV;
+	exec  "ssh","-n",$host,$environment,@ARGV;
 	exit(0);
     }
     if ($opt_w) {  sleep($opt_w);}
