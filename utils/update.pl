@@ -117,6 +117,7 @@ INFO("\n");
 
 if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
     $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
+    notify_local_log();
     print_error_in_red("FAILED");
     ERROR(":" );
 } else { 
@@ -134,6 +135,7 @@ print "[Perms: $losf_permissions_updated/$losf_permissions_total] ";
 print "-> $node_type";
 
 print "\n";
+
 
 # (Optionally) run custom site-specific utility for the cluster
 

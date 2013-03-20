@@ -34,6 +34,12 @@ use lib "$osf_log4perl_dir";
 use Sys::Syslog;  
 use Switch;
 
+# Global vars to count any detected changes
+
+use vars qw($losf_const_updated     $losf_const_total);
+use vars qw($losf_softlinks_updated $losf_softlinks_total);
+use vars qw($losf_services_updated  $losf_services_total);
+
 #@EXPORT = qw(verify_sw_dependencies
 #	     get_logger);
 
@@ -264,6 +270,37 @@ sub expand_individual_macro {
     close($IN);
     close($OUT);
     end_routine();
+}
+
+sub notify_local_log() {
+
+    my $save_dir = "/tmp/losf";
+    my $host = `hostname`;
+    my $date = `date`;
+
+    chomp($host);
+    chomp($date);
+
+    if ( ! -d "/tmp/losf" ) {
+	INFO("Creating $save_dir directory to store local_log output\n");
+	mkdir($save_dir,0700)
+    }
+
+    open(LOGFILE,">$save_dir/last_update")  || die "Cannot create $save_dir/last_update";
+
+    print LOGFILE "$host updated on $date\n";
+    print LOGFILE "-------------------------------------------------------------------------\n";
+
+    if($losf_const_updated)      { print LOGFILE "$losf_const_updated const file(s) changed\n"; }
+    if($losf_softlinks_updated)  { print LOGFILE "$losf_softlinks_updated soft link(s) changed\n"; }
+    if($losf_os_packages_updated){ print LOGFILE "$losf_os_packages_updated OS package(s) changed\n"; }
+    if($losf_custom_packages_updated){ print LOGFILE "$losf_custom_packages_updated Custom package(s) changed\n"; }
+    if($losf_services_updated){ print LOGFILE "$losf_services_updated runtime service(s) changed\n"; }
+    if($losf_permissions_updated){ print LOGFILE "$losf_permissions_updated file permission(s) changed\n"; }
+
+    print LOGFILE "-------------------------------------------------------------------------\n";
+
+    close(LOGFILE);
 }
 
 1;
