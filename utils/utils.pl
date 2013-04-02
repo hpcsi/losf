@@ -274,14 +274,38 @@ sub expand_individual_macro {
 
 sub notify_local_log() {
 
-    my $save_dir = "/tmp/losf";
-    my $host = `hostname`;
-    my $date = `date`;
+    # per request from mclay - create a notification file that is also
+    # world readable with appliance name in it.
+
+    my $save_dir_external = "/tmp";
+    my $save_dir          = "/tmp/losf";
+    my $host              = `hostname`;
+    my $date              = `date`;
 
     chomp($host);
     chomp($date);
 
-    if ( ! -d "/tmp/losf" ) {
+    if( ! -d $save_dir_external ) {
+	ERROR("Unable to save external update notification - $save_dir_external must exist\n");
+    } else {
+	open(LOGFILE,">$save_dir_external/losf_last_update")  || 
+	    die "Cannot create $save_dir_external/losf_last_update";
+
+	print LOGFILE "nodeType   = $node_type\n";
+	print LOGFILE "hostName   = $host\n";
+	print LOGFILE "lastUpdate = $date\n";
+
+	close(LOGFILE);
+
+	# file is world readable - let user decide on top-level path
+
+	chmod (0644,"$save_dir_external/losf_last_update");
+
+
+    }
+
+
+    if ( ! -d $save_dir ) {
 	INFO("Creating $save_dir directory to store local_log output\n");
 	mkdir($save_dir,0700)
     }
