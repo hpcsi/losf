@@ -281,9 +281,11 @@ sub notify_local_log() {
     my $save_dir          = "/tmp/losf";
     my $host              = `hostname`;
     my $date              = `date`;
+    my $epoch             = `date +%s`;
 
     chomp($host);
     chomp($date);
+    chomp($epoch);
 
     if( ! -d $save_dir_external ) {
 	ERROR("Unable to save external update notification - $save_dir_external must exist\n");
@@ -294,6 +296,7 @@ sub notify_local_log() {
 	print LOGFILE "nodeType   = $node_type\n";
 	print LOGFILE "hostName   = $host\n";
 	print LOGFILE "lastUpdate = $date\n";
+	print LOGFILE "timeEpoch  = $epoch\n";
 
 	close(LOGFILE);
 
