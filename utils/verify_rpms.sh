@@ -105,7 +105,7 @@ function verify_rpms
 		  #--------------------------------------------------
 
 		  myarch=$DEFAULT_ARCH
-		  ###echo "version = $VERSION"
+#		  echo "version = $VERSION"
 		  
 		  match=`echo $VERSION | egrep ".x86_64\b"`
 		  if [ "x$match" != "x" ]; then
@@ -137,10 +137,13 @@ function verify_rpms
 
 #	      echo "version = $VERSION"
 #	      echo "MYARCH = $MYARCH"
+
+#  export VERBOSE=1
+
 	      
               # New method to deal with things like "charm++"
 
-###	      echo "rpm -qi $PACKAGE-$VERSION.$myarch"
+	      echo "rpm -qi $PACKAGE-$VERSION.$myarch"
 	      
 #	      my_ver=`rpm -qi $PACKAGE-$VERSION | grep "\bVersion     " | awk '{print $3}'`
 	      my_ver=`rpm -qi $PACKAGE-$VERSION.$myarch | grep "\bVersion     " | awk '{print $3}'`
@@ -246,12 +249,14 @@ function verify_rpms
       for i in $RPM_LIST; do
 
 	  let "count = count + 1"
+
+#	  echo "looking for existing of $i"
 	
 	  export PACKAGE=`echo $i | awk -F : '{print $1}'`
 	  export VERSION=`echo $i | awk -F : '{print $2}'`
 ###	    export INSTALLED=`rpm -q $PACKAGE-$VERSION | awk -F "$PACKAGE-" '{print $2}'`
 	  export INSTALLED=`rpm -q $PACKAGE-$VERSION | sed -e "s/$PACKAGE\-\(.*\)/\1/g"`
-	  
+
 	  if [ "$VERSION" == "$INSTALLED" ];then
 	      echo "$PACKAGE is *installed* and will be removed"
 	      export NEEDS_UPDATE=1

@@ -1219,8 +1219,8 @@ sub add_custom_rpm {
     my $rpm_release = $version_info[2];
     my $rpm_arch    = $version_info[3];
 
-#    my $is_configured = 0;
     my $is_upgrade = 0;
+    my $is_multi   = 0;
     my $old_rpm    = "";
     
     foreach $rpm (@custom_rpms) {
@@ -1239,6 +1239,8 @@ sub add_custom_rpm {
 	    if( $ENV{'LOSF_REGISTER_UPGRADE'} ) {
 		$is_upgrade = 1;
 		$old_rpm    = $rpm_array[0];
+	    } elsif ($ENV{'LOSF_REGISTER_MULTI'} ) {
+		$is_multi   = 1;
 	    } else {
 		INFO("       --> $rpm_name already configured - ignoring addition request\n");
 		#$is_configured = 1;
@@ -1601,7 +1603,11 @@ switch ($command) {
 	}
 
 	if($install) {
-	    $options = $options . "INSTALL";
+	    if($upgrade) {
+		MYERROR("losf: The --upgrade and --install options are mutually exclusive. Please choose only one.");
+	    }
+	    $ENV{'LOSF_REGISTER_MULTI'} = '1';
+	    $options = $options . "INSTALL MULTI";
 	}
 
 	if($assume_yes) {

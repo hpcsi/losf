@@ -647,12 +647,14 @@ sub verify_custom_rpms_removed {
 	my @installed_rpms     = is_os_rpm_installed("$desired_name.$desired_arch");
 	my $installed_versions = @installed_rpms;
 
-	if( $installed_versions > 1 ) {
-	    MYERROR("Internal LosF assert triggered - more than 1 rpm to remove");
-	}
+#	if( $installed_versions > 1 ) {
+#	    ERROR("[ERROR]: Attempting to remove $desired_name.$desired_arch");
+#	    MYERROR("Internal LosF assert triggered - more than 1 rpm to remove");
+#	}
+#
 
-	if( $installed_versions == 1 ) {
-	    my @installed = split(' ',$installed_rpms[0]);
+	for(my $count = 0; $count < $installed_versions; $count++) {
+	    my @installed = split(' ',$installed_rpms[$count]);
 
 	    if( "$installed[1]-$installed[2]" eq "$desired_version-$desired_release" ) {
 		$losf_custom_packages_updated++;

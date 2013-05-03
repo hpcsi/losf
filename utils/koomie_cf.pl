@@ -41,7 +41,7 @@ if ($opt_t) {
      $timeout = $opt_t;
 }
 
-$max_ssh = 288;
+$max_ssh = 200;
 $environment="LOSF_LOG_MODE=ERROR "; # default is to run in quiet mode
 
 if ($opt_m) { $max_ssh = $opt_m; }

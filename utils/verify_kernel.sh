@@ -54,7 +54,9 @@ function verify_kernel
     else
 	# Check for running, but not installed
 
-	export INSTALLED=`rpm -q $KERNEL_RPM` 
+#	export INSTALLED=`rpm -q $KERNEL_RPM` 
+        export INSTALLED=`rpm -q --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' $KERNEL_RPM`
+
 	if [ "$INSTALLED" != "$KERNEL_RPM" ];then
 	    echo "Kernel is running, but no longer installed"
 
