@@ -691,11 +691,15 @@ sub update_distro_packages {
 	my $is_upgrade    = 0;
 	my $count         = 0;
 
-	push(@os_pkgs_new,$rpm_package);
+	my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+
+###	push(@os_pkgs_new,$rpm_package);
+	push(@os_pkgs_new,"$config_string");
 
 	foreach $rpm (@os_rpms) {
-	    
-	    if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+	    my @rpm_array  = split(/\s+/,$rpm);
+###	    if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+	    if ($rpm_array[0] eq $rpm_name && "arch=$rpm_arch" eq $rpm_array[3]) {
 		INFO("       --> Configuring update for $rpm_package (previously $rpm)\n");
 		$is_upgrade   = 1;
 		$old_rpm      = $rpm;
@@ -737,6 +741,7 @@ sub update_distro_packages {
     foreach $rpm (@os_rpms) {
 	if( ! $flag[$count] ) {
 	    if($local_os_cfg->exists($section,$name)) {
+
 		$local_os_cfg->push($section,$name,"$rpm");
 	    } else {
 		$local_os_cfg->newval($section,$name,"$rpm");
