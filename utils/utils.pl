@@ -128,6 +128,46 @@ sub ask_user_for_yes_no {
     }
 }
 
+sub ask_user_for_integer_input {
+
+    my $prompt      = shift;
+    my $min_allowed = shift;
+    my $max_allowed = shift;
+
+    print "\n[LosF] $prompt";
+    chomp(my $line = <STDIN>);
+
+    my $response = verify_integer_response($line,$min_allowed,$max_allowed);
+
+    if( $response > -10 ) {
+	return $response;
+    }
+
+    # Ask again if dodgy response
+
+    print "\n[LosF] Unknown response->  $prompt";
+
+    chomp(my $line = <STDIN>);
+    my $response = verify_integer_response($line,$min_allowed,$max_allowed);
+
+    if( $response > -10 ) {
+	return $response;
+    }
+
+    # dude, get it right. 3rd time is a charm....?
+
+    print "\n[LosF] Unknown response-> $prompt";
+
+    chomp(my $line = <STDIN>);
+    my $response = verify_integer_response($line,$min_allowed,$max_allowed);
+
+    if( $response > -10 ) {
+	return $response;
+    } else  {
+	MYERROR("Unable to validate user response; terminating...");
+    }
+}
+
 sub verify_yes_no_response {
     my $response = shift;
     my $flag     = shift;   
@@ -159,6 +199,18 @@ sub verify_yes_no_response {
 	return -1;
     } else {
 	return -10; 
+    }
+}
+
+sub verify_integer_response {
+    my $response = shift;
+    my $min      = shift;   
+    my $max      = shift;   
+
+    if ( $response ge $min && $response le $max ) {
+	return 1;
+    } else {
+	return -10;
     }
 }
 

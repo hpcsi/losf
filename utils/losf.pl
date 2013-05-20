@@ -1217,16 +1217,17 @@ sub add_custom_rpm {
 
     my @version_info = rpm_version_from_file($package);
     my $rpm_package  = rpm_package_string_from_header(@version_info);
-    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
+    INFO("   --> Attempting to add ".rpm_package_string_from_header(@version_info)."\n");
 
-    my $rpm_name    = $version_info[0];
-    my $rpm_version = $version_info[1];
-    my $rpm_release = $version_info[2];
-    my $rpm_arch    = $version_info[3];
+    my $rpm_name       = $version_info[0];
+    my $rpm_version    = $version_info[1];
+    my $rpm_release    = $version_info[2];
+    my $rpm_arch       = $version_info[3];
 
-    my $is_upgrade = 0;
-    my $is_multi   = 0;
-    my $old_rpm    = "";
+    my $is_upgrade     = 0;
+    my $is_multi       = 0;
+    my $old_rpm        = "";
+    my $uninstall_name = "";
     
     foreach $rpm (@custom_rpms) {
 	my @rpm_array  = split(/\s+/,$rpm);
@@ -1239,19 +1240,54 @@ sub add_custom_rpm {
 #	print "rpm = $rpm\n";
 #	print "looking for $rpm_array[0]\n";
 #	print "name = $rpm_name\n";
-    
+
 	if ($rpm_array[0] =~ /^$rpm_name-(\S+)-(\S+).($rpm_arch)$/ ) {
+
 	    if( $ENV{'LOSF_REGISTER_UPGRADE'} ) {
 		$is_upgrade = 1;
 		$old_rpm    = $rpm_array[0];
 	    } elsif ($ENV{'LOSF_REGISTER_MULTI'} ) {
+		# We only allow a single release of an rpm package
+		# version during MULTI installs
+
+		if($rpm_array[1] eq "name=$rpm_name" && $rpm_array[2] eq "version=$rpm_version") {
+		    INFO("       --> Previous rpm release detected during MULTI install ($rpm_array[0])\n");
+		    INFO("       --> Would you like to register the old version for deletion?\n");
+
+		    my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
+
+		    if( $response == 0 ) {
+			INFO("\n");
+			INFO("       --> Unable to add MULTI custom rpm $rpm_name.\n");
+			INFO("       --> Only one release per package version is allowed. Terminating....\n");
+			INFO("\n");
+			exit(-23);
+		    } else {
+			$old_rpm = $rpm_array[0];
+			INFO("\n");
+			INFO("       --> Choose desired node type to configure package deletion:\n");
+			INFO("           [1] ALL\n");
+			INFO("           [2] $node_type\n");
+			INFO("\n");
+
+			my $response = ask_user_for_integer_input("Enter integer value: ",1,2);
+			if($response == 1) {
+			    $uninstall_name = "ALL";
+			} else {
+			    $uninstall_name = "$node_type";
+			    INFO("\n");
+			}
+		    }
+		}
 		$is_multi   = 1;
 	    } else {
 		INFO("       --> $rpm_name already configured - ignoring addition request\n");
 		#$is_configured = 1;
 		return;
 	    }
-	    last;
+	    if(! $ENV{'LOSF_REGISTER_MULTI'}) {
+		last;
+	    }
 	}
     }
 
@@ -1269,7 +1305,7 @@ sub add_custom_rpm {
 	}
     }
 
-    if(! $is_upgrade) {
+    if(! $is_upgrade && ! $is_multi) {
 	INFO("       --> $rpm_name not previously configured - registering for addition/upgrade\n"); 
     }
 	
@@ -1297,9 +1333,9 @@ sub add_custom_rpm {
     
     # Register updates for custom config input file
     
-    if($is_upgrade) { 
+    if($is_upgrade ||  $ENV{'LOSF_REGISTER_MULTI'} ) { 
 	
-	# Upgrade: since we are using arrays for input values, upgrade
+	# Upgrade/MULTI: since we are using arrays for input values, upgrade
 	# means removing all values, and re-inserting desired values.
 	
 	DEBUG("       --> Removing previous entries for $name...\n");
@@ -1313,7 +1349,26 @@ sub add_custom_rpm {
 		} else {
 		    $local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
 		}
+
+		if($is_multi) {
+		    INFO("       --> Configured MULTI package update for $rpm_name-$rpm_version-$rpm_release\n");
+		} else {
 		    INFO("       --> Configured update for $rpm_name (previously $old_rpm)\n");
+		}
+
+		# Register old MULI rpm release for deletion as it is
+		# deprecated by this new release
+
+		if($ENV{'LOSF_REGISTER_MULTI'}) {
+		    INFO("       --> Registering previous $rpm[0] for deletion (node type = $uninstall_name)\n");
+		    my $uninstallSection = "Custom Packages/uninstall";
+
+		    if($local_custom_cfg->exists($uninstallSection,$uninstall_name)) {
+			$local_custom_cfg->push($uninstallSection,$uninstall_name,$rpm_entry); 
+		    } else {
+			$local_custom_cfg->newval($uninstallSection,$uninstall_name,$rpm_entry); 
+		    }
+		}
 	    } else {
 		DEBUG("       --> Restoring entry for $rpm_name ($rpm_entry)\n");
 		if($local_custom_cfg->exists($section,$name)) {
@@ -1323,6 +1378,16 @@ sub add_custom_rpm {
 		}
 	    }
 	}
+
+	# Register new MULTI package directly when it is not replacing a previous release....
+
+	if( $old_rpm eq "" ) {
+	    if($local_custom_cfg->exists($section,$name)) {
+		$local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
+	    } else {
+		$local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
+	    }
+	}
     } else {
 	if($local_custom_cfg->exists($section,$name)) {
 	    $local_custom_cfg->push($section,$name,"$config_name $md5sum $default_options");
@@ -1330,7 +1395,7 @@ sub add_custom_rpm {
 	    $local_custom_cfg->newval($section,$name,"$config_name $md5sum $default_options");
 	}
     }
-	
+
     # Verify this rpm is available in default LosF location
 
     (my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
