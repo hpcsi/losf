@@ -658,8 +658,8 @@ sub verify_custom_rpms_removed {
 
 	    if( "$installed[1]-$installed[2]" eq "$desired_version-$desired_release" ) {
 		$losf_custom_packages_updated++;
-		print "   --> $installed[0] is installed....registering for removal\n";
-		SYSLOG("Registering locally installed $installed_rpm[0] for removal");
+		print "   --> $installed[0]-$installed[1]-$installed[2] is installed....registering for removal\n";
+		SYSLOG("Registering locally installed $installed_rpm[0]-$installed[1]-$installed[2] for removal");
 
 		push(@rpms_to_remove,$rpm_array[0]);
 	    }
