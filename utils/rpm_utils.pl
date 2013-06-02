@@ -661,7 +661,8 @@ sub verify_custom_rpms_removed {
 		print "   --> $installed[0]-$installed[1]-$installed[2] is installed....registering for removal\n";
 		SYSLOG("Registering locally installed $installed_rpm[0]-$installed[1]-$installed[2] for removal");
 
-		push(@rpms_to_remove,$rpm_array[0]);
+#		push(@rpms_to_remove,$rpm_array[0]);   # update on 6/1/13 to use additional config data
+		push(@rpms_to_remove,"$installed[0]-$installed[1]-$installed[2].$installed[3]");
 	    }
 	}
 
