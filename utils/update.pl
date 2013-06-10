@@ -106,6 +106,9 @@ our $losf_permissions_total       = 0;
 
 # Check for any necessary updates
 
+parse_and_uninstall_os_packages();
+parse_and_uninstall_custom_packages();
+
 parse_and_sync_os_packages();
 parse_and_sync_custom_packages();
 parse_and_sync_const_files();

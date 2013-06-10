@@ -59,13 +59,15 @@ use vars qw($losf_services_updated  $losf_services_total);
 
 BEGIN {
 
-    my $osf_cached_rpms          = 0;
-    my $osf_sync_const_file      = 0;
-    my $osf_sync_soft_links      = 0;
-    my $osf_sync_services        = 0;
-    my $osf_sync_permissions     = 0;
-    my $osf_sync_os_packages     = 0;
-    my $osf_sync_custom_packages = 0;
+    my $osf_cached_rpms                 = 0;
+    my $osf_sync_const_file             = 0;
+    my $osf_sync_soft_links             = 0;
+    my $osf_sync_services               = 0;
+    my $osf_sync_permissions            = 0;
+    my $osf_sync_os_packages            = 0;
+    my $osf_sync_os_packages_delete     = 0;
+    my $osf_sync_custom_packages        = 0;
+    my $osf_sync_custom_packages_delete = 0;
     
     sub parse_and_sync_const_files {
 	
@@ -761,6 +763,31 @@ BEGIN {
 
     }
 
+    sub parse_and_uninstall_os_packages {
+
+	verify_sw_dependencies();
+	begin_routine();
+
+	if ( $osf_sync_os_packages_delete == 0 ) {
+	    $osf_sync_os_packages_delete = 1;
+	} else {
+	    return;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+	INFO("** Checking on OS packages to remove ($node_cluster:$node_type)\n");
+
+	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
+
+	# verify that certain packages are *not* installed
+
+	my @os_rpms_remove = query_cluster_config_os_packages_remove($node_cluster,$node_type);
+
+	verify_rpms_removed(@os_rpms_remove);
+
+	end_routine();
+    }
+
     sub parse_and_sync_os_packages {
 
 	verify_sw_dependencies();
@@ -777,11 +804,11 @@ BEGIN {
 
 	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
 
-	# verify that certain packages are *not* installed
-
-	my @os_rpms_remove = query_cluster_config_os_packages_remove($node_cluster,$node_type);
-
-	verify_rpms_removed(@os_rpms_remove);
+###	# verify that certain packages are *not* installed
+###
+###	my @os_rpms_remove = query_cluster_config_os_packages_remove($node_cluster,$node_type);
+###
+###	verify_rpms_removed(@os_rpms_remove);
 
 	# now, verify that all desired os packages are installed
 
@@ -792,14 +819,12 @@ BEGIN {
 	end_routine();
     }
 
-    sub parse_and_sync_custom_packages {
-
+    sub parse_and_uninstall_custom_packages {
 	verify_sw_dependencies();
 	begin_routine();
-	
-	if ( $osf_sync_custom_packages == 0 ) {
-	    INFO("** Syncing Custom packages\n");
-	    $osf_sync_custom_packages = 1;
+
+	if ( $osf_sync_custom_packages_delete == 0 ) {
+	    $osf_sync_custom_packages_delete = 1;
 	} else {
 	    return;
 	}
@@ -807,10 +832,10 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
 
+	INFO("** Checking on Custom packages to remove ($node_cluster:$node_type)\n");
+
 	my %custom_aliases = ();
 	my @custom_rpms    = ();
-
-###	INFO("\n");
 
 	# (0) read aliases for later use in custom rpms
 
@@ -837,6 +862,52 @@ BEGIN {
 
 	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
 
+	end_routine();
+    }
+
+    sub parse_and_sync_custom_packages {
+
+	verify_sw_dependencies();
+	begin_routine();
+	
+	if ( $osf_sync_custom_packages == 0 ) {
+	    INFO("** Syncing Custom packages\n");
+	    $osf_sync_custom_packages = 1;
+	} else {
+	    return;
+	}
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
+	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+
+	my %custom_aliases = ();
+	my @custom_rpms    = ();
+
+	# (0) read aliases for later use in custom rpms
+
+	%custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+	DEBUG("   --> number of custom aliases defined = ".keys(%custom_aliases)."\n");
+
+	my $ALL_type = "ALL";
+
+###	# verify *non* existence of desired packages for ALL node types
+###
+###	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$ALL_type);
+###	foreach my $rpm (@custom_rpms_remove) {
+###	    DEBUG("   --> Custom rpm removal requested for ALL = $rpm\n");
+###	}
+###
+###	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
+###
+###	# verify *non* existence of desired packages current  node type
+###
+###	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$node_type);
+###	foreach my $rpm (@custom_rpms_remove) {
+###	    DEBUG("   --> Custom rpm removal requested for node:$node_type = $rpm\n");
+###	}
+###
+###	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
+###
 	# verify packages for ALL node types
 
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$ALL_type);
