@@ -99,20 +99,23 @@ BEGIN {
 	
 	init_config_file_parsing("$osf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
-	INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
+
+	INFO("Cluster/Node_Type          = $node_cluster/$node_type\n");
 
 	# Check for custom config_dir - environment variable takes precedence
-
-	INFO("LosF Config Dir     = $osf_config_dir\n\n");
 
 	if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 	    DEBUG("    --> LOSF_CONFIG_DIR setting takes precedence - skipping custom config check\n");
 	} else {
 	    my $dir = query_cluster_local_config_dir($node_cluster,$node_type,$host_name);
 	    if ( "$dir" ne "" ) {
-		INFO("       --> Using custom config dir override = $dir\n");
+		DEBUG("\n[note]: $host_name -> Using custom config dir override = $dir\n\n");
+		our $osf_custom_config_dir = $dir;
 	    }
 	}
+
+	INFO("Top-level config           = $osf_config_dir/config.machines\n");
+	INFO("System specific config dir = $osf_custom_config_dir\n\n");
 
        # All Done.
 	

@@ -54,7 +54,7 @@ my $hostfile_end_delim='------------end-sync-losf-$';
 my $logr = get_logger();
 
 verify_sw_dependencies(); $logr->level($ERROR);
-init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
+init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
 $logr->level($INFO);
 print_header();
 

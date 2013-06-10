@@ -80,7 +80,7 @@ BEGIN {
 	
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	
-	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
 
 	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
@@ -157,7 +157,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing soft links ($node_cluster:$node_type)\n");
 
-	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
 
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
@@ -196,7 +196,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing runlevel services ($node_cluster:$node_type)\n");
 
-	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
 
 	# Node type-specific settings: these take precedence over global
 	# settings; apply them first
@@ -592,7 +592,7 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_config_file_parsing("$osf_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
 	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%perm_files) ) {
@@ -777,7 +777,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Checking on OS packages to remove ($node_cluster:$node_type)\n");
 
-	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
+	init_local_os_config_file_parsing("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
 
 	# verify that certain packages are *not* installed
 
@@ -802,13 +802,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing OS packages ($node_cluster:$node_type)\n");
 
-	init_local_os_config_file_parsing("$osf_config_dir/os-packages/$node_cluster/packages.config");
-
-###	# verify that certain packages are *not* installed
-###
-###	my @os_rpms_remove = query_cluster_config_os_packages_remove($node_cluster,$node_type);
-###
-###	verify_rpms_removed(@os_rpms_remove);
+	init_local_os_config_file_parsing("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
 
 	# now, verify that all desired os packages are installed
 

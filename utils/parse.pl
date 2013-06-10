@@ -1013,18 +1013,18 @@ BEGIN {
 	my $dir       = "";
 
 	if ( $global_cfg->exists($node_cluster,"config_dir") ) {
-	    INFO("   --> global config_dir specified in config.machines\n");
+	    DEBUG("   --> global config_dir specified in config.machines\n");
 	    $dir = $global_cfg->val($node_cluster,"config_dir");
 	}
 
 	# Now, check for possible custom host-specific override
 
 	if( $global_cfg->SectionExists("$node_cluster/config_dir/custom") ) {
-	    INFO("   --> override section for config_dir specified in config.machines\n");
+	    DEBUG("   --> override section for config_dir specified in config.machines\n");
 	    my @custom_dirs = $global_cfg->Parameters("$node_cluster/config_dir/custom");
 
 	    foreach $name (@custom_dirs) {
-		INFO("       --> $name -> config_dir override provided\n");
+		DEBUG("       --> $name -> config_dir override provided\n");
                 my $string    = "$node_cluster/config_dir/custom/$name";
 		my $local_dir = $global_cfg->val("$node_cluster/config_dir/custom",$name);
 
@@ -1040,7 +1040,7 @@ BEGIN {
 			DEBUG("       --> $name -> hostname regex = $regex\n");
 
 			if ($host_name =~ m/\b$regex\b/ ) {
-			    INFO("       --> hostname regex match, overriding with -> $local_dir\n");
+			    DEBUG("       --> hostname regex match, overriding with -> $local_dir\n");
 			    $dir = $local_dir;
 			    last;
 			    

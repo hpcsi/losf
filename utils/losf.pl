@@ -1623,10 +1623,9 @@ my $logr = get_logger(); $logr->level($ERROR);
 verify_sw_dependencies(); 
 (my $node_cluster, my $node_type) = determine_node_membership();
 
-
-init_local_config_file_parsing       ("$osf_config_dir/config."."$node_cluster");
-init_local_os_config_file_parsing    ("$osf_config_dir/os-packages/$node_cluster/packages.config");
-init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+init_local_config_file_parsing       ("$osf_custom_config_dir/config."."$node_cluster");
+init_local_os_config_file_parsing    ("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
+init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 $logr->level($INFO);
 
