@@ -32,7 +32,7 @@ use File::Basename;
 
 our @EXPORT            = qw($osf_top_dir 
 			    $osf_config_dir
-                            $osf_custom_config
+                            $osf_custom_config_dir
 		            $osf_utils_dir
 		            $osf_log4perl_dir
 		            $osf_ini4perl_dir
@@ -42,10 +42,9 @@ our @EXPORT            = qw($osf_top_dir
 #                            $osf_rpm2_dir
 #                            $osf_rpm2_arch_dir
 
-# Determine full path to LsoF install
+# Determine full path to LosF install
 		       
 our $osf_top_dir       = "";
-our $osf_custom_config = 0;
 
 my ($filename,$basename) = fileparse($0);
 
@@ -59,7 +58,7 @@ if ($basename =~ m/(.*)\/utils\/$/) {
 
 #print "osf_top_dir = $osf_top_dir\n";
 
-# Allow for potential separtion of LosF install path and LosF
+# Allow for potential separation of LosF install path and LosF
 # configuration path. By default, we assume a config/ dir local to the
 # LosF install but this can be overridden by an environment variable.
 
@@ -73,25 +72,28 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 	    chop($config_dir);
 	}
 
-	our $osf_config_dir    = $config_dir;
-	our $osf_custom_config = 1;
+	our $osf_config_dir        = $config_dir;
+	our $osf_custom_config_dir = $config_dir;
+###	our $osf_custom_config = 1;
     } else {
 	MYERROR("LOSF_CONFIG_DIR provided path does not exist ($config_dir)");
     }
 } else {
-    our $osf_config_dir  = "$osf_top_dir/config";
+    our $osf_config_dir        = "$osf_top_dir/config";
+    our $osf_custom_config_dir = "$osf_top_dir/config";
 }
 
-our $osf_utils_dir       = "$osf_top_dir/utils";
+our $osf_utils_dir         = "$osf_top_dir/utils";
+#our $osf_custom_config_dir = "$osf_config_dir";  # <-- note: may be overridden later
 		         
-our $osf_log4perl_dir    = "$osf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
-our $osf_ini4perl_dir    = "$osf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
-###our $osf_rpm2_dir        = "$osf_utils_dir/dependencies/RPM2-1.0/lib";
-###our $osf_rpm2_arch_dir   = "$osf_utils_dir/dependencies/RPM2-1.0/blib/arch/auto/RPM2";
-###our $osf_rpm2_dir        = "$osf_utils_dir/dependencies/RPM2-0.70/";
-###our $osf_rpm2_arch_dir   = "$osf_utils_dir/dependencies/RPM2-0.70/blib/arch/auto/RPM2";
-our $osf_term_prompt_dir = "$osf_utils_dir/dependencies/Term-Prompt-1.04/lib";
-our $osf_osupdates_dir   = "$osf_top_dir/os-updates";
+our $osf_log4perl_dir      = "$osf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
+our $osf_ini4perl_dir      = "$osf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
+###our $osf_rpm2_dir       = "$osf_utils_dir/dependencies/RPM2-1.0/lib";
+###our $osf_rpm2_arch_dir  = "$osf_utils_dir/dependencies/RPM2-1.0/blib/arch/auto/RPM2";
+###our $osf_rpm2_dir       = "$osf_utils_dir/dependencies/RPM2-0.70/";
+###our $osf_rpm2_arch_dir  = "$osf_utils_dir/dependencies/RPM2-0.70/blib/arch/auto/RPM2";
+our $osf_term_prompt_dir   = "$osf_utils_dir/dependencies/Term-Prompt-1.04/lib";
+our $osf_osupdates_dir     = "$osf_top_dir/os-updates";
 
 unless(-d $osf_osupdates_dir){
     mkdir $osf_osupdates_dir or die("[ERROR]: Unable to create dir ($osf_osupdates_dir)\n");

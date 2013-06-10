@@ -31,11 +31,14 @@ use strict;
 use LosF_paths;
 use utils;
 
+
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir/";
 
 use base 'Exporter';
+
+###use Config::IniFiles;
 
 require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
@@ -97,7 +100,19 @@ BEGIN {
 	init_config_file_parsing("$osf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
 	INFO("Cluster:Node_Type   = $node_cluster:$node_type\n");
+
+	# Check for custom config_dir - environment variable takes precedence
+
 	INFO("LosF Config Dir     = $osf_config_dir\n\n");
+
+	if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
+	    DEBUG("    --> LOSF_CONFIG_DIR setting takes precedence - skipping custom config check\n");
+	} else {
+	    my $dir = query_cluster_local_config_dir($node_cluster,$node_type,$host_name);
+	    if ( "$dir" ne "" ) {
+		INFO("       --> Using custom config dir override = $dir\n");
+	    }
+	}
 
        # All Done.
 	
