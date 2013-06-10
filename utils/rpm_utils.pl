@@ -476,7 +476,7 @@ sub verify_custom_rpms {
 
 	    if ( ! $desired_installed ) {
 		verify_expected_md5sum($filename,$md5_desired);
-		INFO("   --> desired version not installed - registering for update...\n");
+		INFO("       --> $desired_name desired version not installed - registering for update...\n");
 		SYSLOG("Registering locally installed $rpm for new multi-version");
 		push(@{$rpms_to_install{$rpm_options}},$filename);
 	    } else {
