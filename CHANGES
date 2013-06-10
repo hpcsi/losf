@@ -1,8 +1,16 @@
-Version 0.41.0  (08 May 2013)
 
-  * silent mode option for update which shows single line summary if host is up to date
-  * alternate config directory support using LOSF_CONFIG_DIR environment variable
-  * performance optimizations - locally installed RPMS now queried once and cached
+Version 0.42.0  (In Progress)
+
+  * add auto-configuration of Custom package removal when upgrading a multi-install package
+  * changed order of operations for update utility - all packages
+    (OS and Custom) flagged for removal are now uninstalled prior to any new updates
+
+Version 0.41.0  (19 March 2013)
+
+  * added silent mode option for update which shows single line summary if host is up to date
+  * added option to use alternate config file location (set via LOSF_CONFIG_DIR variable)
+  * added local log file (/tmp/losf/last_update) to track last local update
+  * performance optimization - locally installed RPMS queried once and cached
   * OS and custom package config file format update: "losf config-upgrade" can be used
     to migrate old format to latest version
 
