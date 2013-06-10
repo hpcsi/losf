@@ -1,6 +1,9 @@
 
 Version 0.42.0  (In Progress)
 
+  * add input file option to provide system-specific configuration
+    option (config_dir); the global value can also be customized on a
+    per-host basis using
   * add auto-configuration of Custom package removal when upgrading a multi-install package
   * changed order of operations for update utility - all packages
     (OS and Custom) flagged for removal are now uninstalled prior to any new updates
