@@ -63,7 +63,6 @@ do
 	    exit 1
 	    ;;
 	p)
-	    echo "found a p"
 	    RPM_OVERRIDE=$OPTARG
 	    ;;
 	q)
