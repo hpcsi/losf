@@ -72,7 +72,7 @@ print "   --> tmpfile = $tmpfile\n";
 if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
     if ( "$myval" eq "yes" ) {
 	INFO("   --> IPs assigned from file (ips.$node_cluster)\n");
-        if ( ! -e ("$osf_config_dir/ips."."$node_cluster") ) {
+        if ( ! -e ("$osf_custom_config_dir/ips."."$node_cluster") ) {
 	    MYERROR("ips.$node_cluster file does not exist");
 	}
 	$assign_from_file = 1;

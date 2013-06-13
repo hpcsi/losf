@@ -275,7 +275,7 @@ sub expand_text_macros {
 
     # @losf_synced_file_notice@ 
 
-    my $template = "$osf_config_dir/const_files/$cluster/notify_header";
+    my $template = "$osf_custom_config_dir/const_files/$cluster/notify_header";
 
     if ( -s "$template" ) {
 	DEBUG( "   --> notify_header file available\n");

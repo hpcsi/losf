@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2012 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -252,11 +252,11 @@ BEGIN {
 	# files.  If a configfile.<hostname> exists, we choose this
 	# file to sync in favor of the default configfile.
 
-	my $sync_file = "$osf_config_dir/const_files/$cluster/$type/$basename.$host_name";
+	my $sync_file = "$osf_custom_config_dir/const_files/$cluster/$type/$basename.$host_name";
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {
-	    $sync_file = "$osf_config_dir/const_files/$cluster/$type/$basename";
+	    $sync_file = "$osf_custom_config_dir/const_files/$cluster/$type/$basename";
 	    DEBUG("   --> Looking for file $sync_file\n");
 	} else {
 	    $customized = 1;
@@ -387,7 +387,7 @@ BEGIN {
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to partially sync file: $file\n");
 	
-	my $sync_file = "$osf_config_dir/const_files/$cluster/$type/$basename";
+	my $sync_file = "$osf_custom_config_dir/const_files/$cluster/$type/$basename";
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {

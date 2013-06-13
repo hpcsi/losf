@@ -199,7 +199,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    DEBUG("   --> Initializing input file config parsing ($shortname)\n");
+	    DEBUG("   --> Initializing input file config parsing ($infile)\n");
 	    
 	    verify_file_exists($infile);
 	    
@@ -227,7 +227,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    DEBUG("   --> Initializing OS config_parsing ($shortname)\n");
+	    DEBUG("   --> Initializing OS config_parsing ($infile)\n");
 	    
 	    verify_file_exists($infile);
 	    
