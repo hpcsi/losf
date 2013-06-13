@@ -824,7 +824,7 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+	init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 	INFO("** Checking on Custom packages to remove ($node_cluster:$node_type)\n");
 
@@ -872,7 +872,7 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	init_local_custom_config_file_parsing("$osf_config_dir/custom-packages/$node_cluster/packages.config");
+	init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 	my %custom_aliases = ();
 	my @custom_rpms    = ();

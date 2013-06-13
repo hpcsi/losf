@@ -255,7 +255,7 @@ BEGIN {
 	    my $logr      = get_logger();
 	    my $shortname = fileparse($infile);
 	    
-	    DEBUG("   --> Initializing Custom config_parsing ($shortname)\n");
+	    DEBUG("   --> Initializing Custom config_parsing ($infile)\n");
 	    
 	    verify_file_exists($infile);
 	    
