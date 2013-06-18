@@ -40,7 +40,20 @@ sub add_node_event
     my $comment    = shift;
     my $admin_user = shift;
 
-    my $timestamp=`date +"%F %R"`;
+    my $timestamp;
+
+    my $remain_args = @_;
+    if ( $remain_args == 1) {
+	$timestamp = shift;
+	# validate timestamp (e.g. 2013-06-18 15:50)
+	if ($timestamp !~ m/\d\d\d\d-\d\d-\d\d \d\d:\d\d/) {
+	    print "ERROR: malformed user-provided timestamp: expect 24 hour date of the form -> 2013-06-18 15:50\n";
+	    exit 1;
+	}
+    } else {
+	$timestamp=`date +"%F %R"`;
+    }
+
     chomp($timestamp);
 
     # validate action
@@ -116,23 +129,14 @@ sub clear_state
 
 my %node_status  = ("c401-101" => 0, "c401-102" => 1, "c401-103" => 0);
 
-add_node_event("c401-101","open","just a test","koomie");
+add_node_event("c401-101","open","just a test","koomie","2013-01-07 08:30");
 add_node_event("c401-101","close","uh oh","koomie");
 add_node_event("c401-102","open","just a test2","koomie");
 
-#print Dumper(%node_status);
-print "before dump....\n";
-###print Dumper(%node_history);
-###dump_state_1_0();
 save_state_1_0();
 clear_state();
-print "after clear - before read\n";
 #####print Dumper(%node_history);
 read_state_1_0();
-
-print "after read....\n";
-print "version = $DATA_VERSION\n";
-###print Dumper(%node_history);
 
 dump_state_1_0();
 
