@@ -44,6 +44,7 @@ use rpm_topdir;
 use node_types;
 use utils;
 use rpm_utils;
+use history_utils;
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
@@ -96,25 +97,34 @@ sub usage {
     print "     showalias                   Show all currently defined aliases\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --all                              Add rpm for all node types\n";
-    print "        --upgrade                          Upgrade previous rpm to new version provided\n";
-    print "        --yes                              Assume \"yes\" for interactive additions\n";
-    print "        --alias    [name]                  Add rpm to alias with given name\n";
-    print "        --relocate [oldpath] [newpath]     Change install path for relocatable rpm\n";
-    print "        --install                          Configure to use install mode as opposed to the default\n";
-    print "                                           upgrade mode for RPM installations. Allows multiple\n";
-    print "                                           RPMs of the same name to be installed.\n";
-    print "\n";
+    print "        --all                             Add rpm for all node types\n";
+    print "        --upgrade                         Upgrade previous rpm to new version provided\n";
+    print "        --yes                             Assume \"yes\" for interactive additions\n";
+    print "        --alias    [name]                 Add rpm to alias with given name\n";
+    print "        --relocate [oldpath] [newpath]    Change install path for relocatable rpm\n";
+    print "        --install                         Configure to use install mode as opposed to the default\n";
+    print "                                          upgrade mode for RPM installations. Allows multiple\n";
+    print "                                          RPMs of the same name to be installed.\n";
 
     print color 'bold blue';
     print "  Batch System Interaction:\n";
     print color 'reset';
 
     print "     These commands provide administrative interaction with the locally\n";
-    print "     defined batch system\n";
+    print "     defined batch system:\n";
     print "\n";
     print "     qclose   [name|all]                  Close specified queue (or all queues)\n";
     print "     qopen    [name|all]                  Open  specified queue (or all queues)\n";
+    print "\n";
+    print "     hclose <OPTIONS> [host]              Close specified host from scheduling\n";
+    print "     hopen  <OPTIONS> [host]              Open specified host from scheduling\n";
+    print "\n";
+    print "     OPTIONS:\n";
+    print "        --comment [comment]               Comment string associated with open/closure\n";
+    print "        --date    [YYYY-MM-DD HH:MM]      Override current default timestamp\n";
+    print "        --nocertify                       Skip host certification when opening\n";
+    print "        --noerror                         Do not flag host as errored when closing\n";
+    print "        --logonly                         Log entry only - does not make batch system changes\n";
 
     print "\n";
     exit(1);
@@ -1604,8 +1614,9 @@ sub update_losf_config_file {
 #-------------------------------------------
 
 GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$upgrade,
-	   'install' => \$install, 'alias=s' => \$alias_option,'yes' => \$assume_yes) || usage();
-
+	   'install' => \$install, 'alias=s' => \$alias_option,'yes' => \$assume_yes,
+            "comment=s" => \$comment,'date=s' => \$datestring,'nocertify' => \$nocertify,
+            "logonly",\$logonly,'noerror',\$noerror) || usage();
 
 # Command-line parsing
 
@@ -1686,6 +1697,33 @@ switch ($command) {
 	add_custom_rpm  ($argument,$nodetype,$options,$alias);
     }
 
+    case "hclose"   { 
+	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hclose command");}
+	print "hclose found\n";
+
+	if($nocertify) {exit 0};
+    }
+
+    case "hopen" {
+	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hopen command");}
+
+	my $state=1;
+	if($noerror == 1) { $state=2};
+
+	if($datestring ne '') {
+	    log_add_node_event($argument,"close",$comment,$state,$datestring);
+	} else {
+	    log_add_node_event($argument,"close",$comment,$state);
+	
+	}
+
+	log_dump_state_1_0();
+	
+	# notify batch system
+	
+	if($logonly) {exit 0;}
+    }
+    
     print "\n[Error]: Unknown command received-> $command\n";
 
     usage();

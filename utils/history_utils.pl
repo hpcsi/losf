@@ -38,12 +38,11 @@ use constant {
     CLOSE_NOERROR => 2,
 };
 
-sub add_node_event
+sub log_add_node_event
 {
     my $host       = shift;
     my $action     = shift;
     my $comment    = shift;
-    my $admin_user = shift;
     my $flag       = shift;
 
     my $timestamp;
@@ -54,15 +53,19 @@ sub add_node_event
 
 	# validate timestamp (e.g. 2013-06-18 15:50)
 
-	if ($timestamp !~ m/\d\d\d\d-\d\d-\d\d \d\d:\d\d/) {
-	    print "ERROR: malformed user-provided timestamp: expect 24 hour date of the form -> 2013-06-18 15:50\n";
+	if ($timestamp !~ m/\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
+	    print "ERROR: malformed user-provided timestamp: expect 24 hour date of the form -> 2013-06-18 15:50:42\n";
 	    exit 1;
 	}
     } else {
-	$timestamp=`date +"%F %R"`;
+	$timestamp=`date +"%F %T"`;
     }
 
     chomp($timestamp);
+
+    # determine running user
+
+    my $local_user = getlogin();
 
     # validate action
 
@@ -77,32 +80,37 @@ sub add_node_event
 	exit 1;
     }
 
-    push @{$node_history{$host} },($timestamp,$action,$comment,$admin_user,$flag);
+    # we have a good record, load->update
 
+    if ( -s $DATA_FILE ) {
+	log_read_state_1_0();
+    }
+    push @{$node_history{$host} },($timestamp,$action,$comment,$local_user,$flag);
+    log_save_state_1_0();
 }
 
-sub save_state_1_0
+sub log_save_state_1_0
 {
     # use locking store to save state
 
     lock_nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
 }
 
-sub read_state_1_0
+sub log_read_state_1_0
 {
     # use locking retrieve to read latest state 
 
     ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
 }
 
-sub dump_state_1_0
+sub log_dump_state_1_0
 {
 
     print "-" x 94;
     print "--- DATA VERSION = $DATA_VERSION ---";
     print "\n";
-    print "Hostname      Timestamp     E Action  Comment";
-    print " " x 71;
+    print "Hostname        Timestamp      E Action  Comment";
+    print " " x 68;
     print "User\n";
     for my $key (keys %node_history) {
 	my $num_entries = @{$node_history{$key}};
@@ -116,12 +124,11 @@ sub dump_state_1_0
 		$flag="X";
 	    }
 
-
-	    printf("%-16s ",($value[$count+0]));  # timestamp
-	    printf("%1s ",$flag);                       # error flag
-	    printf("%6s ",($value[$count+1]));         # state
-	    printf(" %-73s ",($value[$count+2]));        # comment
-	    printf("%8s",  ($value[$count+3]));        # user
+	    printf("%-19s ",($value[$count+0]));    # timestamp
+	    printf("%1s ",$flag);                   # error flag
+	    printf("%6s ",($value[$count+1]));      # state
+	    printf(" %-70s ",($value[$count+2]));   # comment
+	    printf("%8s",  ($value[$count+3]));     # user
 	    printf("\n");
 	}
 
@@ -130,24 +137,27 @@ sub dump_state_1_0
     print "\n";
 }
 
-sub clear_state 
+sub log_clear_state 
 {
     $DATA_VERSION = "";
     %node_history = ();
 }
 
-my %node_status  = ("c401-101" => 0, "c401-102" => 1, "c401-103" => 0);
 
-add_node_event("c401-101","open","just a test","koomie",1,"2013-01-07 08:30");
-add_node_event("c401-101","close","uh oh","koomie",2);
-add_node_event("c401-102","open","just a test2","koomie",1);
+# my %node_status  = ("c401-101" => 0, "c401-102" => 1, "c401-103" => 0);
 
-save_state_1_0();
-clear_state();
-#####print Dumper(%node_history);
-read_state_1_0();
+# log_add_node_event("c401-101","open","just a test",1,"2013-01-07 08:30");
+# log_add_node_event("c401-101","close","uh oh",2);
+# log_add_node_event("c401-102","open","just a test2",1);
 
-dump_state_1_0();
+# log_save_state_1_0();
+# log_clear_state();
+# #####print Dumper(%node_history);
+# log_read_state_1_0();
+# log_dump_state_1_0();
+
+
+
 
 
 
