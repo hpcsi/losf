@@ -22,7 +22,8 @@
 #
 #-----------------------------------------------------------------------el-
 
-use Storable qw(store retrieve freeze thaw nstore);
+use Storable qw(store retrieve freeze thaw nstore nstore_fd);
+use Fcntl qw(:DEFAULT :flock);
 use Data::Dumper;
 use strict;
 use warnings;
@@ -30,6 +31,7 @@ use warnings;
 my %node_history        = ();
 my $DATA_VERSION        = "1.0";
 my $HOST_ENTRY_SIZE_1_0 = 4;
+my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
 
 sub add_node_event
 {
@@ -57,13 +59,25 @@ sub add_node_event
 
 sub save_state_1_0
 {
-    nstore [$DATA_VERSION,%node_history ],'/tmp/koomielog';
+    # Initiate file lock
+
+    sysopen(FH,$DATA_FILE,O_RDWR|O_CREAT, 0640) or die "Unable to open $DATA_FILE";
+    flock  (FH, LOCK_EX)                        or die "Cannot lock $DATA_FILE: $!";
+
+    # save the state
+
+    nstore_fd ([$DATA_VERSION,%node_history ],*FH) or die "Unable to store log state to file";
+    truncate(FH,tell(FH));
+
+    # Release the lock
+
+    close(FH);
 }
 
 sub read_state_1_0
 {
-    my $retrieved = retrieve("/tmp/koomielog");
-    ($DATA_VERSION,%node_history) = @{retrieve ("/tmp/koomielog")};
+#    my $retrieved = retrieve("/tmp/koomielog");
+    ($DATA_VERSION,%node_history) = @{retrieve ($DATA_FILE)};
 }
 
 sub dump_state_1_0
