@@ -22,7 +22,7 @@
 #
 #-----------------------------------------------------------------------el-
 
-use Storable qw(store retrieve freeze thaw nstore nstore_fd);
+use Storable qw(store retrieve nstore nstore_fd lock_retrieve lock_nstore);
 use Fcntl qw(:DEFAULT :flock);
 use Data::Dumper;
 use strict;
@@ -39,15 +39,11 @@ sub add_node_event
     my $action     = shift;
     my $comment    = shift;
     my $admin_user = shift;
-###    my $user       = shift;
-###    my $job_id     = shift;
 
-    my $timestamp=`date +"%F %r"`;
+    my $timestamp=`date +"%F %R"`;
     chomp($timestamp);
 
     # validate action
-
-    if($action eq "open") {print "open detected\n"};
 
     die("Unsupported action") if ( $action ne "close"   &&
 				   $action ne "open"    && 
@@ -59,25 +55,42 @@ sub add_node_event
 
 sub save_state_1_0
 {
-    # Initiate file lock
+    # Initiate exclusive file lock for writing
 
-    sysopen(FH,$DATA_FILE,O_RDWR|O_CREAT, 0640) or die "Unable to open $DATA_FILE";
-    flock  (FH, LOCK_EX)                        or die "Cannot lock $DATA_FILE: $!";
+#    sysopen(FH,$DATA_FILE,O_RDWR|O_CREAT, 0640) or die "Unable to open $DATA_FILE: $!";
+#    flock  (FH, LOCK_EX)                        or die "Cannot lock $DATA_FILE: $!";
 
-    # save the state
+    # Save current state
 
-    nstore_fd ([$DATA_VERSION,%node_history ],*FH) or die "Unable to store log state to file";
-    truncate(FH,tell(FH));
+#    nstore_fd ([$DATA_VERSION,%node_history ],*FH) or die "Unable to store log state to file";
+#    truncate(FH,tell(FH));
 
     # Release the lock
 
-    close(FH);
+#    close(FH);
+
+    # use locking version directly
+
+    lock_nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
 }
 
 sub read_state_1_0
 {
-#    my $retrieved = retrieve("/tmp/koomielog");
-    ($DATA_VERSION,%node_history) = @{retrieve ($DATA_FILE)};
+    # Initiate shared file lock for reading
+
+    open (FH,"< $DATA_FILE") or die "Unable to open $DATA_FILE: $!";
+    flock(FH, LOCK_SH)       or die "Cannot lock $DATA_FILE: $!";
+
+    # Read the state
+
+#    ($DATA_VERSION,%node_history) = @{retrieve(*FH)};
+
+    # Release the lock
+
+    close(FH);
+
+#    ($DATA_VERSION,%node_history) = @{retrieve ($DATA_FILE)};
+    ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
 }
 
 sub dump_state_1_0
