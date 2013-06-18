@@ -55,41 +55,29 @@ sub add_node_event
 
 sub save_state_1_0
 {
-    # Initiate exclusive file lock for writing
-
-#    sysopen(FH,$DATA_FILE,O_RDWR|O_CREAT, 0640) or die "Unable to open $DATA_FILE: $!";
-#    flock  (FH, LOCK_EX)                        or die "Cannot lock $DATA_FILE: $!";
-
-    # Save current state
-
-#    nstore_fd ([$DATA_VERSION,%node_history ],*FH) or die "Unable to store log state to file";
-#    truncate(FH,tell(FH));
-
-    # Release the lock
-
-#    close(FH);
-
-    # use locking version directly
+    # use locking store to save state
 
     lock_nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
 }
 
 sub read_state_1_0
 {
-    # Initiate shared file lock for reading
+####    # Initiate shared file lock for reading
+###
+####    open (FH,"< $DATA_FILE") or die "Unable to open $DATA_FILE: $!";
+####    flock(FH, LOCK_SH)       or die "Cannot lock $DATA_FILE: $!";
+###
+###    # Read the state
+###
+####    ($DATA_VERSION,%node_history) = @{retrieve(*FH)};
+###
+###    # Release the lock
+###
+####    close(FH);
+###
+####    ($DATA_VERSION,%node_history) = @{retrieve ($DATA_FILE)};
 
-    open (FH,"< $DATA_FILE") or die "Unable to open $DATA_FILE: $!";
-    flock(FH, LOCK_SH)       or die "Cannot lock $DATA_FILE: $!";
-
-    # Read the state
-
-#    ($DATA_VERSION,%node_history) = @{retrieve(*FH)};
-
-    # Release the lock
-
-    close(FH);
-
-#    ($DATA_VERSION,%node_history) = @{retrieve ($DATA_FILE)};
+    # use locking retrieve to read latest state 
     ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
 }
 
