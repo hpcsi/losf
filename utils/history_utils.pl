@@ -29,7 +29,7 @@ use warnings;
 
 my %node_history        = ();
 my $DATA_VERSION        = "1.0";
-my $HOST_ENTRY_SIZE_1_0 = 6;
+my $HOST_ENTRY_SIZE_1_0 = 4;
 
 sub add_node_event
 {
@@ -37,37 +37,33 @@ sub add_node_event
     my $action     = shift;
     my $comment    = shift;
     my $admin_user = shift;
-    my $user       = shift;
-    my $job_id     = shift;
+###    my $user       = shift;
+###    my $job_id     = shift;
 
     my $timestamp=`date +"%F %r"`;
     chomp($timestamp);
 
     # validate action
 
-#    die("Unsupported action") if ( "$action" ne "closed"  ||
-#				   "$action" ne "open"    || 
-#				   "$action" ne "comment");
+    if($action eq "open") {print "open detected\n"};
 
-    push @{$node_history{$host} },($timestamp,$action,$comment,$admin_user,"","");
+    die("Unsupported action") if ( $action ne "close"   &&
+				   $action ne "open"    && 
+				   $action ne "comment");
+
+    push @{$node_history{$host} },($timestamp,$action,$comment,$admin_user);
 
 }
 
 sub save_state_1_0
 {
-#    my $stored = freeze [\$DATA_VERSION, \%node_history ];
     nstore [$DATA_VERSION,%node_history ],'/tmp/koomielog';
-#    store $stored 
-#    nstore(\$stored,"/tmp/koomielog");
 }
 
 sub read_state_1_0
 {
     my $retrieved = retrieve("/tmp/koomielog");
-    
-#    ($DATA_VERSION,%node_history) = $retrieved;
     ($DATA_VERSION,%node_history) = @{retrieve ("/tmp/koomielog")};
-#    %node_history = @{retrieve("/tmp/koomielog")};
 }
 
 sub dump_state_1_0
@@ -79,7 +75,6 @@ sub dump_state_1_0
     print "Hostname         Timestamp         Action           Comment                      ";
     print "                                 User\n";
     for my $key (keys %node_history) {
-#	my $num_entries = @{$node_history{$key}} / $HOST_ENTRY_SIZE_1_0;
 	my $num_entries = @{$node_history{$key}};
 	
 	my @value = @{$node_history{$key}};
@@ -106,10 +101,6 @@ sub clear_state
 
 my %node_status  = ("c401-101" => 0, "c401-102" => 1, "c401-103" => 0);
 
-#my @default_history = ("DATE","ACTION","COMMENT","ADMIN_USER","AFFECTED_USER","JOB_ID");
-
-#$node_history{"c401-101"} = [ @default_history ];
-
 add_node_event("c401-101","open","just a test","koomie");
 add_node_event("c401-101","close","uh oh","koomie");
 add_node_event("c401-102","open","just a test2","koomie");
@@ -117,17 +108,16 @@ add_node_event("c401-102","open","just a test2","koomie");
 #print Dumper(%node_status);
 print "before dump....\n";
 ###print Dumper(%node_history);
-dump_state_1_0();
+###dump_state_1_0();
 save_state_1_0();
 clear_state();
 print "after clear - before read\n";
 #####print Dumper(%node_history);
-print "rereading...\n";
 read_state_1_0();
 
 print "after read....\n";
 print "version = $DATA_VERSION\n";
-print Dumper(%node_history);
+###print Dumper(%node_history);
 
 dump_state_1_0();
 
