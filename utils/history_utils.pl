@@ -103,8 +103,47 @@ sub log_read_state_1_0
     ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
 }
 
+sub log_dump_entry_1_0 
+{
+    my $host        = shift;
+    my @entries     = @_;
+    my $num_entries = @entries;
+
+    my $count =0;
+    for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
+
+	printf("%-10s ", $host);
+	my $flag="";
+
+	if($entries[$count+4] eq CLOSE_ERROR) {
+	    $flag="X";
+	}
+	
+	printf("%-19s ", ($entries[$count+0]));    # timestamp
+	printf("%1s ",   $flag);                   # error flag
+	printf("%6s ",   ($entries[$count+1]));    # state
+	printf(" %-70s ",($entries[$count+2]));    # comment
+	printf("%8s",    ($entries[$count+3]));    # user
+	printf("\n");
+    }
+    
+}
+
 sub log_dump_state_1_0
 {
+
+    log_read_state_1_0();
+
+    # check if specific host requested?
+
+    my $desired_host="";
+
+    my $remain_args = @_;
+    if ( $remain_args == 1) {
+	$desired_host = shift;
+    }
+
+    # header
 
     print "-" x 94;
     print "--- DATA VERSION = $DATA_VERSION ---";
@@ -112,27 +151,17 @@ sub log_dump_state_1_0
     print "Hostname        Timestamp      E Action  Comment";
     print " " x 68;
     print "User\n";
-    for my $key (keys %node_history) {
-	my $num_entries = @{$node_history{$key}};
-	
-	my @value = @{$node_history{$key}};
-	my $count =0;
-	for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
-	    printf("%-10s ", $key);
-	    my $flag="";
-	    if($value[$count+4] eq CLOSE_ERROR) {
-		$flag="X";
-	    }
 
-	    printf("%-19s ",($value[$count+0]));    # timestamp
-	    printf("%1s ",$flag);                   # error flag
-	    printf("%6s ",($value[$count+1]));      # state
-	    printf(" %-70s ",($value[$count+2]));   # comment
-	    printf("%8s",  ($value[$count+3]));     # user
-	    printf("\n");
+    # raw log results
+
+    if($desired_host ne "" ) {
+	log_dump_entry_1_0($desired_host,@{$node_history{$desired_host}} );
+    } else  {
+	for my $key (keys %node_history) {
+	    log_dump_entry_1_0($key,@{$node_history{$key}} );
 	}
-
     }
+
     print "-" x 120;
     print "\n";
 }

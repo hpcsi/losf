@@ -116,6 +116,7 @@ sub usage {
     print "     qclose   [name|all]                  Close specified queue (or all queues)\n";
     print "     qopen    [name|all]                  Open  specified queue (or all queues)\n";
     print "\n";
+    print "     hlog   <host>                        Display open/close log history\n";
     print "     hclose <OPTIONS> [host]              Close specified host from scheduling\n";
     print "     hopen  <OPTIONS> [host]              Open specified host from scheduling\n";
     print "\n";
@@ -1625,6 +1626,8 @@ if (@ARGV >= 1) {
     if(@ARGV >= 1) {
 #	$argument = shift@ARGV;
 	$argument = "@ARGV";
+    } else {
+	$argument="";
     }
 } else {
     usage();
@@ -1697,9 +1700,16 @@ switch ($command) {
 	add_custom_rpm  ($argument,$nodetype,$options,$alias);
     }
 
+    case "hlog" {
+	if( $argument ne '') {
+	    log_dump_state_1_0($argument);
+	} else {
+	    log_dump_state_1_0();
+	}
+    }
+
     case "hclose"   { 
 	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hclose command");}
-	print "hclose found\n";
 
 	if($nocertify) {exit 0};
     }
@@ -1711,9 +1721,9 @@ switch ($command) {
 	if($noerror == 1) { $state=2};
 
 	if($datestring ne '') {
-	    log_add_node_event($argument,"close",$comment,$state,$datestring);
+	    log_add_node_event($argument,"open",$comment,$state,$datestring);
 	} else {
-	    log_add_node_event($argument,"close",$comment,$state);
+	    log_add_node_event($argument,"open",$comment,$state);
 	
 	}
 
