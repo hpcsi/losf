@@ -23,19 +23,20 @@
 #-----------------------------------------------------------------------el-
 
 use Storable qw(store retrieve nstore nstore_fd lock_retrieve lock_nstore);
-use Fcntl qw(:DEFAULT :flock);
+use Fcntl    qw(:DEFAULT :flock);
 use Data::Dumper;
 use strict;
 use warnings;
 
 my %node_history        = ();
-my $DATA_VERSION        = "1.0";
+my $DATA_VERSION        = "";
 my $HOST_ENTRY_SIZE_1_0 = 5;
 my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
 
 use constant {
-    CLOSE_ERROR   => 1,
-    CLOSE_NOERROR => 2,
+    CLOSE_ERROR     => 1,
+    CLOSE_NOERROR   => 2,
+    DATA_VERSION1_0 => "1.0",
 };
 
 sub log_add_node_event
@@ -92,6 +93,7 @@ sub log_add_node_event
 sub log_save_state_1_0
 {
     # use locking store to save state
+    my $DATA_VERSION = DATA_VERSION1_0;
 
     lock_nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
 }
@@ -172,24 +174,30 @@ sub log_clear_state
     %node_history = ();
 }
 
-
-# my %node_status  = ("c401-101" => 0, "c401-102" => 1, "c401-103" => 0);
-
-# log_add_node_event("c401-101","open","just a test",1,"2013-01-07 08:30");
-# log_add_node_event("c401-101","close","uh oh",2);
-# log_add_node_event("c401-102","open","just a test2",1);
-
-# log_save_state_1_0();
-# log_clear_state();
-# #####print Dumper(%node_history);
-# log_read_state_1_0();
-# log_dump_state_1_0();
-
-
-
-
-
-
-
-
-
+###sub log_ingest_raw_data
+###{
+###    # for internal use to load log from raw file 
+###
+###    my $datafile = "/admin/build/data/slurm_logs/losf_data_ingest.production2";
+###
+###    log_clear_state();
+###
+###    open(INFILE,"<$datafile") || die ("Cannot open $datafile: $!");
+###
+###    while (my $line = <INFILE> ) {
+###	# CLOSE 2012-07-01 15:18:16 batch1 slurm "not responding"
+###
+###	if ($line =~ m/(OPEN|CLOSE) (\S+) (\S+) (\S+) (\S+) (.+)$/) {
+###	    if ($1 eq "CLOSE" ) {
+###		push @{$node_history{$4} },("$2 $3",$1,$6,$5,CLOSE_ERROR);
+###	    } else {
+###		push @{$node_history{$4} },("$2 $3",$1,$6,$5,0);
+###	    }
+###	}    
+###    }
+###
+###    log_save_state_1_0();
+###}
+###
+###log_ingest_raw_data();
+###
