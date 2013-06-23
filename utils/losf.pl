@@ -1614,6 +1614,10 @@ sub update_losf_config_file {
 # Main front-end for losf command-line tool
 #-------------------------------------------
 
+my $datestring = "";
+my $comment    = "";
+my $noerror    = 0;
+
 GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$upgrade,
 	   'install' => \$install, 'alias=s' => \$alias_option,'yes' => \$assume_yes,
             "comment=s" => \$comment,'date=s' => \$datestring,'nocertify' => \$nocertify,
@@ -1711,24 +1715,58 @@ switch ($command) {
     case "hclose"   { 
 	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hclose command");}
 
-	if($nocertify) {exit 0};
+	my $state=1;
+	if($noerror == 1) { $state=2};
+
+	if($comment eq '') {
+	    ERROR("TODO: add request for required comment here\n");
+	    exit 1;
+	}
+
+	# TODO: abstract for alternative resource managers
+
+	my $rc = system("/usr/bin/scontrol update nodename=$argument state=DRAIN reason=\"$comment\"");
+	if( $rc != 0) {
+	    MYERROR("Unable to close host $argument in SLURM....exiting\n");
+	}
+
+	if($datestring ne '') {
+	    log_add_node_event($argument,"close",$comment,$state,$datestring);
+	} else {
+	    log_add_node_event($argument,"close",$comment,$state);
+	}
+
     }
 
     case "hopen" {
 	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hopen command");}
 
-	my $state=1;
-	if($noerror == 1) { $state=2};
+	if($nocertify) {print "TODO: automate recertification here...\n";}
 
-	if($datestring ne '') {
-	    log_add_node_event($argument,"open",$comment,$state,$datestring);
-	} else {
-	    log_add_node_event($argument,"open",$comment,$state);
-	
+	if($comment eq '') {
+	    ERROR("TODO: add request for required comment here\n");
+	    exit 1;
 	}
 
-	log_dump_state_1_0();
-	
+	# TODO: abstract for alternative resource managers
+
+	my $rc = system("/usr/bin/scontrol update nodename=$argument state=IDLE reason=\"$comment\"");
+	    
+	if( $rc != 0) {
+	    MYERROR("Unable to open host $argument in SLURM....exiting\n");
+	}
+
+	my @hosts=`scontrol show hostname $argument`;
+	chomp(@hosts);
+
+	foreach my $myhost (@hosts) {
+	    if($datestring ne '') {
+		log_add_node_event($myhost,"open",$comment,0,$datestring);
+	    } else {
+		log_add_node_event($myhost,"open",$comment,0);
+	    }
+	}
+
 	# notify batch system
 	
 	if($logonly) {exit 0;}

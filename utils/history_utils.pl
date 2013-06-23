@@ -34,6 +34,7 @@ my $HOST_ENTRY_SIZE_1_0 = 5;
 my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
 
 use constant {
+    OPEN_PROD       => 0,
     CLOSE_ERROR     => 1,
     CLOSE_NOERROR   => 2,
     DATA_VERSION1_0 => "1.0",
@@ -76,8 +77,8 @@ sub log_add_node_event
 
     # validate flag
     
-    if($flag != CLOSE_ERROR && $flag != CLOSE_NOERROR) {
-	print "ERROR: unknown host close flag provided\n";
+    if($flag != OPEN_PROD && $flag != CLOSE_ERROR && $flag != CLOSE_NOERROR) {
+	print "ERROR: unknown host close flag provided ($flag)\n";
 	exit 1;
     }
 
