@@ -39,10 +39,10 @@ use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir";
 use lib "$osf_term_prompt_dir";
 
-use node_types;
-###use utils;
-###use rpm_utils;
-###use history_utils;
+use LosF_node_types;
+use LosF_utils;
+use LosF_rpm_utils;
+use history_utils;
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;

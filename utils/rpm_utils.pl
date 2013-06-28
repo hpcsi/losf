@@ -28,12 +28,13 @@
 #--------------------------------------------------------------------------
 
 use LosF_paths;
+use LosF_rpm_topdir;
 
 use lib "$osf_log4perl_dir";
 ###use lib "$osf_rpm2_dir";
 ###use lib "$osf_rpm2_arch_dir";
 
-use rpm_topdir;
+
 use Sys::Syslog;  
 use Digest::MD5;
 use Env qw(SRC_DIR MODE);
