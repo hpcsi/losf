@@ -30,7 +30,6 @@
 #
 # $Id$
 #-------------------------------------------------------------------
-
 use warnings;
 use Switch;
 use LosF_paths;
@@ -40,11 +39,10 @@ use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir";
 use lib "$osf_term_prompt_dir";
 
-use rpm_topdir;
 use node_types;
-use utils;
-use rpm_utils;
-use history_utils;
+###use utils;
+###use rpm_utils;
+###use history_utils;
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
@@ -1628,7 +1626,6 @@ GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$u
 if (@ARGV >= 1) {
     $command  = shift@ARGV;
     if(@ARGV >= 1) {
-#	$argument = shift@ARGV;
 	$argument = "@ARGV";
     } else {
 	$argument="";

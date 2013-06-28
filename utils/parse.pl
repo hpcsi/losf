@@ -45,12 +45,17 @@ BEGIN {
 
 	begin_routine();
 
+	# return direcly if we have already been called previously
+
+	if ($osf_init_global_config == 1) {
+	    end_routine();
+	    return ($node_cluster,$node_type);
+	}	    
+
 	my $host   = shift;
 	my $domain = shift;
 	my $logr   = get_logger();
 	my $found  = 0;
-
-	#$logr->level($DEBUG);
 
 	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
@@ -126,6 +131,8 @@ BEGIN {
 	} else {
 	    DEBUG("   --> Node type determination successful\n");
 	}
+
+	$osf_init_global_config = 1;
 
 	return ($node_cluster,$node_type);
 	end_routine();

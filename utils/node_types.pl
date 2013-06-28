@@ -30,6 +30,7 @@
 use strict;
 use LosF_paths;
 use utils;
+###use rpm_topdir;
 
 
 use lib "$osf_log4perl_dir";
@@ -37,8 +38,6 @@ use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir/";
 
 use base 'Exporter';
-
-###use Config::IniFiles;
 
 require "$osf_utils_dir/utils.pl";
 require "$osf_utils_dir/parse.pl";
@@ -87,7 +86,7 @@ BEGIN {
         # Initialization
         #---------------
 
-	print_header();
+###	print_header();
 	DEBUG("** Node Type Determination\n");
 	
 	chomp($host_name=`hostname -s`);
@@ -100,7 +99,7 @@ BEGIN {
 	init_config_file_parsing("$osf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
 
-	INFO("Cluster/Node_Type          = $node_cluster/$node_type\n");
+###	INFO("Cluster/Node_Type          = $node_cluster/$node_type\n");
 
 	# Check for custom config_dir - environment variable takes precedence
 
@@ -114,8 +113,13 @@ BEGIN {
 	    }
 	}
 
-	INFO("Top-level config           = $osf_config_dir/config.machines\n");
-	INFO("System specific config dir = $osf_custom_config_dir\n\n");
+	# Local RPM TopDir
+
+	(my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
+
+###	INFO("Top-level config           = $osf_config_dir/config.machines\n");
+###	INFO("System specific config dir = $osf_custom_config_dir\n");
+###	INFO("RPM top level dir          = $rpm_topdir\n\n");
 
        # All Done.
 	
