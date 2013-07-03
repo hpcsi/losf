@@ -14,7 +14,7 @@
 
 use strict;
 use LosF_paths;
-use node_types;
+use LosF_node_types;
 
 use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
