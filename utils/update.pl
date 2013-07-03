@@ -41,8 +41,8 @@ use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir";
 
-use node_types;
-use utils;
+use LosF_node_types;
+use LosF_utils;
 use Getopt::Long;
 
 require "$osf_utils_dir/sync_config_utils.pl";

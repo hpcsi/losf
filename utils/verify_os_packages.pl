@@ -39,7 +39,7 @@ use lib "$osf_log4perl_dir";
 use lib "$osf_ini4perl_dir";
 use lib "$osf_utils_dir";
 
-use node_types;
+use LosF_node_types;
 use utils;
 
 require "$osf_utils_dir/utils.pl";
