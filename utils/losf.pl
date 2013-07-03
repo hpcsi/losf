@@ -1752,7 +1752,8 @@ switch ($command) {
 
 	# TODO: abstract for alternative resource managers
 
-	my $rc = system("/usr/bin/scontrol update nodename=$argument state=IDLE reason=\"$comment\"");
+#	print "/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"\n";
+	my $rc = system("/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"");
 	    
 	if( $rc != 0) {
 	    MYERROR("Unable to open host $argument in SLURM....exiting\n");
