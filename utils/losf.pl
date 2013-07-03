@@ -117,6 +117,7 @@ sub usage {
     print "     hlog   <host>                        Display open/close log history\n";
     print "     hclose <OPTIONS> [host]              Close specified host from scheduling\n";
     print "     hopen  <OPTIONS> [host]              Open specified host from scheduling\n";
+    print "     hcheck                               Check for newly closed hosts in batch system\n";
     print "\n";
     print "     OPTIONS:\n";
     print "        --comment [comment]               Comment string associated with open/closure\n";
@@ -1707,6 +1708,10 @@ switch ($command) {
 	} else {
 	    log_dump_state_1_0();
 	}
+    }
+
+    case "hcheck" {
+	log_check_for_closed_hosts();
     }
 
     case "hclose"   { 

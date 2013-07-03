@@ -25,6 +25,7 @@
 use Storable qw(store retrieve nstore nstore_fd lock_retrieve lock_nstore);
 use Fcntl    qw(:DEFAULT :flock);
 use Data::Dumper;
+use File::Temp qw/tempfile/;
 use strict;
 use warnings;
 
@@ -104,6 +105,54 @@ sub log_read_state_1_0
     # use locking retrieve to read latest state 
 
     ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
+}
+
+sub log_check_for_closed_hosts()
+{
+    INFO("Checking for newly closed hosts ...\n");
+    INFO("--> assuming SLURM batch system\n");
+
+    (my $fh,my $tmpfile) = tempfile();
+
+    INFO("--> tmpfile = $tmpfile\n");
+
+    my $cmd="sinfo -R --format=\"%n %H %u \\\"%E\\\"\"> $tmpfile";
+
+
+
+    INFO("--> query command = $cmd\n");
+    system($cmd);
+
+    open(INFILE,"<$tmpfile") || die ("Cannot open $tmpfile: $!");
+
+    while (my $line = <INFILE> ) {
+	print $line;
+
+        #c445-003 2013-06-25T00:35:41 root "TACC: rebooting MIC"
+
+	if ($line =~ m/(\S+) (\d\d\d\d-\d\d-\d\d)T(\S+) (\S+) \"(.+)\"/) {
+	    print "$1 $2 $3 $4 $5\n";
+
+	    # check to see if we have logged this previously
+	    my $new_entry = 0;
+	    my $count     = 0;
+
+	    my @entries = @{$node_history{$1}};
+	    my $num_entries = @entries;
+
+	    for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
+		printf("%-19s\n",$entries[$count+1]);
+	    }
+
+
+	    
+	}
+
+    }
+
+    close(INFILE);
+    unlink($tmpfile);
+
 }
 
 sub log_dump_entry_1_0 
