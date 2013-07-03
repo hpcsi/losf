@@ -29,7 +29,7 @@ use File::Temp qw/tempfile/;
 use strict;
 use warnings;
 
-my %node_history        = ();
+my %node_history       = ();
 my $DATA_VERSION        = "";
 my $HOST_ENTRY_SIZE_1_0 = 5;
 my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
@@ -75,7 +75,6 @@ sub log_add_node_event
     die("Unsupported action") if ( $action ne "close"   &&
 				   $action ne "open"    && 
 				   $action ne "comment");
-
     # validate flag
     
     if($flag != OPEN_PROD && $flag != CLOSE_ERROR && $flag != CLOSE_NOERROR) {
@@ -112,40 +111,69 @@ sub log_check_for_closed_hosts()
     INFO("Checking for newly closed hosts ...\n");
     INFO("--> assuming SLURM batch system\n");
 
+    log_read_state_1_0();
+
     (my $fh,my $tmpfile) = tempfile();
 
-    INFO("--> tmpfile = $tmpfile\n");
+    DEBUG("--> tmpfile = $tmpfile\n");
 
-    my $cmd="sinfo -R --format=\"%n %H %u \\\"%E\\\"\"> $tmpfile";
+    my $cmd="sinfo -h -R --format=\"%n %H %u \\\"%E\\\"\"> $tmpfile";
 
-
-
-    INFO("--> query command = $cmd\n");
+    DEBUG("--> query command = $cmd\n");
     system($cmd);
 
     open(INFILE,"<$tmpfile") || die ("Cannot open $tmpfile: $!");
 
     while (my $line = <INFILE> ) {
-	print $line;
 
-        #c445-003 2013-06-25T00:35:41 root "TACC: rebooting MIC"
+	# example line:
+        # c445-003 2013-06-25T00:35:41 root "TACC: rebooting MIC"
 
 	if ($line =~ m/(\S+) (\d\d\d\d-\d\d-\d\d)T(\S+) (\S+) \"(.+)\"/) {
-	    print "$1 $2 $3 $4 $5\n";
+
+	    my $dupl_entry = 0;
+	    my $count      = 0;
+	    my $host       = $1;
+	    my $comment    = $5;
+	    my $timestamp  = "$2 $3";
 
 	    # check to see if we have logged this previously
-	    my $new_entry = 0;
-	    my $count     = 0;
 
-	    my @entries = @{$node_history{$1}};
-	    my $num_entries = @entries;
-
-	    for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
-		printf("%-19s\n",$entries[$count+1]);
-	    }
-
-
+	    DEBUG("  --> checking on log for $host\n");
 	    
+	    if( exists $node_history{$host}  ) {
+		my @entries     = @{$node_history{$host}};
+		my $num_entries = @entries;
+
+		for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
+		    if( $entries[$count+0] eq $timestamp) {
+			DEBUG("      --> Skipping duplicate timestamp....\n");
+			$dupl_entry = 1;
+			last;
+		    }
+		}
+
+		if($dupl_entry == 1) {
+		    next;
+		} else {
+		    INFO("Adding unmatched log entry for $host\n");
+		    log_add_node_event($host,"close","$comment",CLOSE_ERROR,"$2 $3");
+		}
+		exit 1;
+	    } else {
+		DEBUG("      --> no log entries present\n");
+	        # TACC: rebooting MIC 
+
+		# we skip MIC reboots for now...
+		
+		if($comment eq "TACC: rebooting MIC") {
+		    DEBUG("      --> Skipping MIC reboot....\n");
+		    next;
+		}
+		
+		INFO("Adding unmatched log entry for $host\n");
+		log_add_node_event($host,"close","$comment",CLOSE_ERROR,"$2 $3");
+	    }
 	}
 
     }
@@ -174,7 +202,9 @@ sub log_dump_entry_1_0
 	printf("%-19s ", ($entries[$count+0]));    # timestamp
 	printf("%1s ",   $flag);                   # error flag
 	printf("%6s ",   ($entries[$count+1]));    # state
-	printf(" %-70s ",($entries[$count+2]));    # comment
+###	printf(" %-70s ",($entries[$count+2]));    # comment
+	my $padded = pack("A70",$entries[$count+2]);
+	printf(" %-70s ",$padded);                 # comment
 	printf("%8s",    ($entries[$count+3]));    # user
 	printf("\n");
     }
