@@ -35,4 +35,4 @@ if [ -z "$OSF_ECHO_MODE" ];then
     export OSF_ECHO_MODE="ERROR"
 fi
 
-$TOP_DIR/utils/losf.pl $@
+$TOP_DIR/utils/losf.pl "$@"
