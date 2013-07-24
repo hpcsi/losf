@@ -1617,10 +1617,17 @@ my $datestring = "";
 my $comment    = "";
 my $noerror    = 0;
 
-GetOptions('relocate=s{2}' => \@relocate_options,'all' => \$all,'upgrade' => \$upgrade,
-	   'install' => \$install, 'alias=s' => \$alias_option,'yes' => \$assume_yes,
-            "comment=s" => \$comment,'date=s' => \$datestring,'nocertify' => \$nocertify,
-            "logonly",\$logonly,'noerror',\$noerror) || usage();
+GetOptions("relocate=s{2}" => \@relocate_options,
+	   "all"           => \$all,
+	   "upgrade"       => \$upgrade,
+	   "install"       => \$install, 
+	   "alias=s"       => \$alias_option,
+	   "yes"           => \$assume_yes,
+	   "comment=s"     => \$comment,
+	   "date=s"        => \$datestring,
+	   "nocertify"     => \$nocertify,
+	   "logonly"       => \$logonly,
+	   "noerror"       => \$noerror) || usage();
 
 # Command-line parsing
 
@@ -1727,15 +1734,17 @@ switch ($command) {
 
 	# TODO: abstract for alternative resource managers
 
-	my $rc = system("/usr/bin/scontrol update nodename=$argument state=DRAIN reason=\"$comment\"");
-	if( $rc != 0) {
-	    MYERROR("Unable to close host $argument in SLURM....exiting\n");
+	if(! $logonly ) {
+	    my $rc = system("/usr/bin/scontrol update nodename=$argument state=DRAIN reason=\"$comment\"");
+	    if( $rc != 0) {
+		MYERROR("Unable to close host $argument in SLURM....exiting\n");
+	    }
 	}
 
 	if($datestring ne '') {
-	    log_add_node_event($argument,"close",$comment,$state,$datestring);
+	    log_add_node_event($argument,"close","$comment",$state,$datestring);
 	} else {
-	    log_add_node_event($argument,"close",$comment,$state);
+	    log_add_node_event($argument,"close","$comment",$state);
 	}
 
     }

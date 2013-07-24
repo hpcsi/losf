@@ -32,7 +32,15 @@ use warnings;
 my %node_history       = ();
 my $DATA_VERSION        = "";
 my $HOST_ENTRY_SIZE_1_0 = 5;
+
+
 my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
+###my $DATA_FILE ="/admin/build/admin/hpc_stack/.losf_log_data.koomie";
+my $LOCK_FILE ="/admin/build/admin/hpc_stack/.losf_log_data.lock";
+
+# File handle for locking coordination
+
+open(my $FH_lock,">$LOCK_FILE") || MYERROR("Unable to open $LOCK_FILE");
 
 use constant {
     OPEN_PROD       => 0,
@@ -47,24 +55,6 @@ sub log_add_node_event
     my $action     = shift;
     my $comment    = shift;
     my $flag       = shift;
-
-    my $timestamp;
-
-    my $remain_args = @_;
-    if ( $remain_args == 1) {
-	$timestamp = shift;
-
-	# validate timestamp (e.g. 2013-06-18 15:50)
-
-	if ($timestamp !~ m/\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
-	    print "ERROR: malformed user-provided timestamp: expect 24 hour date of the form -> 2013-06-18 15:50:42\n";
-	    exit 1;
-	}
-    } else {
-	$timestamp=`date +"%F %T"`;
-    }
-
-    chomp($timestamp);
 
     # determine running user
 
@@ -82,13 +72,38 @@ sub log_add_node_event
 	exit 1;
     }
 
+    # validate or generate timestamp
+
+    my $timestamp;
+    my $remain_args = @_;
+
+    if ( $remain_args == 1) {
+	$timestamp = shift;
+
+	# validate timestamp (e.g. 2013-06-18 15:50)
+
+	if ($timestamp !~ m/\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
+	    print "ERROR: malformed user-provided timestamp: expect 24 hour date of the form -> 2013-06-18 15:50:42\n";
+	    exit 1;
+	}
+    } else {
+	$timestamp=`date +"%F %T"`;
+    }
+
+    chomp($timestamp);
+
     # we have a good record, load->update
+
+    logger_get_lock();
 
     if ( -s $DATA_FILE ) {
 	log_read_state_1_0();
     }
     push @{$node_history{$host} },($timestamp,$action,$comment,$local_user,$flag);
+
     log_save_state_1_0();
+
+    logger_release_lock();
 }
 
 sub log_save_state_1_0
@@ -96,20 +111,34 @@ sub log_save_state_1_0
     # use locking store to save state
     my $DATA_VERSION = DATA_VERSION1_0;
 
-    lock_nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
+###    lock_nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
+    nstore [$DATA_VERSION,%node_history ], $DATA_FILE;
+}
+
+sub logger_get_lock {
+    flock($FH_lock,LOCK_EX)  || MYERROR("Unable to get exclusive lock");
+}
+
+sub logger_release_lock {
+    flock($FH_lock,LOCK_UN)  || MYERROR("Unable to release exclusive lock");
 }
 
 sub log_read_state_1_0
 {
     # use locking retrieve to read latest state 
 
-    ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
+###    ($DATA_VERSION,%node_history) = @{lock_retrieve ($DATA_FILE)};
+    ($DATA_VERSION,%node_history) = @{retrieve ($DATA_FILE)};
 }
 
 sub log_check_for_closed_hosts()
 {
     INFO("Checking for newly closed hosts ...\n");
     INFO("--> assuming SLURM batch system\n");
+
+    # LOCK on READ  --------------------------------------
+
+    logger_get_lock();	     
 
     log_read_state_1_0();
 
@@ -181,6 +210,7 @@ sub log_check_for_closed_hosts()
     close(INFILE);
     unlink($tmpfile);
 
+    logger_release_lock();	     
 }
 
 sub log_dump_entry_1_0 
@@ -213,8 +243,9 @@ sub log_dump_entry_1_0
 
 sub log_dump_state_1_0
 {
-
+    logger_get_lock();
     log_read_state_1_0();
+    logger_release_lock();
 
     # check if specific host requested?
 
