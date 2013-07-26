@@ -1710,11 +1710,28 @@ switch ($command) {
     }
 
     case "hlog" {
+
+	logger_get_lock();
+	log_read_state_1_0();
+	logger_release_lock();
+
 	if( $argument ne '') {
 	    log_dump_state_1_0($argument);
 	} else {
 	    log_dump_state_1_0();
 	}
+    }
+
+    case "hverify" {
+	if( $argument ne '') {
+	    sanitize_entries_1_0($argument);
+	} else {
+	    sanitize_entries_1_0();
+	}
+    }
+
+    case "hingest" {
+	log_ingest_raw_data()
     }
 
     case "hcheck" {
