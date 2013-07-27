@@ -29,18 +29,18 @@ use File::Temp qw/tempfile/;
 use strict;
 use warnings;
 
-my %node_history       = ();
+my %node_history        = ();
 my $DATA_VERSION        = "";
 my $HOST_ENTRY_SIZE_1_0 = 5;
+my $isLocked            = 0;
 
 
 my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
 ###my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data.test2";
-###my $DATA_FILE ="/admin/build/admin/hpc_stack/.losf_log_data.koomie";
 
 my $LOCK_FILE ="/admin/build/admin/hpc_stack/.losf_log_data.lock";
 
-# File handle for locking coordination
+# File handle and flag for locking coordination
 
 open(my $FH_lock,">$LOCK_FILE") || MYERROR("Unable to open $LOCK_FILE");
 
@@ -94,20 +94,38 @@ sub log_add_node_event
 
     chomp($timestamp);
 
-    # we have a good record, load->update
+    # we have a good record, let's do the update. 
 
-    logger_get_lock();
+    # Important note: this subroutine has support to be called in a
+    # one-off fashion, or in batch mode to queue up lots of events.
+    # In the second case, we expect the calling routine to do a
+    # lock/read prior to the first call (and write the data when all
+    # calls are completed). Otherwise we lock locally and do the
+    # read/writes within this routine.
 
-    if ( -s $DATA_FILE ) {
-	log_read_state_1_0();
+    my $lockedLocally = 0;
+
+    if($isLocked != 1) {
+
+	DEBUG("add_node_event: loading state locally\n");
+
+	logger_get_lock();
+	$lockedLocally = 1;
+
+	if ( -s $DATA_FILE ) {
+	    log_read_state_1_0();
+	}
     }
 
-###    push @{$node_history{$host} },($timestamp,$action,$comment,$local_user,$flag);
     push @{$node_history{$host} },[$timestamp,$action,$comment,$local_user,$flag];
 
-    log_save_state_1_0();
+    if($lockedLocally == 1) {
+	DEBUG("add_node_event: saving state locally\n");
+	log_save_state_1_0();
+	logger_release_lock();
 
-    logger_release_lock();
+	$lockedLocally = 0;
+    }
 }
 
 sub log_save_state_1_0
@@ -120,11 +138,23 @@ sub log_save_state_1_0
 }
 
 sub logger_get_lock {
-    flock($FH_lock,LOCK_EX)  || MYERROR("Unable to get exclusive lock");
+
+    # a NOOP if we are already locked
+
+    if($isLocked != 1)  {
+	DEBUG("LOGGER: locking....\n");
+	flock($FH_lock,LOCK_EX)  || MYERROR("Unable to get exclusive lock");
+	$isLocked = 1;
+    } 
 }
 
 sub logger_release_lock {
-    flock($FH_lock,LOCK_UN)  || MYERROR("Unable to release exclusive lock");
+
+    if($isLocked != 0) {
+	DEBUG("LOGGER: unlocking....\n");
+	flock($FH_lock,LOCK_UN)  || MYERROR("Unable to release exclusive lock");
+	$isLocked = 0;
+    }
 }
 
 sub log_read_state_1_0
@@ -152,10 +182,13 @@ sub log_check_for_closed_hosts()
 
     DEBUG("--> tmpfile = $tmpfile\n");
 
-    my $cmd="sinfo -h -R --format=\"%n %H %u \\\"%E\\\"\"> $tmpfile";
+    my $cmd="sinfo -h -R --format=\"%n %H %u \\\"%E\\\"\" | sort -u > $tmpfile";
 
     DEBUG("--> query command = $cmd\n");
     system($cmd);
+
+###    print "$cmd\n";
+###    exit 1;
 
     open(INFILE,"<$tmpfile") || die ("Cannot open $tmpfile: $!");
 
@@ -163,6 +196,8 @@ sub log_check_for_closed_hosts()
 
 	# example line:
         # c445-003 2013-06-25T00:35:41 root "TACC: rebooting MIC"
+
+###	print $line;
 
 	if ($line =~ m/(\S+) (\d\d\d\d-\d\d-\d\d)T(\S+) (\S+) \"(.+)\"/) {
 
@@ -172,8 +207,6 @@ sub log_check_for_closed_hosts()
 	    my $comment    = $5;
 	    my $timestamp  = "$2 $3";
 
-	    print $line;
-
 	    # check to see if we have logged this previously
 
 	    DEBUG("  --> checking on log for $host\n");
@@ -182,8 +215,8 @@ sub log_check_for_closed_hosts()
 		my @entries     = @{$node_history{$host}};
 		my $num_entries = @entries;
 
-		for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
-		    if( $entries[$count+0] eq $timestamp) {
+		for($count=0;$count<$num_entries;$count++) {
+		    if( $entries[$count][0] eq $timestamp) {
 			DEBUG("      --> Skipping duplicate timestamp....\n");
 			$dupl_entry = 1;
 			last;
@@ -196,11 +229,10 @@ sub log_check_for_closed_hosts()
 		    INFO("Adding unmatched log entry for $host\n");
 		    log_add_node_event($host,"close","$comment",CLOSE_ERROR,"$2 $3");
 		}
-###		exit 1;
 	    } else {
 		DEBUG("      --> no log entries present\n");
 	        # TACC: rebooting MIC 
-
+		
 		# we skip MIC reboots for now...
 		
 		if($comment eq "TACC: rebooting MIC") {
@@ -212,14 +244,14 @@ sub log_check_for_closed_hosts()
 		log_add_node_event($host,"close","$comment",CLOSE_ERROR,"$2 $3");
 	    }
 	}
-
     }
 
     close(INFILE);
     unlink($tmpfile);
 
-    # Release lock ------------------------------------------
+    # Write and release lock ------------------------------------------
 
+    log_save_state_1_0();
     logger_release_lock();	     
 
     # -------------------------------------------------------
@@ -227,15 +259,6 @@ sub log_check_for_closed_hosts()
 
 sub sanitize_entries_1_0
 {
-
-    # check if specific host requested?
-
-###    my $desired_host="";
-###
-###    my $remain_args = @_;
-###    if ( $remain_args == 1) {
-###	$desired_host = shift;
-###    }
 
     # Verify entries are in increasing timestamp order and verify no
     # duplicate timestamps
@@ -293,7 +316,6 @@ sub sanitize_entries_1_0
 		$changeData     = 1;
 	    } else {
 		push @list_new, $list[$count];
-###		push(@list_new,@{$list[$count]});
 	    }
 	}
 
@@ -314,34 +336,6 @@ sub sanitize_entries_1_0
     logger_release_lock();
 
 }
-
-##### sub log_dump_entry_1_0 
-##### {
-#####     my $host        = shift;
-#####     my @entries     = @_;
-#####     my $num_entries = @entries;
-##### 
-#####     my $count=0;
-#####     for($count=0;$count<$num_entries;$count+=$HOST_ENTRY_SIZE_1_0) {
-##### 
-##### 	printf("%-10s ", $host);
-##### 	my $flag="";
-##### 
-##### 	if($entries[$count+4] eq CLOSE_ERROR) {
-##### 	    $flag="X";
-##### 	}
-##### 	
-##### 	printf("%-19s ", ($entries[$count+0]));    # timestamp
-##### 	printf("%1s ",   $flag);                   # error flag
-##### 	printf("%6s ",   ($entries[$count+1]));    # state
-##### ###	printf(" %-70s ",($entries[$count+2]));    # comment
-##### 	my $padded = pack("A70",$entries[$count+2]);
-##### 	printf(" %-70s ",$padded);                 # comment
-##### 	printf("%8s",    ($entries[$count+3]));    # user
-##### 	printf("\n");
-#####     }
-#####     
-##### }
 
 sub log_dump_entry_1_0 
 {
@@ -401,7 +395,7 @@ sub log_dump_state_1_0
     if($desired_host ne "" ) {
 	log_dump_entry_1_0($desired_host,@{$node_history{$desired_host}} );
     } else  {
-	for my $key (keys %node_history) {
+	for my $key (sort { $a cmp $b} keys %node_history) {
 	    log_dump_entry_1_0($key,@{$node_history{$key}} );
 	}
     }

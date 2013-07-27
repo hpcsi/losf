@@ -1764,7 +1764,7 @@ switch ($command) {
 	    log_add_node_event($argument,"close","$comment",$state);
 	}
 
-    }
+    }				# end hclose
 
     case "hopen" {
 	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hopen command");}
