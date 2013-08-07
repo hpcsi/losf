@@ -45,18 +45,21 @@ BEGIN {
 
 	begin_routine();
 
-	# return direcly if we have already been called previously
-
-	if ($osf_init_global_config == 1) {
-	    end_routine();
-	    return ($node_cluster,$node_type);
-	}	    
-
 	my $host   = shift;
 	my $domain = shift;
 	my $logr   = get_logger();
 	my $found  = 0;
 
+	# return direcly if we have already been called previously with this
+
+	# karl TODO: cannot return below in losf add host; figure out why...
+
+###	if ($osf_init_global_config == 1) {
+###	    print "uh oh koomie\n";
+###	    end_routine();
+###	    return ($node_cluster,$node_type);
+###	}	    
+###
 	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
 	foreach(@Clusters) {
