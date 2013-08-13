@@ -1,6 +1,7 @@
 
 Version 0.42.0  (In Progress)
 
+  * add option to disable update on specific host (via /root/losf-noupdate file)
   * add input file option to provide system-specific configuration
     option (config_dir); the global value can also be customized on a
     per-host basis using regular expressions

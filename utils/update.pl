@@ -64,6 +64,14 @@ sub usage {
 my $logr = get_logger();
 ###$logr->level($INFO);
 
+# Check for update skip request
+
+if ( -e "/root/losf-noupdate" ) {
+    chomp(my $host_name=`hostname -s`);
+    ERROR("Skipping update request on $host_name -> remove /root/losf-noupdate to re-enable.\n");
+    exit(0);
+}
+
 # Allow for alternate RPM source paths
 
 my $alt_rpm;
