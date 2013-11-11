@@ -160,9 +160,11 @@ sub verify_rpms {
 
 	if( @installed_rpm == 0 ) {
 	    DEBUG("   --> $rpm is not installed - registering for add...\n");
+	    SYSLOG("Registering previously uninstalled $full_rpm_name for update");
 	    push(@rpms_to_install,$filename);
 	} elsif( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]") {
 	    DEBUG("   --> version mismatch - registering for update...\n");
+	    SYSLOG("Registering locally installed OS package $full_rpm_name for update");
 	    push(@rpms_to_install,$filename);
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
