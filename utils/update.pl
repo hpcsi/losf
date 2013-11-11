@@ -158,7 +158,7 @@ if ( -x $custom_file ) {
     INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
 
     TRACE("Running cmd $custom_file\n");
-    system($custom_file);
+    system("$custom_file $node_type");
     
 }
 
