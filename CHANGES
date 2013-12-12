@@ -57,5 +57,6 @@ Versions prior to 0.30.0 (2007 thru 2009)
   * 3rd party RPM versioning control
   * OS distro package management
   * basic kernel and boot management
+  * designation of alternate cluster node types via hostname regex
   * support for single-cluster configuration only
   
