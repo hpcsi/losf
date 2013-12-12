@@ -859,7 +859,7 @@ BEGIN {
 	    DEBUG("   --> Read kickstart   = $myval\n");
 	    $kickstart = $myval;
 	} else {
-	    MYERROR("Kickstart file not defined for node type $host_type - plesae update config.\n");
+	    MYERROR("Kickstart file not defined for node type $host_type - please update config.\n");
 	}
 	
 	$osf_init_sync_kickstarts=1;
@@ -889,7 +889,7 @@ BEGIN {
 	    DEBUG("   --> Read profile   = $myval\n");
 	    $profile = $myval;
 	} else {
-	    MYERROR("OS profile not defined for node type $host_type - plesae update config.\n");
+	    MYERROR("OS profile not defined for node type $host_type - please update config.\n");
 	}
 	
 	end_routine();
@@ -918,7 +918,7 @@ BEGIN {
 	    DEBUG("   --> Read name-server   = $myval\n");
 	    $value = $myval;
 	} else {
-	    MYERROR("Name server not defined for node type $host_type - plesae update config.\n");
+	    MYERROR("Name server not defined for node type $host_type - please update config.\n");
 	}
 	
 	end_routine();
@@ -947,7 +947,7 @@ BEGIN {
 	    DEBUG("   --> Read name-server search  = $myval\n");
 	    $value = $myval;
 	} else {
-	    MYERROR("Name server search not defined for node type $host_type - plesae update config.\n");
+	    MYERROR("Name server search not defined for node type $host_type - please update config.\n");
 	}
 	
 	end_routine();
@@ -977,7 +977,7 @@ BEGIN {
 	    DEBUG("   --> Read kernel boot option  = $myval\n");
 	    $value = $myval;
 	} else {
-	    DEBUG("No kernel boot options provided for node type $host_type - plesae update config.\n");
+	    DEBUG("No kernel boot options provided for node type $host_type - please update config.\n");
 	}
 	
 	end_routine();
@@ -1007,7 +1007,7 @@ BEGIN {
 	    DEBUG("   --> Read kernel boot option  = $myval\n");
 	    $value = $myval;
 	} else {
-	    DEBUG("No kernel boot options provided for node type $host_type - plesae update config.\n");
+	    DEBUG("No kernel boot options provided for node type $host_type - please update config.\n");
 	}
 	
 	end_routine();
