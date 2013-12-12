@@ -1,5 +1,5 @@
 
-Version 0.42.0  (In Progress)
+Version 0.42.0  (12 December 2013)
 
   * add option to disable update on specific host (via /root/losf-noupdate file)
   * add input file option to provide system-specific configuration
