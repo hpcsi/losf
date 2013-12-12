@@ -42,7 +42,7 @@ my $LOCK_FILE ="/admin/build/admin/hpc_stack/.losf_log_data.lock";
 
 # File handle and flag for locking coordination
 
-open(my $FH_lock,">$LOCK_FILE") || MYERROR("Unable to open $LOCK_FILE");
+###open(my $FH_lock,">$LOCK_FILE") || MYERROR("Unable to open $LOCK_FILE");
 
 use constant {
     OPEN_PROD       => 0,
@@ -143,6 +143,7 @@ sub logger_get_lock {
 
     if($isLocked != 1)  {
 	DEBUG("LOGGER: locking....\n");
+	open(my $FH_lock,">$LOCK_FILE") || MYERROR("Unable to open $LOCK_FILE");
 	flock($FH_lock,LOCK_EX)  || MYERROR("Unable to get exclusive lock");
 	$isLocked = 1;
     } 
@@ -152,6 +153,7 @@ sub logger_release_lock {
 
     if($isLocked != 0) {
 	DEBUG("LOGGER: unlocking....\n");
+	open(my $FH_lock,">$LOCK_FILE") || MYERROR("Unable to open $LOCK_FILE");
 	flock($FH_lock,LOCK_UN)  || MYERROR("Unable to release exclusive lock");
 	$isLocked = 0;
     }
