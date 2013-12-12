@@ -10,11 +10,6 @@ if [ $# -lt 1 ];then
     exit 1
 fi
 
-
-#echo
-#echo "cmd: ipmitool -I lan -H $1 -U root chassis bootdev pxe"
-#echo
-
 # Get password if necessary
 
 if [ ! $IPMI_PASSWORD ]; then

@@ -1,22 +1,18 @@
 #!/bin/bash
 
-#echo
-#echo "cmd: ipmitool -I lan -H $1 -U root chassis power reset"
-#echo
+if [ ! $IPMI_PASSWORD ]; then
+    stty -echo
+    read -p "Password: " passw; echo
+    stty echo
+    echo
 
-if [ ! $IPMI_PASSWORD ]
-then
-stty -echo
-read -p "Password: " passw; echo
-stty echo
-echo
-
-/usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis power soft
-echo
+    /usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis power soft
+    echo
 fi
 
 # ks mod: 4/28/08 - allow for multiple command-line hosts
 # 
+
 NUM_HOSTS=$#
 
 if [ $IPMI_PASSWORD ]; then
