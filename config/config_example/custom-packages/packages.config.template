@@ -10,6 +10,19 @@
 # any custom built RPMs to your cluster.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-#
+
+# Package aliases - these are used to group like packages (or specific
+# revisions) together
+
+[Custom Packages/Aliases]
+
+# Packages to uninsall
+
+[Custom Packages/uninstall]
+
+# Custom 3rd party packages (can use aliases to expand groups of
+# packages)
+
 [Custom Packages]
+
 # end of Custom Packages
