@@ -46,6 +46,7 @@ use history_utils;
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
+use File::Path;
 use Term::ANSIColor;
 use Getopt::Long;
 
@@ -577,14 +578,15 @@ sub update_custom_config {
     if ( compare($new_file,$ref_file) != 0 ) {
 	
 	if ( ! -d "$hist_dir") {
-	    mkdir("$hist_dir",0700);
+	    mkpath("$hist_dir") || MYERROR("Unable to create path $hist_dir");
 	}
 
 	my $timestamp=`date +%F:%H:%M`;
 	chomp($timestamp);
 	print "   --> Updating Custom RPM config file...\n";
+
 	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
-	    MYERROR("Unable to save previous OS config file\n");
+	    MYERROR("Unable to save previous Custom RPM config file\n");
 	rename($new_file,$ref_file)                 || 
 	    MYERROR("Unaable to update Custom RPM config file\n");
 	print "Copy of original configuration file stored in $hist_dir....\n";
@@ -775,7 +777,7 @@ sub update_distro_packages {
     if ( compare($new_file,$ref_file) != 0 ) {
 
 	if ( ! -d "$hist_dir") {
-	    mkdir("$hist_dir",0700);
+	    mkpath("$hist_dir") || MYERROR("Unable to create path $hist_dir");
 	}
 
 	my $timestamp=`date +%F:%H:%M`;
@@ -927,8 +929,17 @@ sub add_distro_package {
 
 		# Stage downloaded RPM files into LosF repository
 
+		print "try to copy to $rpm_topdir/$rpm_arch\n";
+		
 		my $basename = basename($file);
+
 		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
+
+		    # verify path exists..
+		    if ( ! -d "$rpm_topdir/$rpm_arch" ) {
+			mkpath("$rpm_topdir/$rpm_arch") || MYERROR("Unable to create path $rpm_topdir/$rpm_arch");	
+		    }
+
 		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
 		    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
 		}
@@ -940,7 +951,7 @@ sub add_distro_package {
 
 	my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
 	my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-	my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions/packages.config";
+	my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -949,13 +960,15 @@ sub add_distro_package {
 
 	if ( compare($new_file,$ref_file) != 0 ) {
 
-	    if ( ! -d "$hist_dir") {
-		mkdir("$hist_dir",0700);
+	    if ( ! -d $hist_dir ) {
+		mkpath($hist_dir) || MYERROR("Unable to create path $hist_dir");
 	    }
 
 	    my $timestamp=`date +%F:%H:%M`;
 	    chomp($timestamp);
 	    print "   --> Updating OS config file...\n";
+	    print "hist_dir = $hist_dir\n";
+	    print "saving to $hist_dir\n";
 	    rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous OS config file\n");
 	    rename($new_file,$ref_file)                 || MYERROR("Unaable to update OS config file\n");
 	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
@@ -1124,7 +1137,7 @@ sub add_distro_group {
 	if ( compare($new_file,$ref_file) != 0 ) {
 
 	    if ( ! -d "$hist_dir") {
-		mkdir("$hist_dir",0700);
+		mkpath("$hist_dir") || MYERROR("Unable to create path $hist_dir");
 	    }
 
 	    my $timestamp=`date +%F:%H:%M`;
@@ -1436,7 +1449,7 @@ sub add_custom_rpm {
     if ( compare($new_file,$ref_file) != 0 ) {
 
 	if ( ! -d "$hist_dir") {
-	    mkdir("$hist_dir",0700);
+	    mkpath("$hist_dir") || MYERROR("Unable to create path $hist_dir");
 	}
 
 	my $timestamp=`date +%F:%H:%M`;
@@ -1532,7 +1545,7 @@ sub register_alias {
     if ( compare($new_file,$ref_file) != 0 ) {
 
 	if ( ! -d "$hist_dir") {
-	    mkdir("$hist_dir",0700);
+	    mkpath("$hist_dir") || MYERROR("Unable to create path $hist_dir");
 	}
 
 	my $timestamp=`date +%F:%H:%M`;
@@ -1588,7 +1601,7 @@ sub update_losf_config_file {
     if ( compare($new_file,$ref_file) != 0 ) {
 	
 	if ( ! -d "$hist_dir") {
-	    mkdir("$hist_dir",0700);
+	    mkpath("$hist_dir") || MYERROR("Unable to create path $hist_dir");
 	}
 	
 	my $timestamp=`date +%F:%H:%M`;
