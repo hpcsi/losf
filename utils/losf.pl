@@ -929,8 +929,6 @@ sub add_distro_package {
 
 		# Stage downloaded RPM files into LosF repository
 
-		print "try to copy to $rpm_topdir/$rpm_arch\n";
-		
 		my $basename = basename($file);
 
 		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
