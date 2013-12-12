@@ -1023,8 +1023,8 @@ BEGIN {
 	my $dir       = "";
 
 	if ( $global_cfg->exists($node_cluster,"config_dir") ) {
-	    DEBUG("   --> global config_dir specified in config.machines\n");
 	    $dir = $global_cfg->val($node_cluster,"config_dir");
+	    DEBUG("   --> global config_dir specified in config.machines ($dir)\n");
 	}
 
 	# Now, check for possible custom host-specific override
