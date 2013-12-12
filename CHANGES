@@ -54,6 +54,7 @@ Version 0.30.0 (23 October 2009)
 Versions prior to 0.30.0 (2007 thru 2009)
 
   * initial config management via Bash utilities
-  * RPM versioning control
+  * 3rd party RPM versioning control
+  * OS distro package management
   * support for single-cluster configuration only
   
