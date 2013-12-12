@@ -56,5 +56,6 @@ Versions prior to 0.30.0 (2007 thru 2009)
   * initial config management via Bash utilities
   * 3rd party RPM versioning control
   * OS distro package management
+  * basic kernel and boot management
   * support for single-cluster configuration only
   
