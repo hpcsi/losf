@@ -221,9 +221,9 @@ sub add_node  {
     my $dns_options        = query_cluster_config_dns_options         ($node_cluster,$node_type);
 
     print "\n";
-    print "   --> Kickstart      = $kickstart\n";
-    print "   --> Profile        = $profile\n";
-    print "   --> Name Server    = $name_server (search = $name_server_search)\n";
+    print "   --> Kickstart         = $kickstart\n";
+    print "   --> Profile           = $profile\n";
+    print "   --> Name Server       = $name_server (search = $name_server_search)\n";
 
     my $kopts    = "";
     my $dns_opts = "";
@@ -239,10 +239,10 @@ sub add_node  {
     }
 
     if ($dns_options eq "yes" ) {
-	print "   --> DNS enabled    = yes ($host.$domain_name on first defined interface)\n";
+	print "   --> DNS enabled       = yes ($host.$domain_name on first defined interface)\n";
 	$dns_opts = "--dns=$host.$domain_name";
     } else {
-	print "   --> DNS enabled     = no\n";
+	print "   --> DNS enabled       = no\n";
     }
 
     $cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
