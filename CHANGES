@@ -1,3 +1,8 @@
+Version 0.43.0 (In Progress)
+
+  * example top-level LosF config file provided in config/config.machines.example
+  * example cluster-specific configuration file provided in config/config.Bar
+  * transitioned SCM from svn to git
 
 Version 0.42.0  (12 December 2013)
 
