@@ -965,8 +965,6 @@ sub add_distro_package {
 	    my $timestamp=`date +%F:%H:%M`;
 	    chomp($timestamp);
 	    print "   --> Updating OS config file...\n";
-	    print "hist_dir = $hist_dir\n";
-	    print "saving to $hist_dir\n";
 	    rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous OS config file\n");
 	    rename($new_file,$ref_file)                 || MYERROR("Unaable to update OS config file\n");
 	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
