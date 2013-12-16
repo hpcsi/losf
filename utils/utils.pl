@@ -255,17 +255,6 @@ sub end_routine {
     DEBUG("\n");
 }
 
-sub print_var_stdout {
-    begin_routine();
-    
-    my $var = shift;
-    my $val = shift;
-
-    print "<TACC-LOSF>$var=$val\n";
-
-    end_routine();
-}
-
 sub expand_text_macros {
     begin_routine();
 
