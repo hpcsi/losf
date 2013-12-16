@@ -1,6 +1,8 @@
 #!/bin/bash
 
-TOP_LEVEL_UTILS="losf node_types rpm_topdir sync_config_files update update.sh update_hosts"
+# Simple convenience utility to update headers.
+
+TOP_LEVEL_UTILS="losf node_types rpm_topdir sync_config_files update update update_hosts"
 
 for i in $TOP_LEVEL_UTILS ; do
     ./update_license.pl ../LICENSE ../$i

@@ -1,25 +1,33 @@
 # -*-sh-*-
 #!/bin/bash
-#----------------------------------------------------------------------
-# LosF Software Updates
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
 # 
+# LosF - a Linux operating system Framework for HPC clusters
+#
+# Copyright (C) 2007-2013 Karl W. Schulz
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
 # Utility to update individual cluster node types to latest production
 # revision (or verify that a node is already in sync).
 #
 # $Id$
-#----------------------------------------------------------------------
-#
-#
-# Node type definitions are controlled via the LosF input files
-# located in the top-level config/ directory.  To customize your
-# cluster, you will want to create an update.<your-cluster-name> file
-# to define desired RPM packages for each of your node definitions.  A
-# template file is provided in update.template.
-#
-# Questions/Problems?: karl@tacc.utexas.edu
-# Texas Advanced Computing Center 
-#----------------------------------------------------------------------
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
 
 # Command-line Inputs
 
