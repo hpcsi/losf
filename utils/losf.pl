@@ -63,8 +63,10 @@ sub usage {
     print "  Host Registration:\n";
     print color 'reset';
 
-    print "     add [host]                  Register a new host for provisioning\n";
-    print "     del [host]                  Delete an existing host\n";
+    print "     add      [host]              Register a new host for provisioning\n";
+    print "     del      [host]              Delete an existing host\n";
+    print "     reinsert [host]              Reinsert an existing host\n";
+    print "     sync                         Sync host provisioning config with Cobbler\n";
     print "\n";
 
     print color 'bold blue';
@@ -282,7 +284,51 @@ sub del_node {
     $cmd="cobbler system remove --name=$host";
 
     `$cmd`;
+}
 
+sub reinsert_node {
+    my $host = shift;
+
+    del_node($host);
+    add_node($host);
+}
+
+sub sync {
+    INFO("\n** Syncing provisioning config with Cobbler...\n");
+
+    $cmd="cobbler sync";
+    ($fh,$filename) = tempfile();
+
+    system("$cmd 1> $filename 2>&1");
+
+    my $cmd_return=$?;
+
+    if ( $cmd_return != 0 ) {
+	ERROR("\n--> Error running sync!\n");
+	ERROR("--> Please verify that you are running on a valid Cobbler provisioning host.\n");
+	if ( -s $filename ) {
+	    ERROR("--> Output from $cmd:\n\n");
+	    open ($fh,"<$filename") || MYERROR("Cannot open sync output file ($filename)\n");
+	    while ($line = <$fh>) {
+		ERROR($line);
+	    }
+	    ERROR("\n");
+	    close($fh);
+	}
+    } else {
+
+	INFO("--> sync successful\n");
+
+	$cmd="cobbler system list | wc -l";
+	my $result = `$cmd`;
+	my $cmd_return2 = $?;
+
+	if($cmd_return2 == 0) {
+	    INFO("--> number of hosts currently registered = $result\n");
+	}
+    }
+
+    unlink($filename);
 }
 
 sub update_os_config {
@@ -1665,10 +1711,12 @@ switch ($command) {
 
     # Do the deed
     
-    case "add"            { add_node($argument) };
-    case "del"            { del_node($argument) };
-    case "delete"         { del_node($argument) };
-		          
+    case "add"            { add_node     ($argument) };
+    case "del"            { del_node     ($argument) };
+    case "delete"         { del_node     ($argument) };
+    case "reinsert"       { reinsert_node($argument) };
+    case "sync"           { sync         ()          };
+
     case "addpkg"         { add_distro_package($argument)     };
     case "addgroup"       { add_distro_group  ($argument)     };
     case "showalias"      { show_defined_aliases()            };
