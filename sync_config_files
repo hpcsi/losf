@@ -28,15 +28,18 @@
 #--------------------------------------------------------------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
-export PERL5LIB=$TOP_DIR/utils
+
+if [  -z $PERL5LIB ];then
+    export PERL5LIB=$TOP_DIR/utils
+else
+    export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
+fi
 
 if [ $# -eq 0 ];then
     $TOP_DIR/utils/sync_config.pl
 elif [ $# -eq 1 ];then
     $TOP_DIR/utils/sync_named_file.pl $1
-#    echo "??"
 else
-#    echo "[Warn]: Ignoring extra command-line arguments"
     echo " "
     echo "Usage: sync_config_files <individual-file>"
     echo " "

@@ -33,7 +33,11 @@ else
     export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 fi
 
-export PERL5LIB=$TOP_DIR/utils
+if [  -z $PERL5LIB ];then
+    export PERL5LIB=$TOP_DIR/utils
+else
+    export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
+fi
 
 if [ ! -e $TOP_DIR/utils/update_hosts.pl ]; then
     echo "[Error]: unable to locate update_hosts.pl"]

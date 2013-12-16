@@ -29,7 +29,12 @@
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
 
-export PERL5LIB=$TOP_DIR/utils
+if [  -z $PERL5LIB ];then
+    export PERL5LIB=$TOP_DIR/utils
+else
+    export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
+fi
+
 export LOSF_LOG_MODE="INFO"
 
 $TOP_DIR/utils/node_types.pl

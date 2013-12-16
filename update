@@ -39,7 +39,13 @@ export UPDATE_RPMS=1
 # End Inputs -------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
-export PERL5LIB=$TOP_DIR/utils
+
+if [  -z $PERL5LIB ];then
+    export PERL5LIB=$TOP_DIR/utils
+else
+    export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
+fi
+
 export MYHOST=`hostname -s`
 
 usage()
