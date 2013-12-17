@@ -1,7 +1,8 @@
 Version 0.43.0 (In Progress)
 
+  * added -v options to losf and update utilities to provide versioning info
   * addition of "losf sync" command which synchronizes host provisioning config with Cobbler
-  * addition of "losf reinsert [host]" (a convenience command for del/add combinations)
+  * addition of "losf reinsert [host]" (a convenience command to perform del/add combinations)
   * example top-level LosF config file provided in config/config.machines.example
   * example cluster-specific configuration file provided in config/config.Bar
   * transitioned SCM from subversion to git 
