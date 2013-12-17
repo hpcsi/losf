@@ -52,10 +52,6 @@ rpm_build_dir = /work/build/rpms/RPMS
 
 domainname      = bar|bar.yourdomain.com
 
-# Define location of your local LosF config directory
-
-config_dir      = /admin/losf/config
-
 # Define unique node types via hostname regular expressions
 
 master          = master
