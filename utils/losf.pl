@@ -59,16 +59,16 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
-    print "     version, --version           Print version number and exit\n\n";
+    print "     version, --version                   Print version number and exit\n\n";
 
     print color 'bold blue';
     print "  Host Registration:\n";
     print color 'reset';
 
-    print "     add      [host]              Register a new host for provisioning\n";
-    print "     del      [host]              Delete an existing host\n";
-    print "     reinsert [host]              Reinsert an existing host\n";
-    print "     sync                         Sync host provisioning config with Cobbler\n";
+    print "     add      [host]                      Register a new host for provisioning\n";
+    print "     del      [host]                      Delete an existing host\n";
+    print "     reinsert [host]                      Reinsert an existing host\n";
+    print "     sync                                 Sync host provisioning config with Cobbler\n";
     print "\n";
 
     print color 'bold blue';
@@ -79,12 +79,12 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
 
-    print "     addpkg     [package]         Add new OS package (and dependencies)\n";
-    print "     delpkg     [package]         Remove previously added OS package\n";
-    print "     addgroup   [ group ]         Add new OS group (and dependencies)\n";
-    print "     updatepkg  [package]         Update specific OS packages (and dependencies)\n";
-    print "     config-upgrade               Upgrade existing packages.config to latest configuration format\n";
-    print "     updatepkgs                   Update all local OS packages (and dependencies)\n";
+    print "     addpkg     [package]                 Add new OS package (and dependencies)\n";
+    print "     delpkg     [package]                 Remove previously added OS package\n";
+    print "     addgroup   [ group ]                 Add new OS group (and dependencies)\n";
+    print "     updatepkg  [package]                 Update specific OS packages (and dependencies)\n";
+    print "     updatepkgs                           Update all local OS packages (and dependencies)\n";
+    print "     config-upgrade                       Upgrade existing packages.config to latest syntax format\n";
 
     print "\n";
 
@@ -96,8 +96,8 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
 
-    print "     addrpm    <OPTIONS> [rpm]   Add a new custom RPM for current node type\n";
-    print "     showalias                   Show all currently defined aliases\n";
+    print "     addrpm    <OPTIONS> [rpm]            Add a new custom RPM for current node type\n";
+    print "     showalias                            Show all currently defined aliases\n";
     print "\n";
     print "     OPTIONS:\n";
     print "        --all                             Add rpm for all node types\n";
@@ -113,8 +113,8 @@ sub usage {
     print "  Batch System Interaction:\n";
     print color 'reset';
 
-    print "     These commands provide administrative interaction with the locally\n";
-    print "     defined batch system:\n";
+    print "     These commands provide administrative interaction with the\n";
+    print "     locally defined batch system:\n";
     print "\n";
     print "     qclose   [name|all]                  Close specified queue (or all queues)\n";
     print "     qopen    [name|all]                  Open  specified queue (or all queues)\n";
