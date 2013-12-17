@@ -21,11 +21,8 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
-# Utility Functions for syncing small configuration files, 
+# Utility functions for syncing small configuration files, 
 # symbolic links, and other chkconfig services.
-#
-# $Id$
 #--------------------------------------------------------------------------
 
 use strict;

@@ -21,11 +21,8 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
 # Top-level update utility: used to synchronize all packages and
 # config files for local node type.
-#
-# $Id$
 #--------------------------------------------------------------------------
 
 use strict;

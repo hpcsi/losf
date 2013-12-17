@@ -36,9 +36,7 @@ my $isLocked            = 0;
 
 
 my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data";
-###my $DATA_FILE="/admin/build/admin/hpc_stack/.losf_log_data.test2";
-
-my $LOCK_FILE ="/admin/build/admin/hpc_stack/.losf_log_data.lock";
+my $LOCK_FILE="/admin/build/admin/hpc_stack/.losf_log_data.lock";
 
 # File handle and flag for locking coordination
 
