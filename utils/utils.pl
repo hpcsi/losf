@@ -24,7 +24,6 @@
 # Various support utility functions
 #--------------------------------------------------------------------------
 
-#package utils;
 use LosF_paths;
 use base 'Exporter';
 use lib "$osf_log4perl_dir";
@@ -36,9 +35,6 @@ use Switch;
 use vars qw($losf_const_updated     $losf_const_total);
 use vars qw($losf_softlinks_updated $losf_softlinks_total);
 use vars qw($losf_services_updated  $losf_services_total);
-
-#@EXPORT = qw(verify_sw_dependencies
-#	     get_logger);
 
 sub verify_sw_dependencies {
     verify_log4perl_availability();
