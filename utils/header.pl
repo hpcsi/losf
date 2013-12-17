@@ -27,17 +27,24 @@
 # $Id$
 #--------------------------------------------------------------------------
 
-my $VERSION="0.43.0";
-my $PKGNAME="Linux OSF";
-
 sub print_header {
 
-    my $width = 50;
+    my $width = 23;
     my $logr  = get_logger();
+    my $ver   = "";
+
+    if ( ! -e "$osf_utils_dir/VERSION" ) {
+	MYERROR("Unable to obtain version...please verify local LosF install");
+    } else {
+	open ($IN,"<$osf_utils_dir/VERSION") || MYERROR("Unable to open VERSION file");
+	$ver = <$IN>;
+	chomp($ver);
+	close($IN);
+    }
 
     INFO("\n");
     INFO("-"x $width . "\n");
-    INFO("TACC $PKGNAME: Version = $VERSION\n");
+    INFO("LosF: Version $ver\n");
     INFO("-"x $width . "\n");
     INFO("\n");
 }

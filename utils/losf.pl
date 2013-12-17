@@ -59,6 +59,8 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
+    print "     version, --version           Print version number and exit\n\n";
+
     print color 'bold blue';
     print "  Host Registration:\n";
     print color 'reset';
@@ -1682,9 +1684,17 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 	   "date=s"        => \$datestring,
 	   "nocertify"     => \$nocertify,
 	   "logonly"       => \$logonly,
+	   "version"       => \$version,
 	   "noerror"       => \$noerror) || usage();
 
+
+
 # Command-line parsing
+
+if ($version) {
+    print_header();
+    exit(0);
+}
 
 if (@ARGV >= 1) {
     $command  = shift@ARGV;
@@ -1710,12 +1720,13 @@ $logr->level($INFO);
 switch ($command) {
 
     # Do the deed
-    
+
     case "add"            { add_node     ($argument) };
     case "del"            { del_node     ($argument) };
     case "delete"         { del_node     ($argument) };
     case "reinsert"       { reinsert_node($argument) };
     case "sync"           { sync         ()          };
+    case "version"        { print_header ()          };
 
     case "addpkg"         { add_distro_package($argument)     };
     case "addgroup"       { add_distro_group  ($argument)     };
