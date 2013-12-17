@@ -21,15 +21,9 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-# Node provisioning registration utility.  Presently intended for use with
-# cobbler.  
-#
-# Originally: 12/25/10
-# 
-# Questions? karl@tacc.utexas.edu
-#
-# $Id$
-#-------------------------------------------------------------------
+# Package management, logging, and node provisioning registration
+# utility.  Presently intended for use with cobbler.
+#--------------------------------------------------------------------------
 use warnings;
 use Switch;
 use LosF_paths;

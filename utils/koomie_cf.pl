@@ -21,8 +21,9 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-# Lineage dates back to forking script from the great Bill Jones @ TACC
-#--------------------------------------------------------------------------
+# Parallel ssh tool. Lineage dates back to forking script from the
+# great Bill Jones @ TACC
+# --------------------------------------------------------------------------
 
 use POSIX;
 require "getopts.pl";

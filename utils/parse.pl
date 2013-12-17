@@ -24,9 +24,7 @@
 #
 # Input File Parsing Utilities: Used to query specific variables
 # from .ini style configuration files.
-#
-# $Id$
-#-------------------------------------------------------------------
+#--------------------------------------------------------------------------
 
 use Config::IniFiles;
 

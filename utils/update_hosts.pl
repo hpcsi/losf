@@ -21,10 +21,7 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
-# Utility functions for populating master /etc/hosts file
-#
-# $Id$
+# Utility functions for populating a master /etc/hosts file 
 #--------------------------------------------------------------------------
 
 # $Id$

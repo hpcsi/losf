@@ -21,10 +21,7 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
 # Sync desired Custom RPMs.
-#
-# $Id$
 #--------------------------------------------------------------------------
 
 use strict;
@@ -42,12 +39,6 @@ use lib "$osf_utils_dir";
 use LosF_node_types;
 use LosF_utils;
 
-#require "$osf_utils_dir/utils.pl";
-#require "$osf_utils_dir/parse.pl";
-#require "$osf_utils_dir/header.pl";
-#require "$osf_utils_dir/sync_config_utils.pl";
-
-print "hello koomie\n";
 #parse_and_sync_custom_packages();
 
 1;
