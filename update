@@ -24,8 +24,6 @@
 #-----------------------------------------------------------------------el-
 # Utility to update individual cluster node types to latest production
 # revision (or verify that a node is already in sync).
-#
-# $Id$
 #-------------------------------------------------------------------------
 
 

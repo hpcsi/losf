@@ -21,10 +21,7 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
-# Wrapper for losf node provisioning utility.
-#
-# $Id$
+# Wrapper for losf utility.
 #--------------------------------------------------------------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
