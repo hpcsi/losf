@@ -62,14 +62,14 @@ usage()
     -h          Show help message.
     -q          Quiet logging mode; shows detected system changes only.
     -p [path]   Override configured RPM source directory to prefer provided path instead.
-
+    -v          Print version number and exit.
 
 EOF
 }
 
 RPM_OVERRIDE=
 
-while getopts "hqp:" OPTION
+while getopts "hqvp:" OPTION
 do
     case $OPTION in
 	h)
@@ -81,6 +81,23 @@ do
 	    ;;
 	q)
 	    export LOSF_LOG_MODE=ERROR
+	    ;;
+	v)
+	    if [ ! -s $TOP_DIR/utils/VERSION ];then
+		echo " "
+		echo "[ERROR]: Unable to obtain version...please verify local LosF install"
+		echo " "
+		exit 1
+	    else
+		version=`cat $TOP_DIR/utils/VERSION`
+		echo " "
+		echo "-----------------------"
+		echo "LosF: Version $version"
+		echo "-----------------------"
+		echo " "
+	    fi
+
+	    exit 0
 	    ;;
 	?)
 	    usage
@@ -95,7 +112,5 @@ done
 
 $TOP_DIR/utils/update.pl $RPM_OVERRIDE
 
-#	q)
-#	    export TACC_LOG_MODE=ERROR
-#	    ;;
+
 
