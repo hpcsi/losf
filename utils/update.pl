@@ -111,6 +111,8 @@ our $losf_permissions_total       = 0;
 
 # Check for any necessary updates
 
+INFO("** Config dir -> $osf_config_dir\n");
+
 parse_and_uninstall_os_packages();
 parse_and_uninstall_custom_packages();
 
