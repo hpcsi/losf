@@ -1,0 +1,26 @@
+
+-------------------------------------------------------------------
+LosF: A Linux operating system Framework for managing HPC clusters
+-------------------------------------------------------------------
+
+LosF is presently designed to work with Cobbler
+(http://www.cobblerd.org), which is used to perform bare-metal
+provisioning. If you want to use LosF to manage the Cobbler
+provisioning mechanism, you will need to identify at least one master
+host on your cluster to serve as the provisioning server. If your
+master server has external network access, you can download the
+necessary packages to setup Cobbler from the EPEL repository
+(https://fedoraproject.org/wiki/EPEL). There are many resources
+available online regarding EPEL, a quickstart method which works with
+CentOS distributions is as follows:
+
+1. Register your master server with EPEL
+
+$ yum install cobbler
+$ yum install yum-plugin-downloadonly
+
+
+LosF Requirements:
+
+$ yum install perl-Log-Log4perl
+$ yum install perl-Config-IniFiles
