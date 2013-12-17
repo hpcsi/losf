@@ -21,10 +21,7 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
 # Wrapper for querying local node type -> echo's config to stdout
-#
-# $Id$
 #--------------------------------------------------------------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`

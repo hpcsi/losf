@@ -21,10 +21,7 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
-# Wrapper for file syncing utilitity.
-#
-# $Id$
+# Wrapper for file syncing utility.
 #--------------------------------------------------------------------------
 
 export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
