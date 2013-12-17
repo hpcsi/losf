@@ -46,6 +46,8 @@ my $logr = get_logger();
 verify_sw_dependencies(); 
 $logr->level($ERROR);
 
+my $standalone = $ENV{'LOSF_STANDALONE_UTIL'};
+
 #---------------------
 # Determine node type
 #---------------------
@@ -57,6 +59,10 @@ $logr->level($ERROR);
 #---------------------------
 
 (our $osf_rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
+
+if($standalone == 1) {
+    print "[LosF] RPM topdir:      $osf_rpm_topdir\n";
+}
 
 DEBUG("\nRPM_TOPDIR = $osf_rpm_topdir\n");
 
