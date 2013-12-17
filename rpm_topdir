@@ -32,4 +32,6 @@ else
     export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
 fi
 
+export LOSF_STANDALONE_UTIL=1
+
 $TOP_DIR/utils/rpm_topdir.pl

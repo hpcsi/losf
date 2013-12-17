@@ -108,7 +108,8 @@ BEGIN {
 	$osf_membership_init = 1;
 
 	if($standalone == 1) {
-	    print "** LosF node type determination: $node_cluster -> $node_type\n";
+	    print "[LosF] Node type:       $node_cluster -> $node_type\n";
+	    print "[LosF] Config dir:      $osf_custom_config_dir\n";
 	}
 
 	return($node_cluster,$node_type);
