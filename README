@@ -25,7 +25,7 @@ capabilities and features provided by LosF on HPC clusters include:
 There are three primary top-level command line utilities provided by LosF:
 
 * losf   -> configuration for package management, node provisioning, and logging
-* update -> synchronization utility to bring local host into current s/w revision
+* update -> utility to bring local host in sync with current s/w configuration
 * koomie -> parallel ssh tool
 
 To use these tools (and other ancillary utilities), configuration
