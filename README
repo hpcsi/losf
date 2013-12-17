@@ -1,0 +1,45 @@
+
+-------------------------------------------------------------------
+LosF: A Linux operating system Framework for managing HPC clusters
+-------------------------------------------------------------------
+
+LosF is intended to be a lightweight configuration management system
+designed for use with high-performance computing (HPC) clusters.
+Target users for the package are HPC system administrators and system
+architects who desire flexible command-line utilities for
+synchronizing hosts across a cluster. Based on keyword-driven
+configuration files, cluster hosts can be organized into different
+node types (e.g. login, compute, file-system servers, etc), and each
+node type maintains it's own configuration. Typical synchronization
+capabilities and features provided by LosF on HPC clusters include:
+
+* kickstart provisioning files (for use with Cobbler)
+* host configuration files
+* runtime services
+* file permissions
+* soft links
+* OS packages from distros (RPM based)
+* custom 3rd party HPC packages (RPM based)
+* historical host logs
+
+There are three primary top-level command line utilities provided by LosF:
+
+* losf   -> configuration for package management, node provisioning, and logging
+* update -> synchronization utility to bring local host into current s/w revision
+* koomie -> parallel ssh tool
+
+To use these tools (and other ancillary utilities), configuration
+files are required to be provided on a per-cluster basis to define
+node type designations based on hostname regular expressions, and to
+provide templates for desired configuration files. 
+
+See the INSTALL file for more information on software requirements to
+use LosF.
+
+-----------
+Questions?
+-----------
+
+Karl W. Schulz, losf@koomie.com
+
+
