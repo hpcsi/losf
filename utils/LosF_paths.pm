@@ -40,9 +40,6 @@ our @EXPORT            = qw($osf_top_dir
                             $osf_term_prompt_dir
 			    $osf_osupdates_dir);
 
-#                            $osf_rpm2_dir
-#                            $osf_rpm2_arch_dir
-
 # Determine full path to LosF install
 		       
 our $osf_top_dir       = "";
@@ -89,10 +86,6 @@ our $osf_utils_dir         = "$osf_top_dir/utils";
 		         
 our $osf_log4perl_dir      = "$osf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
 our $osf_ini4perl_dir      = "$osf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
-###our $osf_rpm2_dir       = "$osf_utils_dir/dependencies/RPM2-1.0/lib";
-###our $osf_rpm2_arch_dir  = "$osf_utils_dir/dependencies/RPM2-1.0/blib/arch/auto/RPM2";
-###our $osf_rpm2_dir       = "$osf_utils_dir/dependencies/RPM2-0.70/";
-###our $osf_rpm2_arch_dir  = "$osf_utils_dir/dependencies/RPM2-0.70/blib/arch/auto/RPM2";
 our $osf_term_prompt_dir   = "$osf_utils_dir/dependencies/Term-Prompt-1.04/lib";
 our $osf_osupdates_dir     = "$osf_top_dir/os-updates";
 
