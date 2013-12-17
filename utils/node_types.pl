@@ -39,8 +39,9 @@ require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 
 my $output_mode = $ENV{'LOSF_LOG_MODE'};
+my $standalone  = $ENV{'LOSF_STANDALONE_UTIL'};
 
-determine_node_membership();  
+determine_node_membership();
 
 BEGIN {
     my $osf_membership_init = 0;        # initialization flag 
@@ -66,11 +67,8 @@ BEGIN {
 	     "$output_mode" eq "DEBUG" ) {
 	    $logr->level($output_mode);
 	} else {
-#	    $logr->level($ERROR);
 	    $logr->level($INFO);
 	}
-
-	#$logr->level($DEBUG);
 
 	if ( $osf_membership_init == 1 ) {
 	    DEBUG("--> Returning from determine_node_membership\n");
@@ -81,8 +79,8 @@ BEGIN {
         # Initialization
         #---------------
 
-	DEBUG("** Node Type Determination\n");
-	
+	DEBUG("** LosF Node Type Determination:\n");
+
 	chomp($host_name=`hostname -s`);
 	chomp($domain_name=`dnsdomainname`);
 
@@ -105,13 +103,13 @@ BEGIN {
 	    }
 	}
 
-	# Local RPM TopDir
-
-###	(my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
-
-       # All Done.
+	# All Done.
 	
 	$osf_membership_init = 1;
+
+	if($standalone == 1) {
+	    print "** LosF node type determination: $node_cluster -> $node_type\n";
+	}
 
 	return($node_cluster,$node_type);
 	
