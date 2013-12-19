@@ -82,7 +82,7 @@ BEGIN {
 	DEBUG("** LosF Node Type Determination:\n");
 
 	chomp($host_name=`hostname -s`);
-	chomp($domain_name=`dnsdomainname`);
+	chomp($domain_name=`dnsdomainname 2> /dev/null`);
 
         #---------------
         # Global Parsing
