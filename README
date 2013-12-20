@@ -33,8 +33,9 @@ files are required to be provided on a per-cluster basis to define
 node type designations based on hostname regular expressions, and to
 provide templates for desired configuration files. 
 
-See the INSTALL file for more information on software requirements to
-use LosF.
+LosF is currently designed to work with Cobbler for bare-metal
+provisioning. See the companion INSTALL file for more information on
+software requirements to use LosF and Cobbler.
 
 -----------
 Questions?
