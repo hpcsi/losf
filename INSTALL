@@ -3,7 +3,7 @@
 LosF: A Linux operating system Framework for managing HPC clusters
 -------------------------------------------------------------------
 
-LosF is presently designed to work with Cobbler
+LosF is optionally designed to work with Cobbler
 (http://www.cobblerd.org), which is used to perform bare-metal
 provisioning. If you want to use LosF to manage the Cobbler
 provisioning mechanism, you will need to identify at least one master
@@ -11,16 +11,106 @@ host on your cluster to serve as the provisioning server. If your
 master server has external network access, you can download the
 necessary packages to setup Cobbler from the EPEL repository
 (https://fedoraproject.org/wiki/EPEL). There are many resources
-available online regarding EPEL, a quickstart method which works with
-CentOS distributions is as follows:
+available online regarding EPEL and Cobbler.
 
-1. Register your master server with EPEL
+A quickstart method for setting up Cobbler and LosF on a new cluster
+that should work with CentOS distributions is outlined in the
+following sections.
 
-$ yum install cobbler
-$ yum install yum-plugin-downloadonly
+---------------------------------------------------------------------------
+
+1. Install a master server from baseline OS distribution (e.g. CentOS)
+
+(a) Boot from installation media and install as desired. Cobbler will
+    mirror repositories in /var/www so consider providing ample space
+    to your /var partition (e.g. 40G or more).
+
+(b) Configure basic networking. At a minimum, you will likely want to
+    configure two network interfaces: (1) one interface for internal
+    cluster access (eg. eth0 on a private subnet) and (2) one
+    interface for external access to the outside world (eg. eth1 into
+    your existing WAN).
+
+    Register your master server with an EPEL repo. See
+    http://fedoraproject.org/wiki/EPEL/FAQ for more information. An
+    example for CentOS6 is below
+
+    $ rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+
+(b) Install cobbler software and necessary dependencies for LosF on
+    master server.
+
+    $ yum install cobbler
+    $ yum install pykickstart
+
+    LosF Requirements:
+
+    $ yum install yum-plugin-downloadonly
+    $ yum install perl-Log-Log4perl
+    $ yum install perl-Config-IniFiles
+
+---------------------------------------------------------------------------
+
+2. Perform a basic configuration for Cobbler
+
+(a) Edit /etc/cobbler/settings file to define the IPs for your master
+    server. Relevant variables to update are:
+
+    next_server
+    server
+    default_password_crypted
+
+    The default_password_crypted is the location to define the root
+    password that will be used during the provisioning process. You
+    need to change this from the default password to a strong password
+    of your own choosing. You can define the crypted hash via:
+
+    $openssl passwd -1 -salt 'random-phrase-here' 'your-password-here'
+
+(b) Start cobbler
+
+    /etc/init.d/cobbler start
+
+(c) Import an OS distribution (e.g. from the media used to install the
+    initial server). Assuming a CentOS distribution DVD is in the
+    cdrom drive on your master host, you can mount an import as
+    follows:
+
+    $ mount /dev/cdrom /mnt/cdrom
+    $ cobbler import --path=/mnt/cdrom --name=CentOS6.5 --arch=x86_64
+    $ cobbler sync
+
+(d) Import an EPEL distribution (this will mirror the repo for use
+    locally throughout your cluster). An example for CentOS6 is below:
+
+    $ cobbler import --path=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
+      	      --name=epel6 --arch=x86_64
+
+(e) Mirror the newly defined EPEL repository (will take some time). 
+
+    $ cobbler reposync
+
+(f) Run cobbler check and fix any errors. You can safely ignore
+    warnings about a missing debmirror or fencing tools.
+
+---------------------------------------------------------------------------
+
+2. Install and perform baseline configuration for LosF
+
+(a) Clone a copy of LosF or untar from a release tarball, preferably
+    into a shared file system that will be available across the
+    cluster. 
+
+    Suggestion: Assuming you have additional drives availabe in your
+    master host, a reasonable place to install is into an admin
+    partition hosted by your master hosts.
+
+   $ git clone [url to go here]  /your/local/path
+
+(b) 
+
+   
 
 
-LosF Requirements:
 
-$ yum install perl-Log-Log4perl
-$ yum install perl-Config-IniFiles
+
