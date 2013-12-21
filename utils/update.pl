@@ -128,13 +128,15 @@ INFO("\n");
 if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
     $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
     notify_local_log();
-    print_error_in_red("FAILED");
-    ERROR(":" );
+    print color 'red';
+    print "FAILED";
 } else { 
     print color 'green';
-    ERROR("OK: ");
-    print color 'reset';
+    print "OK";
 }
+
+print color 'reset';
+print ": ";
 
 print "[RPMs: OS $losf_os_packages_updated/$losf_os_packages_total ";
 print " Custom $losf_custom_packages_updated/$losf_custom_packages_total] ";
