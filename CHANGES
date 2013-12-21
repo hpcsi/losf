@@ -1,5 +1,9 @@
 Version 0.43.0 (In Progress)
-
+  
+  * enhanced ability to create directory with no contents (e.g. a file
+    system mount point). To have LosF create an empty directory, add
+    the desired directory path into the [Permissions] config section
+    and include a trailing slash "/" on the directory path. 
   * require user to provide a valid configuration path (set via
     LOSF_CONFIG_DIR environment variable or config/config_dir file)
   * added -v options to losf and update command-line utilities to provide versioning info
