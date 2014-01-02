@@ -80,18 +80,6 @@ if ( $assign_from_file != 1) {
     MYERROR("Assignment of IP addresses is currently only available using the assign_ips_from_file option");
 }
 
-###my %interfaces = query_cluster_config_host_network_definitions($node_cluster,$node_type);
-###print "just queried\n";
-
-###while ( my ($key,$value) = each(%interfaces) ) {
-###    INFO("   --> $key => $value\n");
-
-###     if ( -e $key || -d $key ) {
-### 	my $cmd_string = sprintf("chmod %i %s",$value,$key);
-### 	system($cmd_string);
-###     }
-###}
-
 #---------------------------------------------
 # Query cobbler for defined hosts/ips
 #---------------------------------------------
@@ -106,8 +94,6 @@ if ( ! -s $tmpfile ) {
 open($IN1, "<$tmpfile")  || die "Cannot open $tmpfile for reading\n";
 
 while ($line1 = <$IN1>) {
-
-#    print "$line1";
 
     if($line1 =~ m/^Name\s+: (\S+)/ ) {
 	$current_host=$1;
