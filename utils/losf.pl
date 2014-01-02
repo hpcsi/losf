@@ -1294,15 +1294,6 @@ sub add_custom_rpm {
     foreach $rpm (@custom_rpms) {
 	my @rpm_array  = split(/\s+/,$rpm);
 
-#	print "input rpm = $rpm\n";
-#	print "rpm_array[0] = $rpm_array[0]\n";
-#	print "looking to match $rpm_name-$version_info[1]\n";
-	
-#	if ($rpm_array[0] =~ /^$rpm_name-$version_info[1]-(\S+).($rpm_arch)$/ ) {
-#	print "rpm = $rpm\n";
-#	print "looking for $rpm_array[0]\n";
-#	print "name = $rpm_name\n";
-
 	if ($rpm_array[0] =~ /^$rpm_name-(\S+)-(\S+).($rpm_arch)$/ ) {
 
 	    if( $ENV{'LOSF_REGISTER_UPGRADE'} ) {
