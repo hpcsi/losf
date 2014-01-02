@@ -53,7 +53,8 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
-    print "     version, --version                   Print version number and exit\n\n";
+    print "     version, --version                   Print version number and exit\n";
+    print "     initconfig [cluster-name]            Initialize a new LosF config directory for a cluster\n\n";
 
     print color 'bold blue';
     print "  Host Registration:\n";
@@ -89,9 +90,9 @@ sub usage {
     print "     These commands update the non-distro (custom) RPM configuration\n";
     print "     for the local node type on which the command is executed:\n";
     print "\n";
-
-    print "     addrpm    <OPTIONS> [rpm]            Add a new custom RPM for current node type\n";
+    print "     addrpm <OPTIONS> [rpm]               Add a new custom RPM for current node type\n";
     print "     showalias                            Show all currently defined aliases\n";
+    print "     showalias [name]                     Show all rpms associated with a particular alias name\n";
     print "\n";
     print "     OPTIONS:\n";
     print "        --all                             Add rpm for all node types\n";
@@ -1603,7 +1604,7 @@ sub register_alias {
 sub show_defined_aliases {
 
     begin_routine();
-
+    
     my %custom_aliases = ();
 
     INFO("\n");
@@ -1619,6 +1620,35 @@ sub show_defined_aliases {
 	} else {
 	    INFO("packages)\n");
 	}
+    }
+
+    end_routine();
+    return;
+} # end sub show_defined_aliases()
+
+sub show_defined_alias_members {
+
+    begin_routine();
+
+    my $alias          = shift;
+    my %custom_aliases = ();
+
+    INFO("\n");
+    INFO("Querying locally defined alias for Cluster:$node_cluster -> $alias\n");
+
+    %custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+
+    if( ! exists $custom_aliases{$alias} ) {
+	MYERROR("--> Alias $alias requested but not defined\n");
+    }
+
+    my $group_size =  @{$custom_aliases{$alias}};
+
+    INFO("\nAlias \@$alias contains $group_size entries:\n");
+
+    foreach $entry (@{$custom_aliases{$alias}}) {
+	my @rpm = split(/\s+/,$entry);
+	INFO("   --> $rpm[0]\n");
     }
 
     end_routine();
@@ -1721,15 +1751,21 @@ switch ($command) {
     case "reinsert"       { reinsert_node($argument) };
     case "sync"           { sync         ()          };
     case "version"        { print_header ()          };
-
-    case "addpkg"         { add_distro_package($argument)     };
-    case "addgroup"       { add_distro_group  ($argument)     };
-    case "showalias"      { show_defined_aliases()            };
+    case "addpkg"         { add_distro_package     ($argument)};
+    case "addgroup"       { add_distro_group       ($argument)};
     case "updatepkg"      { update_distro_packages($argument) };
     case "updatepkgs"     { update_distro_packages("ALL")     };
     case "config-upgrade" { 
 	update_os_config();
 	update_custom_config();
+    };
+
+    case "showalias"{ 
+	if( $argument ne '') {
+	    show_defined_alias_members($argument);
+	} else {
+	    show_defined_aliases();
+	}
     };
 
     case "addrpm"   { 
