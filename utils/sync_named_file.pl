@@ -50,6 +50,9 @@ if ($#ARGV != 0) {
     exit(1);
 }
 
+# Only one LosF instance at a time
+losf_get_lock();
+
 sync_single_file($ARGV[0]);
 
 BEGIN {
@@ -98,11 +101,13 @@ BEGIN {
 	    exit(0);  
 	}
 
-
-
 	if (! $found) { 
 	    MYERROR("$file not under LosF control - not syncing");
 	}
     }
 
 }
+
+# Done with lock
+
+our $LOSF_FH_lock; close($LOSF_FH_lock);

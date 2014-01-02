@@ -29,6 +29,7 @@ use base 'Exporter';
 use lib "$osf_log4perl_dir";
 use Sys::Syslog;  
 use Switch;
+use Fcntl qw(:flock);
 
 # Global vars to count any detected changes
 
@@ -341,7 +342,6 @@ sub notify_local_log() {
 
     }
 
-
     if ( ! -d $save_dir ) {
 	INFO("Creating $save_dir directory to store local_log output\n");
 	mkdir($save_dir,0700)
@@ -362,6 +362,23 @@ sub notify_local_log() {
     print LOGFILE "-------------------------------------------------------------------------\n";
 
     close(LOGFILE);
+}
+
+sub losf_get_lock() {
+    begin_routine();
+
+    my $lockFile = "/tmp/.losf_lock__";
+
+    open($LOSF_FH_lock, ">$lockFile") || MYERROR("Unable to open $lockFile\n");
+
+    if (! flock($LOSF_FH_lock,LOCK_EX|LOCK_NB))  {
+	ERROR("\n[ERROR]: Unable to obtain local lock for LosF...\n\n");
+	ERROR("Please verify no other instance is running locally and try again.\n");
+	exit(23);
+    }
+
+    DEBUG("flock obtained\n");
+    end_routine();
 }
 
 1;

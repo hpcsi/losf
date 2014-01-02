@@ -54,12 +54,14 @@ sub usage {
 	  
 }
 
+# Only one LosF instance at a time
+losf_get_lock();
+
+# Local node membership
 (my $node_cluster, my $node_type) = determine_node_membership();
 
 # Default logging is set to ERROR
-
 my $logr = get_logger();
-###$logr->level($INFO);
 
 # Check for update skip request
 
@@ -162,6 +164,10 @@ if ( -x $custom_file ) {
     system("$custom_file $node_type");
     
 }
+
+# Done with lock
+
+our $LOSF_FH_lock; close($LOSF_FH_lock);
 
 1;
 
