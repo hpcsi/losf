@@ -1653,7 +1653,7 @@ sub show_defined_alias_members {
 
     end_routine();
     return;
-} # end sub show_defined_aliases()
+} # end sub show_defined_alias_members()
 
 sub update_losf_config_file {
     begin_routine();
