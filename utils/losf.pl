@@ -91,6 +91,7 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
     print "     addrpm <OPTIONS> [rpm]               Add a new custom RPM for current node type\n";
+    print "     addalias  [name]                     Add defined alias to custom RPM list for current node type\n";
     print "     showalias                            Show all currently defined aliases\n";
     print "     showalias [name]                     Show all rpms associated with a particular alias name\n";
     print "\n";
@@ -830,7 +831,7 @@ sub update_distro_packages {
 	    MYERROR("Unable to save previous OS config file\n");
 	rename($new_file,$ref_file)                 || 
 	    MYERROR("Unaable to update OS config file\n");
-	print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+	print "\n\nOS config update complete; you can now run \"update\" to make changes take effect.\n";
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
@@ -1010,7 +1011,7 @@ sub add_distro_package {
 	    print "   --> Updating OS config file...\n";
 	    rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous OS config file\n");
 	    rename($new_file,$ref_file)                 || MYERROR("Unaable to update OS config file\n");
-	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect.\n";
 	} else {
 	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
 	}
@@ -1498,31 +1499,34 @@ sub add_custom_rpm {
     return;
 } # end sub add_custom_rpm
 
-sub register_alias {
-
-    MYERROR("This function deprecated....");
+sub add_alias {
 
     begin_routine();
     my $alias            = shift;
-    my $node_config_type = shift;
 
-    my $appliance = $node_config_type;
+    INFO("\n** Checking on possible addition of RPM package alias: $alias\n");
 
-    if ( $node_config_type eq "local" ) {
-	$appliance = $node_type;
-    } 
-	
-    INFO("\n** Checking on possible addition of custom RPM alias: $alias\n");
+    # Verify alias exists
 
-    INFO("   --> Cluster = $node_cluster, Node Type = $appliance\n");
+    my %custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+
+    INFO("   --> Cluster = $node_cluster, Node Type = $node_type\n");
+
+    if( ! exists $custom_aliases{$alias} ) {
+	MYERROR("--> Alias $alias requested but not defined\n");
+    }  else {
+	my $group_size =  @{$custom_aliases{$alias}};
+	INFO("   --> Alias \@$alias contains $group_size entries:\n");
+    }
+
     INFO("\n");
-    INFO("   --> Would you like to add $alias \n");
-    INFO("       to your local LosF config for $node_cluster:".$appliance." nodes?\n\n");
+    INFO("   --> Would you like to add \@$alias to your local LosF config for $node_cluster:".
+	 $node_type." nodes?\n\n");
 
-    my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
+    my $response = ask_user_for_yes_no("Enter yes/no to confirm (or -1 to add to multiple node types): ",2);
 
     if( $response == 0 ) {
-	INFO("   --> Did not add $alias to LosF config, terminating....\n");
+	INFO("       --> Did not add $alias to LosF config, terminating....\n");
 	exit(-22);
     } 
 
@@ -1532,34 +1536,30 @@ sub register_alias {
     INFO("   --> Reading Custom package config file:\n");
     INFO("       --> $osf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
 
-    my @custom_rpms = {};
+    my @custom_rpms  = {};
+    
+    @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
-    @custom_rpms    = query_cluster_config_custom_packages($node_cluster,$appliance);
-
-    # check to see if alias is already registered
+    # Verify alias is not already included.
 
     foreach $rpm (@custom_rpms) {
-	if( $rpm =~ m/^@(\S+)/ ) {
-	    my $group = $1;
-	    if( "$group" eq "$alias" )  {
-		INFO("       --> $alias already configured - ignoring addition request\n");
-		$is_configured = 1;
-		return;
-	    }
+	my @rpm_array = split(/\s+/,$rpm);
+
+	if ($rpm_array[0] eq "\@$alias" ) {
+	    MYERROR("--> \@$alias is already configured - ignoring addition request\n");
 	}
     }
 
-    if (! $is_configured ) {
-	INFO("       --> $alias not previously configured - Registering for addition\n"); 
+    my $section = "Custom Packages";
+    my $name    = $node_type;
 
-	if($local_custom_cfg->exists("Custom Packages","$node_type")) {
-	    $local_custom_cfg->push("Custom Packages",$appliance,"@"."$alias");
-	} else {
-	    $local_custom_cfg->newval("Custom Packages",$appliance,"@"."$alias");
-	}
+    if($local_custom_cfg->exists($section,$name)) {
+	$local_custom_cfg->push($section,$name,"\@$alias");
+    } else {
+	$local_custom_cfg->newval($section,$name,"@$alias");
     }
 
-    SYSLOG("User requested addition of custom RPM alias: $alias (type=$appliance)");
+    SYSLOG("User requested addition of custom RPM alias: \@$alias (type=$node_type)");
 
     # Update LosF config to include desired custom package
 
@@ -1569,8 +1569,8 @@ sub register_alias {
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
-    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
-    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid custom package file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid custom package file for update: $ref_file"); }
 
     if ( compare($new_file,$ref_file) != 0 ) {
 
@@ -1580,17 +1580,19 @@ sub register_alias {
 
 	my $timestamp=`date +%F:%H:%M`;
 	chomp($timestamp);
-	print "   --> Updating Custom RPM config file...\n";
-	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous custom config file\n");
-	rename($new_file,$ref_file)                || MYERROR("Unable to update custom config file\n");
-	print "\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect\n";
+	INFO("   --> Updating Custom RPM config file...\n");
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+	    MYERROR("Unable to save previous custom config file\n");
+	rename($new_file,$ref_file) ||
+	    MYERROR("Unable to update custom config file\n");
+	INFO("\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect.\n");
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
 
     end_routine();
     return;
-} # end sub register_alias
+} # end sub add_alias
 
 sub show_defined_aliases {
 
@@ -1737,6 +1739,7 @@ switch ($command) {
     # Do the deed
 
     case "add"            { add_node     ($argument) };
+    case "addalias"       { add_alias    ($argument) };
     case "del"            { del_node     ($argument) };
     case "delete"         { del_node     ($argument) };
     case "reinsert"       { reinsert_node($argument) };
