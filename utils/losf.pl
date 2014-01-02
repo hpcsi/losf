@@ -1687,6 +1687,9 @@ sub update_losf_config_file {
 # Main front-end for losf command-line tool
 #-------------------------------------------
 
+# Only one LosF instance at a time
+losf_get_lock();
+
 my $datestring = "";
 my $comment    = "";
 my $noerror    = 0;
@@ -1870,7 +1873,6 @@ switch ($command) {
 
 	# TODO: abstract for alternative resource managers
 
-#	print "/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"\n";
 	my $rc = system("/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"");
 	    
 	if( $rc != 0) {
@@ -1898,4 +1900,10 @@ switch ($command) {
     usage();
     exit(1);
 }
+
+# Done with lock
+
+close($LOSF_FH_lock);
+
+1;
 

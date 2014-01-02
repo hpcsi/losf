@@ -44,10 +44,18 @@ require "$osf_utils_dir/parse.pl";
 require "$osf_utils_dir/header.pl";
 require "$osf_utils_dir/sync_config_utils.pl";
 
+# Only one LosF instance at a time
+losf_get_lock();
+
 parse_and_sync_const_files();
 parse_and_sync_softlinks();
 parse_and_sync_services();
 parse_and_sync_permissions();
+
+# Done with lock
+
+our $LOSF_FH_lock; close($LOSF_FH_lock);
+
 
 1;
 
