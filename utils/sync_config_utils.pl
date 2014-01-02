@@ -49,9 +49,10 @@ require "$osf_utils_dir/rpm_utils.pl";
 
 # Global vars to count any detected changes
 
-use vars qw($losf_const_updated     $losf_const_total);
-use vars qw($losf_softlinks_updated $losf_softlinks_total);
-use vars qw($losf_services_updated  $losf_services_total);
+use vars qw($losf_const_updated       $losf_const_total);
+use vars qw($losf_softlinks_updated   $losf_softlinks_total);
+use vars qw($losf_services_updated    $losf_services_total);
+use vars qw($losf_permissions_updated $losf_permissions_total);
 
 BEGIN {
 
@@ -591,14 +592,51 @@ BEGIN {
 	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
 	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
 
+	$losf_permissions_total = scalar keys %perm_files;
+
 	while ( my ($key,$value) = each(%perm_files) ) {
+
 	    DEBUG("   --> $key => $value\n");
 
-	    if ( -e $key || -d $key ) {
-		my $cmd_string = sprintf("chmod %i %s",$value,$key);
-		system($cmd_string); 
+	    my $parent_dir = dirname($key);
+
+	    # Check on existence of user-desired directory.
+	    # Directoreis are designated via the presence of a
+	    # trailing /
+
+	    if( $key =~ /(.*)\/$/) {
+		if( -d $key) {
+		    print_info_in_green("OK");
+		    INFO(": $key directory present\n");
+		} else {
+		    $losf_permissions_updated++;
+		    print_error_in_red("FAILED");
+		    ERROR(": Desired directory $key does not exist...creating\n");
+		    mkpath("$key") || MYERROR("Unable to create path $key");
+		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
+		    system($cmd_string); 
+		}
 	    }
-	}
+
+	    if ( -e $key || -d $key ) {
+		my $info = stat($key);
+		my $current_mode = $info->mode;
+
+		my $current_mode = sprintf("%4o",$current_mode & 07777);
+
+		if($current_mode == $value) {
+		    print_info_in_green("OK");
+		    INFO(": $key perms correct ($value)\n");
+		} else {
+		    $losf_permissions_updated++;
+		    print_error_in_red("FAILED");
+		    ERROR(": $key perms incorrect..setting to $value\n");
+
+		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
+		    system($cmd_string); 
+		}
+	    }
+	}		       
 
 	end_routine();
 	return;
