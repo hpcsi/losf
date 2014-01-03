@@ -28,9 +28,9 @@ should work with CentOS distributions is outlined in the following sections.
        install configuration procedure.
 
    (b) Configure basic networking. At a minimum, you will likely want to configure two
-       network interfaces: (1) one interface for internal cluster access (eg. eth0 on a
+       network interfaces: (1) one interface for internal cluster access (e.g. eth0 on a
        private subnet) and (2) one interface for external access to the outside world
-       (eg. eth1 into your existing WAN).
+       (e.g. eth1 into your existing WAN).
 
    (c) Add EPEL repo access to your master server. 
 
@@ -234,8 +234,8 @@ should work with CentOS distributions is outlined in the following sections.
        The following example highlights the process to add the "finger" package, followed
        by update to push the package install.
 
-       $ losf addpkg finger
-       $ update -q
+       $ <losf-install>/losf addpkg finger
+       $ <losf-install>/update -q
 
        More sophisticated options for adding OS groups and updating OS packages are also
        available. See "losf -h" for more details.
@@ -250,9 +250,62 @@ should work with CentOS distributions is outlined in the following sections.
        example registering a locally built RPM for the MVAPICH2 open-source project and
        installing it locally via update.
 
-       $ losf addrpm ./mvapich2-2.0-1.x86_64
-       $ update -q
+       $ <losf-install>/losf addrpm ./mvapich2-2.0-1.x86_64
+       $ <losf-install>/update -q
 
        More sophisticated options for managing multi-version RPMs, relocatable RPMs, and
        aliases are available. Please see "losf -h" for more details.
-   
+
+   (d) Sync config files only.
+
+       The "update" utility is normally used to verify that all configuration files and
+       OS/Custom packages are in sync. A convenience utility is provided in cases where
+       you only modified a configuration file or runtime service and want to bring a host
+       in sync without checking all RPM packages.  
+
+       To synchronize all defined config files, soft links, and runtime services, issue:
+
+       $ <losf-install>/sync_config_files
+
+       To synchronize a particular file, provide the file pathname. For example:
+
+       $ <losf-install>/sync_config_files /etc/motd
+
+       The latter example is convenient for synchronizing specific files periodically via
+       cron (e.g. user credentials).
+
+   (e) Perform system tasks in parallel.
+
+       The "koomie_cf" utility runs arbitrary commands in parallel across multiple hosts
+       based on user options. This utility assumes a working password-less ssh capability
+       and is intended for use by system administrators. Usage options are shown below:
+
+       Usage: koomie_cf [OPTIONS] command
+       
+       where "command" is a command to spawn in parallel across one or more
+       cluster hosts using ssh. Results of the commands from each host are
+       written to stdout and are prepended by the executing hostname. If a
+       host is currently unavailable, it will be skipped. If a host fails to
+       execute the command before the timeout window completes, the requested
+       command will be terminated.
+       
+       OPTIONS:
+         --help                  generate help message and exit
+         -r <1,2,..n>|<2-5>      operate on a subset list of racks (e.g. -r 101-105); this option
+                                 can also accept a special rack types (e.g. -r login)
+         -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
+         -f <hostfile>           operate on hosts specified in provided hostfile
+         -m <max_ssh>            maximum number of commands to run in parallel (default = 288)
+         -t <timeout>            timeout period for command completion in seconds (default = 5 minutes)
+         -x <regex>              operate on hosts which match supplied regex pattern
+         -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
+         -v                      run LosF in verbose mode 
+
+        A common occurrence when performing cluster updates is to use the "koomie_cf"
+        utility in concert with "update".  For example, assuming we have 4 login nodes
+        available named login1,login2,login3, and login4, the following example will run
+        update on all of them in parallel. Note that the "-q" option to update is enabled
+        automatically when run remotely via koomie_cf.
+
+	$ koomie_cf -x login[104] <losf-install/update 
+
