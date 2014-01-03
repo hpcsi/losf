@@ -1,4 +1,4 @@
-Version 0.43.0 (In Progress)
+Version 0.43.0 (02 January 2014)
 
   * addition of "losf addalias" option to register custom package alias for installation
   * additional option added to showalias allowing expansion of alias membership

@@ -5,7 +5,7 @@ LosF: A Linux operating system Framework for managing HPC clusters
 
 LosF is intended to be a lightweight configuration management system
 designed for use with high-performance computing (HPC) clusters.
-Target users for the package are HPC system administrators and system
+Target users for this package are HPC system administrators and system
 architects who desire flexible command-line utilities for
 synchronizing hosts across a cluster. Based on keyword-driven
 configuration files, cluster hosts can be organized into different
