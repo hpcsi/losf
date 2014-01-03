@@ -38,7 +38,7 @@ our @EXPORT            = qw($losf_top_dir
 
 # Determine full path to LosF install
 		       
-our $losf_top_dir       = "";
+our $losf_top_dir = "";
 
 my ($filename,$basename) = fileparse($0);
 
@@ -50,13 +50,26 @@ if ($basename =~ m/(.*)\/utils\/$/) {
     our $losf_top_dir = $basename;
 }
 
+sub print_no_defined_config_path_message {
+
+    print "\nError: A valid LosF config directory was not provided. You must provide a valid config\n";
+    print "path for your local cluster. This can be accomplished via one of two methods:\n\n";
+    print "  (1) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n";
+    print "  (2) Set the LOSF_CONFIG_DIR environment variable\n\n";
+    print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n";
+
+    print "\nFor new systems, you can also run \"losf initconfig <YourClusterName>\" to create a\n";
+    print "to create a vanilla NOOP configuration\n\n";
+    exit(1);
+}
+
 # ----------------------------------------------------------------------
 # v0.43.0 Change:
 #
-# require user to provide us with a config path (we
-# no longer assume it is local to LosF install since users will likely
-# want to use their own SCM for config files). Config path can be
-# specified in one of two ways:
+# require user to provide us with a config path (we no longer assume
+# it is local to LosF install since users will likely want to use
+# their own SCM for config files). Config path can be specified in one
+# of two ways:
 # 
 # 1. LOSF_CONFIG_DIR environment variable
 # 2. config/config_dir file in locally running LosF path
@@ -79,9 +92,11 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 	}
 	our $losf_config_dir        = $config_dir;
 	our $losf_custom_config_dir = $config_dir;
+###	INFO("Using LOSF_CONFIG_DIR environment variable for config_dir\n");
 ###	our $osf_custom_config = 1;
     } else {
-	MYERROR("LOSF_CONFIG_DIR provided path does not exist ($config_dir)");
+	print ("[ERROR]: LOSF_CONFIG_DIR provided path does not exist ($config_dir)\n");
+	exit 1;
     }
 } else {
     my $local_config_file="$losf_top_dir/config/config_dir";
@@ -101,23 +116,15 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 	    our $losf_config_dir        = "$local_config_dir";
 	    our $losf_custom_config_dir = "$local_config_dir";
 	} else {
-	    print "\nError: A valid LosF config directory was not provided. You must provide a valid config\n";
-	    print "path for your local cluster. You can do this via one of two methods:\n\n";
-	    print "  (1) Set the LOSF_CONFIG_DIR environment variable\n";
-	    print "  (2) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n\n";
-	    print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n\n";
-	    exit(1);
-	}
+	    print_no_defined_config_path_message();
+	} 
+    } else {
+	print_no_defined_config_path_message();
     }
 }
 
 our $losf_utils_dir         = "$losf_top_dir/utils";
 our $losf_log4perl_dir      = "$losf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
 our $losf_ini4perl_dir      = "$losf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
-our $osf_osupdates_dir     = "$losf_top_dir/os-updates";
-
-#unless(-d $osf_osupdates_dir){
-#    mkdir $osf_osupdates_dir or die("[ERROR]: Unable to create dir ($osf_osupdates_dir)\n");
-#}
 
 1;

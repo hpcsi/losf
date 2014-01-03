@@ -128,7 +128,7 @@ BEGIN {
 
 	    if ( -e "$_") {
 		$losf_const_updated++;
-		print_error_in_red("FAILED");
+		print_error_in_red("UPDATING");
 		ERROR(": [$basename] File present: deleting\n");
 		unlink("$_") || MYERROR("Unable to remove file: $_");
 	    } else {
@@ -291,7 +291,7 @@ BEGIN {
 	    }
 	} else {
 	    $losf_const_updated++;
-	    print_error_in_red("FAILED");
+	    print_error_in_red("UPDATING");
 	    ERROR(": [$basename] Differences found: requires syncing");
 
 	    if($customized) { 
@@ -471,7 +471,7 @@ BEGIN {
 	    INFO(": $file in (partial) sync\n");
 	} else {
 	    $losf_const_updated++;
-	    print_error_in_red("FAILED");
+	    print_error_in_red("UPDATING");
 	    ERROR(": [$basename] Differences found: $basename requires partial syncing\n");
 
 	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
@@ -559,7 +559,7 @@ BEGIN {
 	    my $resolved_file = readlink("$file");
 	    if ( "$resolved_file" ne "$target" ) {
 		$losf_softlinks_updated++;
-		ERROR("   --> FAILED [...$notice_string/$basename] Soft link difference found: updating...\n");
+		ERROR("   --> UPDATING [...$notice_string/$basename] Soft link difference found: updating...\n");
 		unlink("$file") || MYERROR("[$basename] Unable to remove $file");
 		symlink("$target","$file") || 
 		    MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
@@ -569,7 +569,7 @@ BEGIN {
 	    }
 	} else {
 	    $losf_softlinks_updated++;
-	    print_error_in_red("FAILED");
+	    print_error_in_red("UPDATING");
 	    ERROR(": Creating link between $file -> $target\n");
 	    symlink("$target","$file") || 
 		MYERROR("[$notice_string/$basename] Unable to create symlink for $file");	
@@ -610,7 +610,7 @@ BEGIN {
 		    INFO(": $key directory present\n");
 		} else {
 		    $losf_permissions_updated++;
-		    print_error_in_red("FAILED");
+		    print_error_in_red("UPDATING");
 		    ERROR(": Desired directory $key does not exist...creating\n");
 		    mkpath("$key") || MYERROR("Unable to create path $key");
 		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
@@ -629,7 +629,7 @@ BEGIN {
 		    INFO(": $key perms correct ($value)\n");
 		} else {
 		    $losf_permissions_updated++;
-		    print_error_in_red("FAILED");
+		    print_error_in_red("UPDATING");
 		    ERROR(": $key perms incorrect..setting to $value\n");
 
 		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
@@ -681,13 +681,13 @@ BEGIN {
 
 	    my $basename = basename($newfile);
 	    
-#	    ERROR("   --> FAILED: [$basename] updating sync file permissions...\n") 
+#	    ERROR("   --> UPDATING: [$basename] updating sync file permissions...\n") 
 #		unless ($display_change_message == 0);
 
 	    if ( $display_change_message != 0) {
 		print "   --> "; 
 		print color 'red';
-		print "FAILED";
+		print "UPDATING";
 		print color 'reset';
 		print ": [$basename] updating sync file permissions...\n";
 	    }
@@ -698,10 +698,10 @@ BEGIN {
 	# make sure ownership is consistent as well
 
 	if ($display_change_message && $uid_old != $uid_new) {
-	    ERROR( "   --> FAILED: updating sync file  ownership...\n")
+	    ERROR( "   --> UPDATING: updating sync file  ownership...\n")
 	}
 	if ($display_change_message && $gid_old != $gid_new) {
-	    ERROR( "   --> FAILED: updating sync group ownership...\n")
+	    ERROR( "   --> UPDATING: updating sync group ownership...\n")
 	}
 
 	my $cnt = chown $uid_old,$gid_old, $newfile;
@@ -768,7 +768,7 @@ BEGIN {
 		INFO( ": $service is ON\n");
 	    } else {
 		$losf_services_updated++;
-		print_error_in_red("FAILED");
+		print_error_in_red("UPDATING");
 		ERROR( ": disabling $service\n");
 		`/sbin/chkconfig $service off`;
 		`/etc/init.d/$service stop`;
@@ -781,7 +781,7 @@ BEGIN {
 	    DEBUG("   --> $service is OFF\n");
 	    if($enable_service) {
 		$losf_services_updated++;
-		print_error_in_red("FAILED");
+		print_error_in_red("UPDATING");
 		ERROR(": enabling $service\n");
 		`/sbin/chkconfig $service on`;
 		`/etc/init.d/$service start`;
@@ -918,24 +918,6 @@ BEGIN {
 
 	my $ALL_type = "ALL";
 
-###	# verify *non* existence of desired packages for ALL node types
-###
-###	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$ALL_type);
-###	foreach my $rpm (@custom_rpms_remove) {
-###	    DEBUG("   --> Custom rpm removal requested for ALL = $rpm\n");
-###	}
-###
-###	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
-###
-###	# verify *non* existence of desired packages current  node type
-###
-###	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$node_type);
-###	foreach my $rpm (@custom_rpms_remove) {
-###	    DEBUG("   --> Custom rpm removal requested for node:$node_type = $rpm\n");
-###	}
-###
-###	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
-###
 	# verify packages for ALL node types
 
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$ALL_type);
@@ -957,8 +939,6 @@ BEGIN {
 
 	end_routine();
     }
-
-
 
 }
 

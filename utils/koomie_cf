@@ -55,7 +55,7 @@ OPTIONS:
   -t <timeout>            timeout period for command completion in seconds (default = 5 minutes)
   -x <regex>              operate on hosts which match supplied regex pattern
   -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
-  -v                      run LosF in verose mode 
+  -v                      run LosF in verbose mode 
 
 EOF
 ;

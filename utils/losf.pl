@@ -52,8 +52,7 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
-    print "     version, --version                   Print version number and exit\n";
-    print "     initconfig [cluster-name]            Initialize a new LosF config directory for a cluster\n\n";
+    print "     version, --version                   Print version number and exit\n\n";
 
     print color 'bold blue';
     print "  Host Registration:\n";
@@ -1704,8 +1703,9 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 	   "nocertify"     => \$nocertify,
 	   "logonly"       => \$logonly,
 	   "version"       => \$version,
+	   "h"             => \$help,
+	   "help"          => \$help,
 	   "noerror"       => \$noerror) || usage();
-
 
 
 # Command-line parsing
@@ -1713,6 +1713,10 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 if ($version) {
     print_header();
     exit(0);
+}
+
+if($help) {
+    usage();
 }
 
 if (@ARGV >= 1) {
