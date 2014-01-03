@@ -38,7 +38,7 @@ our @EXPORT            = qw($losf_top_dir
 
 # Determine full path to LosF install
 		       
-our $losf_top_dir       = "";
+our $losf_top_dir = "";
 
 my ($filename,$basename) = fileparse($0);
 

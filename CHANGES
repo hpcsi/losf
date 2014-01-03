@@ -1,5 +1,7 @@
-Version 0.43.0 (02 January 2014)
+Version 0.43.0 (03 January 2014)
 
+  * expanded INSTALL directions
+  * new initialization utility "initconfig" provided, see INSTALL for more details
   * addition of "losf addalias" option to register custom package alias for installation
   * additional option added to showalias allowing expansion of alias membership
   * enhanced ability to create directory with no contents (e.g. a file
