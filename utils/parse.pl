@@ -53,11 +53,10 @@ BEGIN {
 	# karl TODO: cannot return below in losf add host; figure out why...
 
 ###	if ($osf_init_global_config == 1) {
-###	    print "uh oh koomie\n";
 ###	    end_routine();
 ###	    return ($node_cluster,$node_type);
 ###	}	    
-###
+
 	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
 	foreach(@Clusters) {
@@ -155,10 +154,11 @@ BEGIN {
 	DEBUG("   --> Initializing input config file parsing ($shortname)\n");
 
 	if ( ! -e $infile) {
+	    ERROR("\n");
 	    ERROR("[ERROR]: The following file is not accessible: $infile\n");
-	    ERROR("[ERROR]: Please verify LosF config/ directory is available locally\n\n");
-            ERROR("Alternatively, you can use the \"LOSF_CONFIG_DIR\" environment\n");
-	    ERROR("variable to override the default LosF config location.\n\n");
+	    ERROR("[ERROR]: Please verify that LosF \$config_dir directory is correctly defined and available locally.\n\n");
+            ERROR("Alternatively, you can use the \"LOSF_CONFIG_DIR\" environment variable\n");
+	    ERROR("to override the default LosF config_dir location.\n");
 	    exit(1);
 	}
 
