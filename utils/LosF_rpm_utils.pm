@@ -27,10 +27,7 @@
 use LosF_paths;
 use LosF_rpm_topdir;
 
-use lib "$osf_log4perl_dir";
-###use lib "$osf_rpm2_dir";
-###use lib "$osf_rpm2_arch_dir";
-
+use lib "$losf_log4perl_dir";
 
 use Sys::Syslog;  
 use Digest::MD5;
@@ -109,7 +106,6 @@ sub verify_rpms {
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
-###	my $arch     = rpm_arch_from_filename($rpm);
 
 	if ( "$MODE" eq "PXE" ) {
 	    $filename = "$SRC_DIR/$desired_arch/$full_rpm_name.rpm";

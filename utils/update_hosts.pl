@@ -30,16 +30,16 @@
 use LosF_paths;
 use LosF_node_types;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir/";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir/";
 use File::Temp qw/tempfile/;
 use File::Compare;
 use File::Copy;
 
-require "$osf_utils_dir/utils.pl";
-require "$osf_utils_dir/parse.pl";
-require "$osf_utils_dir/header.pl";
+require "$losf_utils_dir/utils.pl";
+require "$losf_utils_dir/parse.pl";
+require "$losf_utils_dir/header.pl";
 
 my $hostfile_begin_delim='----------begin-sync-losf-$';
 my $hostfile_end_delim='------------end-sync-losf-$';
@@ -51,7 +51,7 @@ my $hostfile_end_delim='------------end-sync-losf-$';
 my $logr = get_logger();
 
 verify_sw_dependencies(); $logr->level($ERROR);
-init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
+init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 $logr->level($INFO);
 print_header();
 
@@ -69,7 +69,7 @@ print "   --> tmpfile = $tmpfile\n";
 if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
     if ( "$myval" eq "yes" ) {
 	INFO("   --> IPs assigned from file (ips.$node_cluster)\n");
-        if ( ! -e ("$osf_custom_config_dir/ips."."$node_cluster") ) {
+        if ( ! -e ("$losf_custom_config_dir/ips."."$node_cluster") ) {
 	    MYERROR("ips.$node_cluster file does not exist");
 	}
 	$assign_from_file = 1;

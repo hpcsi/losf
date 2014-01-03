@@ -22,8 +22,6 @@
 #
 #-----------------------------------------------------------------------el-
 # Configuration paths definitions.
-#
-# $Id$
 #--------------------------------------------------------------------------
 
 package LosF_paths;
@@ -31,27 +29,25 @@ use strict;
 use base 'Exporter';
 use File::Basename;
 
-our @EXPORT            = qw($osf_top_dir 
-			    $osf_config_dir
-                            $osf_custom_config_dir
-		            $osf_utils_dir
-		            $osf_log4perl_dir
-		            $osf_ini4perl_dir
-                            $osf_term_prompt_dir
-			    $osf_osupdates_dir);
+our @EXPORT            = qw($losf_top_dir 
+			    $losf_config_dir
+                            $losf_custom_config_dir
+		            $losf_utils_dir
+		            $losf_log4perl_dir
+		            $losf_ini4perl_dir);
 
 # Determine full path to LosF install
 		       
-our $osf_top_dir       = "";
+our $losf_top_dir       = "";
 
 my ($filename,$basename) = fileparse($0);
 
 # Strip off utils/ dir if necessary
 
 if ($basename =~ m/(.*)\/utils\/$/) {
-    our $osf_top_dir = $1;
+    our $losf_top_dir = $1;
 } else {
-    our $osf_top_dir = $basename;
+    our $losf_top_dir = $basename;
 }
 
 # ----------------------------------------------------------------------
@@ -81,14 +77,14 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 	if($config_dir =~ /(.*)\/$/) {
 	    chop($config_dir);
 	}
-	our $osf_config_dir        = $config_dir;
-	our $osf_custom_config_dir = $config_dir;
+	our $losf_config_dir        = $config_dir;
+	our $losf_custom_config_dir = $config_dir;
 ###	our $osf_custom_config = 1;
     } else {
 	MYERROR("LOSF_CONFIG_DIR provided path does not exist ($config_dir)");
     }
 } else {
-    my $local_config_file="$osf_top_dir/config/config_dir";
+    my $local_config_file="$losf_top_dir/config/config_dir";
     if ( -s $local_config_file ) {
 	open (my $IN,"<$local_config_file") || MYERROR("Unable to open  file ($local_config_file)");
 	my $local_config_dir = <$IN>;
@@ -102,27 +98,26 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 		chop($local_config_dir);
 	    }
 
-	    our $osf_config_dir        = "$local_config_dir";
-	    our $osf_custom_config_dir = "$local_config_dir";
+	    our $losf_config_dir        = "$local_config_dir";
+	    our $losf_custom_config_dir = "$local_config_dir";
 	} else {
 	    print "\nError: A valid LosF config directory was not provided. You must provide a valid config\n";
 	    print "path for your local cluster. You can do this via one of two methods:\n\n";
 	    print "  (1) Set the LOSF_CONFIG_DIR environment variable\n";
-	    print "  (2) Add your desired config path to the file -> $osf_top_dir/config/config_dir\n\n";
-	    print "Example configuration files are availabe at -> $osf_top_dir/config/config_example\n\n";
+	    print "  (2) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n\n";
+	    print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n\n";
 	    exit(1);
 	}
     }
 }
 
-our $osf_utils_dir         = "$osf_top_dir/utils";
-our $osf_log4perl_dir      = "$osf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
-our $osf_ini4perl_dir      = "$osf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
-our $osf_term_prompt_dir   = "$osf_utils_dir/dependencies/Term-Prompt-1.04/lib";
-our $osf_osupdates_dir     = "$osf_top_dir/os-updates";
+our $losf_utils_dir         = "$losf_top_dir/utils";
+our $losf_log4perl_dir      = "$losf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
+our $losf_ini4perl_dir      = "$losf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
+our $osf_osupdates_dir     = "$losf_top_dir/os-updates";
 
-unless(-d $osf_osupdates_dir){
-    mkdir $osf_osupdates_dir or die("[ERROR]: Unable to create dir ($osf_osupdates_dir)\n");
-}
+#unless(-d $osf_osupdates_dir){
+#    mkdir $osf_osupdates_dir or die("[ERROR]: Unable to create dir ($osf_osupdates_dir)\n");
+#}
 
 1;

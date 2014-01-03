@@ -26,7 +26,7 @@
 
 use LosF_paths;
 use base 'Exporter';
-use lib "$osf_log4perl_dir";
+use lib "$losf_log4perl_dir";
 use Sys::Syslog;  
 use Switch;
 use Fcntl qw(:flock);
@@ -258,7 +258,7 @@ sub expand_text_macros {
 
     # @losf_synced_file_notice@ 
 
-    my $template = "$osf_custom_config_dir/const_files/$cluster/notify_header";
+    my $template = "$losf_custom_config_dir/const_files/$cluster/notify_header";
 
     if ( -s "$template" ) {
 	DEBUG( "   --> notify_header file available\n");
