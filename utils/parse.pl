@@ -21,7 +21,6 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
 # Input File Parsing Utilities: Used to query specific variables
 # from .ini style configuration files.
 #--------------------------------------------------------------------------

@@ -52,8 +52,7 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
-    print "     version, --version                   Print version number and exit\n";
-    print "     initconfig [cluster-name]            Initialize a new LosF config directory for a cluster\n\n";
+    print "     version, --version                   Print version number and exit\n\n";
 
     print color 'bold blue';
     print "  Host Registration:\n";

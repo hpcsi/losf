@@ -149,14 +149,24 @@ should work with CentOS distributions is outlined in the following sections.
 
    (c) Create necessary baseline configuration files for the current cluster.
 
-       Some rudimentary configuration example files are provided in the
+       Rudimentary configuration example files are provided in the
        "config/config_example" directory for a cluster designated as "Bar". These can be
        used as the basis for creating the necessary configuration files for your cluster
        in $config_dir and help to illustrate some of the available options.
-       Alternatively, you can use the losf utility to initialize the cluster with a
+       
+       Alternatively, you can use a convenience utility to initialize the cluster with a
        vanilla configuration as follows:
 
-       $ losf initconfig <YourClusterName>
+       $ <losf-install> initconfig <YourClusterName>
+
+       This utility will define a single "default" node type based on the local hostname
+       and domainname of the host on which it is executed. If the basic initialization is
+       complet, it should be possible to run the "update" utility. Example output after
+       running initconfig is shown below indicating that no specifi configuration
+       features have been requested and host is presently up to date.
+
+       $ update -q
+       OK: [RPMs: OS 0/0  Custom 0/0] [Files: 0/0] [Links: 0/0] [Services: 0/0] [Perms: 0/0] -> default
 
 -------------------------------------------------------------------------------------------------
 
@@ -187,7 +197,7 @@ should work with CentOS distributions is outlined in the following sections.
        options pertaining to host configuration files, runtime services, file
        permissions, soft links, and (optionally), cobbler provisioning options.
 
-       If you used the "losf initconfig" option to initialize your configuration,
+       If you used the "initconfig" option to initialize your configuration,
        the initial file will be very minimal with no configuration options registered.
        See <losf-install>/config/config.Bar for details on example syntax and options. 
 
