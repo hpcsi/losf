@@ -63,10 +63,10 @@ admin           = sm[1-2]
 compute         = c[4-5][0-9][0-9]-[0-9]0[0-9]|c400-11[0-6]
 
 # Define location of RPM package directory (note that you can override
-# the default value for a particular node type)
+# the default value for a particular node type). 
 
-rpm_build_dir     = /admin/losf/rpms/RPMS
-rpm_build_compute = /lustre/admin/losf/rpms/RPMS
+rpm_dir         = /admin/losf/rpms/RPMS
+rpm_dir_compute = /lustre/admin/losf/rpms/RPMS
 
 
 
