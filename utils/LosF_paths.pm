@@ -56,10 +56,10 @@ sub print_no_defined_config_path_message {
     print "path for your local cluster. This can be accomplished via one of two methods:\n\n";
     print "  (1) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n";
     print "  (2) Set the LOSF_CONFIG_DIR environment variable\n\n";
-    print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n\n";
+    print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n";
 
     print "\nFor new systems, you can also run \"losf initconfig <YourClusterName>\" to create a\n";
-    print "to create a vanilla NOOP configuration\n";
+    print "to create a vanilla NOOP configuration\n\n";
     exit(1);
 }
 
