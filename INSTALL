@@ -1,122 +1,258 @@
 
--------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
 LosF: A Linux operating system Framework for managing HPC clusters
--------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
 
-LosF is optionally designed to coordinate with Cobbler
-(http://www.cobblerd.org), which is used to perform bare-metal
-provisioning. If you want to use LosF to manage the Cobbler
-provisioning configuration, you will need to identify at least one
-master host on your cluster to serve as the provisioning server. If
-your master server has external network access, you can download the
-necessary packages to setup Cobbler from the EPEL repository
-(https://fedoraproject.org/wiki/EPEL). There are many resources
-available online regarding EPEL and Cobbler.
+This file outlines the steps for installing LosF and associated dependencies. Certain
+sections or steps or steps are optional and are identified as such. In particular, LosF
+is designed to optionally coordinate with Cobbler (http://www.cobblerd.org), which is
+used to perform bare-metal provisioning. If you want to use LosF to manage the Cobbler
+provisioning configuration, you will need to identify at least one master host on your
+cluster to serve as the provisioning server. If your master server has external network
+access, you can download the necessary packages to setup Cobbler from the EPEL repository
+(https://fedoraproject.org/wiki/EPEL). There are many resources available online
+regarding EPEL and Cobbler.
 
-A quickstart method for setting up Cobbler and LosF on a new cluster
-that should work with CentOS distributions is outlined in the
-following sections.
+A quickstart method for setting up LosF and optionally, Cobbler on a new cluster that
+should work with CentOS distributions is outlined in the following sections.
 
----------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
 
-1. Install a master server from baseline OS distribution (e.g. CentOS)
+1. Install a master server from baseline OS distribution (e.g. CentOS).
 
-(a) Boot from installation media and install as desired. Note: if you
-    are planning to use Cobbler's functionality to mirror
-    repositories, be aware that the default storage location is
-    /var/www. Consequently, consider providing ample space to your
-    /var partition (e.g. 40G or more) during the base install
-    procedure.
-
-(b) Configure basic networking. At a minimum, you will likely want to
-    configure two network interfaces: (1) one interface for internal
-    cluster access (eg. eth0 on a private subnet) and (2) one
-    interface for external access to the outside world (eg. eth1 into
-    your existing WAN).
-
-    Register your master server with an EPEL repo. See
-    http://fedoraproject.org/wiki/EPEL/FAQ for more information. An
-    example for CentOS6 is below:
-
-    $ rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-
-(c) [Optional]: Install cobbler software and associated
-depenencies. Cobbler can be used for bare-metal provisioning, but LosF
-
-(b) Install cobbler software and necessary dependencies for LosF on
-master server.
-
-    $ yum install cobbler
-    $ yum install pykickstart
-
-    LosF Requirements:
-
-    $ yum install yum-plugin-downloadonly
-    $ yum install perl-Log-Log4perl
-    $ yum install perl-Config-IniFiles
-
----------------------------------------------------------------------------
-
-2. Perform a basic configuration for Cobbler
-
-(a) Edit /etc/cobbler/settings file to define the IPs for your master
-    server. Relevant variables to update are:
-
-    next_server
-    server
-    default_password_crypted
-
-    The default_password_crypted is the location to define the root
-    password that will be used during the provisioning process. You
-    need to change this from the default password to a strong password
-    of your own choosing. You can define the crypted hash via:
-
-    $openssl passwd -1 -salt 'random-phrase-here' 'your-password-here'
-
-(b) Start cobbler
-
-    /etc/init.d/cobbler start
-
-(c) Import an OS distribution (e.g. from the media used to install the
-    initial server). Assuming a CentOS distribution DVD is in the
-    cdrom drive on your master host, you can mount an import as
-    follows:
-
-    $ mount /dev/cdrom /mnt/cdrom
-    $ cobbler import --path=/mnt/cdrom --name=CentOS6.5 --arch=x86_64
-    $ cobbler sync
-
-(d) Import an EPEL distribution (this will mirror the repo for use
-    locally throughout your cluster). An example for CentOS6 is below:
-
-    $ cobbler import --path=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
-      	      --name=epel6 --arch=x86_64
-
-(e) Mirror the newly defined EPEL repository (will take some time). 
-
-    $ cobbler reposync
-
-(f) Run cobbler check and fix any errors. You can safely ignore
-    warnings about a missing debmirror or fencing tools.
-
----------------------------------------------------------------------------
-
-2. Install and perform baseline configuration for LosF
-
-(a) Clone a copy of LosF or untar from a release tarball, preferably
-    into a shared file system that will be available across the
-    cluster. 
-
-    Suggestion: Assuming you have additional drives availabe in your
-    master host, a reasonable place to install is into an admin
-    partition hosted by your master hosts.
-
-   $ git clone [url to go here]  /your/local/path
-
-(b) 
-
+   (a) Boot from installation media and install as desired. 
    
+       Note: if you are planning to use Cobbler's functionality to mirror repositories,
+       be aware that the default storage location is /var/www. Consequently, consider
+       providing ample space to your /var partition (e.g. 40G or more) during the base
+       install configuration procedure.
 
+   (b) Configure basic networking. At a minimum, you will likely want to configure two
+       network interfaces: (1) one interface for internal cluster access (eg. eth0 on a
+       private subnet) and (2) one interface for external access to the outside world
+       (eg. eth1 into your existing WAN).
 
+   (c) Add EPEL repo access to your master server. 
 
+       See http://fedoraproject.org/wiki/EPEL/FAQ for more information. An example for
+       CentOS6 is below:
+   
+       $ rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+   
+   (c) [ Optional ]: Install baseline cobbler software and it's associated dependencies
+       (available from the EPEL repo above). Cobbler can be used for bare-metal
+       provisioning, but LosF is used for configuration management after a base install,
+       so other provisioning mechanisms can be used as desired.  Assuming your master
+       server has external network access, the necessary packages can be installed as
+       follows:
+   
+       $ yum install cobbler
+       $ yum install pykickstart
 
+   (d) Install LosF OS software dependencies. LosF requires a yum download plugin and two
+       specific perl modules. These are also available from the EPEL repo:
+   
+       $ yum install yum-plugin-downloadonly
+       $ yum install perl-Log-Log4perl
+       $ yum install perl-Config-IniFiles
+
+-------------------------------------------------------------------------------------------------
+
+2. [ Optional ] Perform a basic configuration for Cobbler. 
+
+   Before you can use cobbler, you need to define a basic working configuration. See
+   http://www.cobblerd.org and other online resources for more information; a starting
+   point for a basic configuration outline on your master cluster server is outlined as
+   follows:
+
+   (a) Edit /etc/cobbler/settings file to define the IPs for your master server. Relevant
+       variables to update are:
+   
+       next_server
+       server
+       default_password_crypted
+   
+       The default_password_crypted is the location to define the root password that will
+       be used during the provisioning process. You need to change this from the default
+       password to a strong password of your own choosing. You can define the crypted
+       hash via:
+   
+       $openssl passwd -1 -salt 'random-phrase-here' 'your-password-here'
+   
+   (b) Start cobbler.
+   
+       $ /etc/init.d/cobbler start
+   
+   (c) Import an OS distribution (e.g. from the media used to install the initial
+       server). Assuming a CentOS distribution DVD is in the cdrom drive on your master
+       host, you can mount an import as follows:
+   
+       $ mount /dev/cdrom /mnt/cdrom
+       $ cobbler import --path=/mnt/cdrom --name=CentOS6.5 --arch=x86_64
+       $ cobbler sync
+   
+   (d) Import an EPEL distribution (this will mirror the repo for use locally throughout
+       your cluster). An example for CentOS6 is below:
+   
+       $ cobbler import --path=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
+         	      --name=epel6 --arch=x86_64
+   
+   (e) Mirror the newly defined EPEL repository (note: this will take some time).
+   
+       $ cobbler reposync
+   
+   (f) Run cobbler check and fix any remaining errors. Note that you can safely ignore
+       warnings about a missing debmirror or fencing tools.
+
+-------------------------------------------------------------------------------------------------
+
+3. Install and perform baseline configuration for LosF.
+
+   (a) Untar a release tarball (or clone desired version for GitHub directly), preferably
+       into a shared file system that will be available across the cluster.
+   
+       Suggestion: Assuming you have additional drives available in your master host, a
+       reasonable place to install is into an admin directory or partition hosted by your
+       chosen master host.
+   
+   (b) Define LosF config path and initialize for the current cluster.
+   
+       Note that you can manage multiple clusters with a single LosF install, but you
+       need to first choose a top-level config directory (config_dir) and designate a
+       unique identifier for the local cluster. There are two options for defining the
+       local config directory:
+   
+          (1) set in "config/config_dir" file in local LosF install dir
+          (2) set via the "LOSF_CONFIG_DIR" environment variable
+   
+       For production usage, it is recommended to use option (1) to set the path directly
+       in the "config/config_dir" file, a simple ascii file. Alternatively, the second
+       environment variable option provides a convenient way to override the default
+       config path to test alternate config settings prior to a production rollout.
+
+       To set the config_dir via option (1), consider the following depending on whether
+       this is a new install or upgrade.
+
+          (i)  New installs: A template file is provided that you can copy and edit to
+	       identify a preferred path:
+	       
+	       $ cd <losf-install>/config 
+               $ cp config_dir.template config_dir [then edit to suit]
+
+	  (ii) Upgrades: if you have been using a previous version of LosF and are
+	       upgrading to a newer release, you can simply copy your previous
+	       config/config_dir file into the latest install path.
+
+       Note that for a first-time install, you will likely not have a pre-existing
+       config_dir for LosF; in that case, the path you choose will be created during the
+       following initialization step.
+
+   (c) Create necessary baseline configuration files for the current cluster.
+
+       Some rudimentary configuration example files are provided in the
+       "config/config_example" directory for a cluster designated as "Bar". These can be
+       used as the basis for creating the necessary configuration files for your cluster
+       in config_dir and help to illustrate some of the available options. Alternatively,
+       you can use the losf utility to initialize the cluster with a vanilla
+       configuration as follows:
+
+       $ losf initconfig <YourClusterName>
+
+-------------------------------------------------------------------------------------------------
+
+4. Customize cluster configuration
+
+   See the top-level LosF README for a brief introduction on the primary-command line
+   utilities available. In addition, running "losf" with no command-line options will
+   provide documentation on the available options and syntax. Prior to running any
+   commands, customize the cluster configuration:
+
+   (a) Update config.machines file.
+
+       To begin, the first file to edit is the $config_dir/config.machines file to define
+       the domainname of your new cluster, provide desired node type definitions
+       (e.g. logins, compute, io, etc), and define the location to house RPMs registered
+       with LosF.  The configuration files are simple, ascii keyword driven files that
+       are organized by [sections] and can be edited directly.
+
+       See <losf-install>/config/config.machines for more details and example syntax.
+
+       $ <losf-install>/update -q
+
+   (b) Update config.<YourClusterName> file.
+
+       Once the cluster and node types have been identified, the next file to update is
+       the cluster-specific config file at $config_dir/config.<YourClusterName>. This
+       keyword driven input file is used to define all of the desired configuration
+       options pertaining to host configuration files, runtime services, file
+       permissions, soft links, and (optionally), cobbler provisioning options.
+
+       If you used the "losf initconfig" option to initialize your configuration,
+       the initial file will be very minimal with no configuration options registered.
+       See <losf-install>/config/config.Bar for details on example syntax and options. 
+
+       Note: when adding new configuration files to sync across the cluster (e.g. in the
+       [ConfigFiles] section), it is important to provide a reference template file for
+       the node type in which you desire to synchronize the file. These reference
+       templates should be maintained in:
+
+       $config_dir/const_files/<YourClusterName>/<Node Type>
+
+   Suggestion: for traceability, it is recommended to track your local config changes
+   using your favorite version control system (e.g. git, subversion, etc.).
+
+-------------------------------------------------------------------------------------------------
+
+5. Manage/update your snazzy HPC cluster.
+
+   With a working LosF install and configuration in place (and OS distribution repository
+   defined via external network access or from local Cobbler mirroring), you should be
+   able to further customize your system and synchronize system-wide based on desired
+   node type settings. The following examples highlight a few common tasks:
+
+   (a) Update host to latest state. 
+
+       The "update" utility is used to bring a node to the latest configuration status
+       (via the installation/removal of desired packages and synchronization of
+       configuration files and services).  Basic usage is below (or see
+       "<losf-install>/update -h"):
+
+       usage: update [OPTIONS]
+        
+       OPTIONS:
+          -h          Show help message.
+          -q          Quiet logging mode; shows detected system changes only.
+          -p [path]   Override configured RPM source directory to prefer provided path instead.
+          -v          Print version number and exit.
+
+   (b) Add OS packages.
+
+       You can add additional OS packages using the "losf" utility. The utility will
+       automatically download any associated dependencies and configure the OS packages
+       for the *local* node type where you are executing the command.
+
+       The following example highlights the process to add the "finger" package, followed
+       by update to push the package install.
+
+       $ losf addpkg finger
+       $ update -q
+
+       More sophisticated options for adding OS groups and updating OS packages are also
+       available. See "losf -h" for more details.
+
+   (c) Add Custom 3rd packages.
+
+       HPC systems frequently require custom packages that are not part of a standard
+       Linux distribution mechanism (e.g. commercial compilers, open-source parallel
+       file systems, MPI stacks, etc). The "losf" utility provides a way to manage custom
+       RPMs and organize groups of related custom RPMs via aliases. See "losf -h" for
+       more details regarding management of custom RPMs. The example below shows a simple
+       example registering a locally built RPM for the MVAPICH2 open-source project and
+       installing it locally via update.
+
+       $ losf addrpm ./mvapich2-2.0-1.x86_64
+       $ update -q
+
+       More sophisticated options for managing multi-version RPMs, relocatable RPMs, and
+       aliases are available. Please see "losf -h" for more details.
+   
