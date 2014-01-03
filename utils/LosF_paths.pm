@@ -53,9 +53,9 @@ if ($basename =~ m/(.*)\/utils\/$/) {
 sub print_no_defined_config_path_message {
 
     print "\nError: A valid LosF config directory was not provided. You must provide a valid config\n";
-    print "path for your local cluster. You can do this via one of two methods:\n\n";
-    print "  (1) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n\n";
-    print "  (2) Set the LOSF_CONFIG_DIR environment variable\n";
+    print "path for your local cluster. This can be accomplished via one of two methods:\n\n";
+    print "  (1) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n";
+    print "  (2) Set the LOSF_CONFIG_DIR environment variable\n\n";
     print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n\n";
     exit(1);
 }
