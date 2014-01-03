@@ -918,24 +918,6 @@ BEGIN {
 
 	my $ALL_type = "ALL";
 
-###	# verify *non* existence of desired packages for ALL node types
-###
-###	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$ALL_type);
-###	foreach my $rpm (@custom_rpms_remove) {
-###	    DEBUG("   --> Custom rpm removal requested for ALL = $rpm\n");
-###	}
-###
-###	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
-###
-###	# verify *non* existence of desired packages current  node type
-###
-###	my @custom_rpms_remove = query_cluster_config_custom_packages_remove($node_cluster,$node_type);
-###	foreach my $rpm (@custom_rpms_remove) {
-###	    DEBUG("   --> Custom rpm removal requested for node:$node_type = $rpm\n");
-###	}
-###
-###	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
-###
 	# verify packages for ALL node types
 
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$ALL_type);
@@ -957,8 +939,6 @@ BEGIN {
 
 	end_routine();
     }
-
-
 
 }
 
