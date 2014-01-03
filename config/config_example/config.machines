@@ -46,7 +46,7 @@ gridftp    = gridftp[1-2]
 
 rpm_dir = /work/build/rpms/RPMS
 
-# Example high-level cluster config for Stampede
+# Example high-level cluster config for Bar
 
 [Bar]
 
