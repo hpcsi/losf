@@ -20,7 +20,7 @@ capabilities and features provided by LosF on HPC clusters include:
 * soft links
 * OS packages from distros (RPM based)
 * custom 3rd party HPC packages (RPM based)
-* historical host logs
+* historical host logging (beta, still under development)
 
 There are three primary top-level command line utilities provided by LosF:
 
