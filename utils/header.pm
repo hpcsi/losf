@@ -31,10 +31,10 @@ sub print_header {
     my $logr  = get_logger();
     my $ver   = "";
 
-    if ( ! -e "$osf_utils_dir/VERSION" ) {
+    if ( ! -e "$losf_utils_dir/VERSION" ) {
 	MYERROR("Unable to obtain version...please verify local LosF install");
     } else {
-	open ($IN,"<$osf_utils_dir/VERSION") || MYERROR("Unable to open VERSION file");
+	open ($IN,"<$losf_utils_dir/VERSION") || MYERROR("Unable to open VERSION file");
 	$ver = <$IN>;
 	chomp($ver);
 	close($IN);

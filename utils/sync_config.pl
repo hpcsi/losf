@@ -32,17 +32,17 @@ use File::Compare;
 use File::Copy;
 use File::Temp qw(tempfile);
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
 
-require "$osf_utils_dir/utils.pl";
-require "$osf_utils_dir/parse.pl";
-require "$osf_utils_dir/header.pl";
-require "$osf_utils_dir/sync_config_utils.pl";
+require "$losf_utils_dir/utils.pl";
+require "$losf_utils_dir/parse.pl";
+require "$losf_utils_dir/header.pl";
+require "$losf_utils_dir/sync_config_utils.pl";
 
 # Only one LosF instance at a time
 losf_get_lock();
@@ -55,7 +55,6 @@ parse_and_sync_permissions();
 # Done with lock
 
 our $LOSF_FH_lock; close($LOSF_FH_lock);
-
 
 1;
 
