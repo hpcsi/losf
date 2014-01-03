@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2013 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz <losf@koomie.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -38,20 +38,21 @@ use File::stat;
 use File::Temp qw(tempfile);
 use Term::ANSIColor;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir";
 
-require "$osf_utils_dir/utils.pl";
-require "$osf_utils_dir/parse.pl";
-require "$osf_utils_dir/header.pl";
-require "$osf_utils_dir/rpm_utils.pl";
+require "$losf_utils_dir/utils.pl";
+require "$losf_utils_dir/parse.pl";
+require "$losf_utils_dir/header.pl";
+require "$losf_utils_dir/rpm_utils.pl";
 
 # Global vars to count any detected changes
 
-use vars qw($losf_const_updated     $losf_const_total);
-use vars qw($losf_softlinks_updated $losf_softlinks_total);
-use vars qw($losf_services_updated  $losf_services_total);
+use vars qw($losf_const_updated       $losf_const_total);
+use vars qw($losf_softlinks_updated   $losf_softlinks_total);
+use vars qw($losf_services_updated    $losf_services_total);
+use vars qw($losf_permissions_updated $losf_permissions_total);
 
 BEGIN {
 
@@ -76,7 +77,7 @@ BEGIN {
 	
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	
-	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
 	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
@@ -153,7 +154,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing soft links ($node_cluster:$node_type)\n");
 
-	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
@@ -192,7 +193,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing runlevel services ($node_cluster:$node_type)\n");
 
-	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
 	# Node type-specific settings: these take precedence over global
 	# settings; apply them first
@@ -248,11 +249,11 @@ BEGIN {
 	# files.  If a configfile.<hostname> exists, we choose this
 	# file to sync in favor of the default configfile.
 
-	my $sync_file = "$osf_custom_config_dir/const_files/$cluster/$type/$basename.$host_name";
+	my $sync_file = "$losf_custom_config_dir/const_files/$cluster/$type/$basename.$host_name";
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {
-	    $sync_file = "$osf_custom_config_dir/const_files/$cluster/$type/$basename";
+	    $sync_file = "$losf_custom_config_dir/const_files/$cluster/$type/$basename";
 	    DEBUG("   --> Looking for file $sync_file\n");
 	} else {
 	    $customized = 1;
@@ -383,7 +384,7 @@ BEGIN {
 	my $basename = basename($file);
 	DEBUG("   --> [$basename] Attempting to partially sync file: $file\n");
 	
-	my $sync_file = "$osf_custom_config_dir/const_files/$cluster/$type/$basename";
+	my $sync_file = "$losf_custom_config_dir/const_files/$cluster/$type/$basename";
 	DEBUG("   --> Looking for file $sync_file\n");
 
 	if ( ! -s $sync_file ) {
@@ -588,17 +589,54 @@ BEGIN {
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
 
-	init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
+	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
 
+	$losf_permissions_total = scalar keys %perm_files;
+
 	while ( my ($key,$value) = each(%perm_files) ) {
+
 	    DEBUG("   --> $key => $value\n");
 
-	    if ( -e $key || -d $key ) {
-		my $cmd_string = sprintf("chmod %i %s",$value,$key);
-		system($cmd_string); 
+	    my $parent_dir = dirname($key);
+
+	    # Check on existence of user-desired directory.
+	    # Directoreis are designated via the presence of a
+	    # trailing /
+
+	    if( $key =~ /(.*)\/$/) {
+		if( -d $key) {
+		    print_info_in_green("OK");
+		    INFO(": $key directory present\n");
+		} else {
+		    $losf_permissions_updated++;
+		    print_error_in_red("FAILED");
+		    ERROR(": Desired directory $key does not exist...creating\n");
+		    mkpath("$key") || MYERROR("Unable to create path $key");
+		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
+		    system($cmd_string); 
+		}
 	    }
-	}
+
+	    if ( -e $key || -d $key ) {
+		my $info = stat($key);
+		my $current_mode = $info->mode;
+
+		my $current_mode = sprintf("%4o",$current_mode & 07777);
+
+		if($current_mode == $value) {
+		    print_info_in_green("OK");
+		    INFO(": $key perms correct ($value)\n");
+		} else {
+		    $losf_permissions_updated++;
+		    print_error_in_red("FAILED");
+		    ERROR(": $key perms incorrect..setting to $value\n");
+
+		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
+		    system($cmd_string); 
+		}
+	    }
+	}		       
 
 	end_routine();
 	return;
@@ -773,7 +811,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Checking on OS packages to remove ($node_cluster:$node_type)\n");
 
-	init_local_os_config_file_parsing("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
+	init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
 
 	# verify that certain packages are *not* installed
 
@@ -798,7 +836,7 @@ BEGIN {
 	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing OS packages ($node_cluster:$node_type)\n");
 
-	init_local_os_config_file_parsing("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
+	init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
 
 	# now, verify that all desired os packages are installed
 
@@ -820,7 +858,7 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
+	init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 	INFO("** Checking on Custom packages to remove ($node_cluster:$node_type)\n");
 
@@ -868,7 +906,7 @@ BEGIN {
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
-	init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
+	init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 	my %custom_aliases = ();
 	my @custom_rpms    = ();
@@ -909,8 +947,6 @@ BEGIN {
 
 	# verify packages for current node types
 	
-###	INFO("\n");
-
 	@custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
 	foreach my $rpm (@custom_rpms) {

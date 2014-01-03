@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# Simple developer convenience utility to generate release tarballs
+# from local repo.
+
+RUNDIR=`dirname $0`
+
+if [ "$RUNDIR" != "." ];then
+    echo "Error: the export_tarball requires one to run from within the misc/ directory directly"
+    exit 1
+fi
+
+VERSION=`cat ../utils/VERSION`
+TARBALL=losf-$VERSION.tar.gz
+
+if [ -e $TARBALL ];then
+    rm $TARBALL
+fi
+echo " "
+echo "Packaging distribution tarball for LosF v$VERSION"
+
+cd ..
+git archive --format=tar master --prefix=losf-$VERSION/ | gzip -n > ./misc/$TARBALL
+
+if [ ! -s ./misc/$TARBALL ];then
+   echo "Error generating tarball.."
+   exit 1
+fi
+
+numfiles=`tar tvfz ./misc/$TARBALL | wc -l`
+md5sum=`md5sum ./misc/$TARBALL | awk '{print $1}'`
+
+echo "--> $TARBALL generated from local git repo"
+echo "--> numfiles included = $numfiles"
+echo "--> md5sum            = $md5sum"
+
+
+
+
+
