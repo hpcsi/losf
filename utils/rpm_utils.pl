@@ -175,7 +175,7 @@ sub verify_rpms {
 	INFO(": OS packages in sync ($num_rpms rpms checked)\n");
 	return;
     } else {
-	print_error_in_red("FAILED");
+	print_error_in_red("UPDATING");
 	ERROR(": A total of $count OS distro rpm(s) need updating\n");
     }
 
@@ -236,7 +236,7 @@ sub verify_rpms_removed {
     } else {
 	print "   --> ";
 	print color 'red';
-	print "FAILED";
+	print "UPDATING";
 	print color 'reset';
 	print ": A total of $count OS rpm(s) need to be removed $appliance\n";
     }
@@ -497,7 +497,7 @@ sub verify_custom_rpms {
 	INFO(": Custom packages in sync for $appliance: $num_rpms rpm(s) checked\n");
 	return;
     } else {
-	print_error_in_red("FAILED");
+	print_error_in_red("UPDATING");
 	ERROR(": A total of $count custom rpm(s) need updating for $appliance\n");
     }
 
@@ -650,7 +650,7 @@ sub verify_custom_rpms_removed {
 	INFO(": Verified desired Custom RPMs are *not* installed ($num_rpms total)...\n");
 	return;
     } else {
-	print_error_in_red("FAILED");
+	print_error_in_red("FAIL");
 	print ": A total of $count Custom rpm(s) need to be removed for $appliance\n";
     }
 
