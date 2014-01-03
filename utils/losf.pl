@@ -28,10 +28,9 @@ use warnings;
 use Switch;
 use LosF_paths;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir";
-use lib "$osf_term_prompt_dir";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
@@ -147,7 +146,7 @@ sub add_node  {
 
     if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
 	if ( "$myval" eq "yes" ) {
-	    $filename = "$osf_custom_config_dir/ips."."$node_cluster";
+	    $filename = "$losf_custom_config_dir/ips."."$node_cluster";
 	    INFO("   --> IPs assigned from file $filename\n");
 	    if ( ! -e ("$filename") ) {
 		MYERROR("$filename does not exist");
@@ -348,7 +347,7 @@ sub update_os_config {
     print "** Upgrading OS package config file format to latest version (1.1)\n";
     my $section = "OS Packages";
 
-    INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+    INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
     my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
     # Check and update all OS packages for all currently defined node types
@@ -445,9 +444,9 @@ sub update_os_config {
 
     }  # end loop over all node types
 
-    my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+    my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
     $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -598,7 +597,7 @@ sub update_custom_config {
     begin_routine();
 
     print "** Upgrading Custom RPM package config file format to latest version (1.1)\n";
-    INFO("   Reading Custom RPM  package config file -> $osf_custom_config_dir/custom-packages/"."$node_cluster/packages.config\n");
+    INFO("   Reading Custom RPM  package config file -> $losf_custom_config_dir/custom-packages/"."$node_cluster/packages.config\n");
 
     my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
@@ -610,9 +609,9 @@ sub update_custom_config {
     update_custom_config_section("Custom Packages/Aliases");
     update_custom_config_section("Custom Packages/uninstall");
 
-    my $new_file  = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
+    my $new_file  = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$losf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -715,7 +714,7 @@ sub update_distro_packages {
     my $host_name;
     chomp($host_name=`hostname -s`);
 
-    INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+    INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
     my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
     # Upgrade: since we are using arrays for input values, upgrade
@@ -809,9 +808,9 @@ sub update_distro_packages {
 
     # Update LosF config to include newly added distro packages
 
-    my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+    my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
     $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -917,7 +916,7 @@ sub add_distro_package {
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
-	INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+	INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
@@ -991,9 +990,9 @@ sub add_distro_package {
 	
 	# Update LosF config to include newly added distro packages
 
-	my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-	my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-	my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+	my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+	my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+	my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1103,7 +1102,7 @@ sub add_distro_group {
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
-	INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+	INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
@@ -1165,9 +1164,9 @@ sub add_distro_group {
 	
 	# Update LosF config to include newly added distro packages
 
-	my $new_file = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-	my $ref_file = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-	my $hist_dir = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+	my $new_file = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+	my $ref_file = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+	my $hist_dir = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1253,7 +1252,7 @@ sub add_custom_rpm {
 
     INFO("\n");
     INFO("   --> Reading Custom package config file:\n");
-    INFO("       --> $osf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
+    INFO("       --> $losf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
 
     my @custom_rpms    = {};
     my %custom_aliases = ();
@@ -1468,9 +1467,9 @@ sub add_custom_rpm {
 
     # Update LosF config to include desired custom package
 
-    my $new_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
-    my $ref_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config";
-    my $hist_dir = "$osf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
+    my $new_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir = "$losf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1534,7 +1533,7 @@ sub add_alias {
 
     INFO("\n");
     INFO("   --> Reading Custom package config file:\n");
-    INFO("       --> $osf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
+    INFO("       --> $losf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
 
     my @custom_rpms  = {};
     
@@ -1563,9 +1562,9 @@ sub add_alias {
 
     # Update LosF config to include desired custom package
 
-    my $new_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
-    my $ref_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config";
-    my $hist_dir = "$osf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
+    my $new_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir = "$losf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1731,9 +1730,9 @@ my $logr = get_logger(); $logr->level($ERROR);
 verify_sw_dependencies(); 
 (my $node_cluster, my $node_type) = determine_node_membership();
 
-init_local_config_file_parsing       ("$osf_custom_config_dir/config."."$node_cluster");
-init_local_os_config_file_parsing    ("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
-init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
+init_local_config_file_parsing       ("$losf_custom_config_dir/config."."$node_cluster");
+init_local_os_config_file_parsing    ("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
+init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 $logr->level($INFO);
 

@@ -34,15 +34,15 @@ use File::Copy;
 use File::Temp qw(tempfile);
 use Term::ANSIColor;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
 use Getopt::Long;
 
-require "$osf_utils_dir/sync_config_utils.pl";
+require "$losf_utils_dir/sync_config_utils.pl";
 
 sub usage { 
 
@@ -113,7 +113,7 @@ our $losf_permissions_total       = 0;
 
 # Check for any necessary updates
 
-INFO("** Config dir -> $osf_config_dir\n");
+INFO("** Config dir -> $losf_config_dir\n");
 
 parse_and_uninstall_os_packages();
 parse_and_uninstall_custom_packages();
@@ -155,7 +155,7 @@ print "\n";
 
 ###(my $node_cluster, my $node_type) = determine_node_membership();
 
-my $custom_file = "$osf_top_dir/update.$node_cluster";
+my $custom_file = "$losf_top_dir/update.$node_cluster";
 
 if ( -x $custom_file ) {
     INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
