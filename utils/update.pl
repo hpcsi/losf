@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2013 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz <losf@koomie.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -34,15 +34,15 @@ use File::Copy;
 use File::Temp qw(tempfile);
 use Term::ANSIColor;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
 use Getopt::Long;
 
-require "$osf_utils_dir/sync_config_utils.pl";
+require "$losf_utils_dir/sync_config_utils.pl";
 
 sub usage { 
 
@@ -54,12 +54,14 @@ sub usage {
 	  
 }
 
+# Only one LosF instance at a time
+losf_get_lock();
+
+# Local node membership
 (my $node_cluster, my $node_type) = determine_node_membership();
 
 # Default logging is set to ERROR
-
 my $logr = get_logger();
-###$logr->level($INFO);
 
 # Check for update skip request
 
@@ -111,7 +113,7 @@ our $losf_permissions_total       = 0;
 
 # Check for any necessary updates
 
-INFO("** Config dir -> $osf_config_dir\n");
+INFO("** Config dir -> $losf_config_dir\n");
 
 parse_and_uninstall_os_packages();
 parse_and_uninstall_custom_packages();
@@ -128,13 +130,15 @@ INFO("\n");
 if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
     $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
     notify_local_log();
-    print_error_in_red("FAILED");
-    ERROR(":" );
+    print color 'red';
+    print "FAILED";
 } else { 
     print color 'green';
-    ERROR("OK: ");
-    print color 'reset';
+    print "OK";
 }
+
+print color 'reset';
+print ": ";
 
 print "[RPMs: OS $losf_os_packages_updated/$losf_os_packages_total ";
 print " Custom $losf_custom_packages_updated/$losf_custom_packages_total] ";
@@ -151,7 +155,7 @@ print "\n";
 
 ###(my $node_cluster, my $node_type) = determine_node_membership();
 
-my $custom_file = "$osf_top_dir/update.$node_cluster";
+my $custom_file = "$losf_top_dir/update.$node_cluster";
 
 if ( -x $custom_file ) {
     INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
@@ -160,6 +164,10 @@ if ( -x $custom_file ) {
     system("$custom_file $node_type");
     
 }
+
+# Done with lock
+
+our $LOSF_FH_lock; close($LOSF_FH_lock);
 
 1;
 

@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2013 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz <losf@koomie.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -28,10 +28,9 @@ use warnings;
 use Switch;
 use LosF_paths;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir";
-use lib "$osf_term_prompt_dir";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
@@ -53,7 +52,8 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
-    print "     version, --version                   Print version number and exit\n\n";
+    print "     version, --version                   Print version number and exit\n";
+    print "     initconfig [cluster-name]            Initialize a new LosF config directory for a cluster\n\n";
 
     print color 'bold blue';
     print "  Host Registration:\n";
@@ -89,9 +89,10 @@ sub usage {
     print "     These commands update the non-distro (custom) RPM configuration\n";
     print "     for the local node type on which the command is executed:\n";
     print "\n";
-
-    print "     addrpm    <OPTIONS> [rpm]            Add a new custom RPM for current node type\n";
+    print "     addrpm <OPTIONS> [rpm]               Add a new custom RPM for current node type\n";
+    print "     addalias  [name]                     Add defined alias to custom RPM list for current node type\n";
     print "     showalias                            Show all currently defined aliases\n";
+    print "     showalias [name]                     Show all rpms associated with a particular alias name\n";
     print "\n";
     print "     OPTIONS:\n";
     print "        --all                             Add rpm for all node types\n";
@@ -145,7 +146,7 @@ sub add_node  {
 
     if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
 	if ( "$myval" eq "yes" ) {
-	    $filename = "$osf_custom_config_dir/ips."."$node_cluster";
+	    $filename = "$losf_custom_config_dir/ips."."$node_cluster";
 	    INFO("   --> IPs assigned from file $filename\n");
 	    if ( ! -e ("$filename") ) {
 		MYERROR("$filename does not exist");
@@ -346,7 +347,7 @@ sub update_os_config {
     print "** Upgrading OS package config file format to latest version (1.1)\n";
     my $section = "OS Packages";
 
-    INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+    INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
     my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
     # Check and update all OS packages for all currently defined node types
@@ -443,9 +444,9 @@ sub update_os_config {
 
     }  # end loop over all node types
 
-    my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+    my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
     $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -596,7 +597,7 @@ sub update_custom_config {
     begin_routine();
 
     print "** Upgrading Custom RPM package config file format to latest version (1.1)\n";
-    INFO("   Reading Custom RPM  package config file -> $osf_custom_config_dir/custom-packages/"."$node_cluster/packages.config\n");
+    INFO("   Reading Custom RPM  package config file -> $losf_custom_config_dir/custom-packages/"."$node_cluster/packages.config\n");
 
     my @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
@@ -608,9 +609,9 @@ sub update_custom_config {
     update_custom_config_section("Custom Packages/Aliases");
     update_custom_config_section("Custom Packages/uninstall");
 
-    my $new_file  = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
+    my $new_file  = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$losf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -713,7 +714,7 @@ sub update_distro_packages {
     my $host_name;
     chomp($host_name=`hostname -s`);
 
-    INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+    INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
     my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
     # Upgrade: since we are using arrays for input values, upgrade
@@ -807,9 +808,9 @@ sub update_distro_packages {
 
     # Update LosF config to include newly added distro packages
 
-    my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-    my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-    my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+    my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+    my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+    my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
     $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -829,7 +830,7 @@ sub update_distro_packages {
 	    MYERROR("Unable to save previous OS config file\n");
 	rename($new_file,$ref_file)                 || 
 	    MYERROR("Unaable to update OS config file\n");
-	print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+	print "\n\nOS config update complete; you can now run \"update\" to make changes take effect.\n";
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
@@ -915,7 +916,7 @@ sub add_distro_package {
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
-	INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+	INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
@@ -989,9 +990,9 @@ sub add_distro_package {
 	
 	# Update LosF config to include newly added distro packages
 
-	my $new_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-	my $ref_file  = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-	my $hist_dir  = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+	my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+	my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+	my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1009,7 +1010,7 @@ sub add_distro_package {
 	    print "   --> Updating OS config file...\n";
 	    rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous OS config file\n");
 	    rename($new_file,$ref_file)                 || MYERROR("Unaable to update OS config file\n");
-	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect\n";
+	    print "\n\nOS config update complete; you can now run \"update\" to make changes take effect.\n";
 	} else {
 	    unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
 	}
@@ -1101,7 +1102,7 @@ sub add_distro_group {
 	my $host_name;
 	chomp($host_name=`hostname -s`);
 
-	INFO("   Reading OS package config file -> $osf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
+	INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
 	# cache defined OS rpms. If the RPM is available, we derive
@@ -1163,9 +1164,9 @@ sub add_distro_group {
 	
 	# Update LosF config to include newly added distro packages
 
-	my $new_file = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
-	my $ref_file = "$osf_custom_config_dir/os-packages/$node_cluster/packages.config";
-	my $hist_dir = "$osf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+	my $new_file = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+	my $ref_file = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+	my $hist_dir = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
 
 	$local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1251,7 +1252,7 @@ sub add_custom_rpm {
 
     INFO("\n");
     INFO("   --> Reading Custom package config file:\n");
-    INFO("       --> $osf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
+    INFO("       --> $losf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
 
     my @custom_rpms    = {};
     my %custom_aliases = ();
@@ -1292,15 +1293,6 @@ sub add_custom_rpm {
     
     foreach $rpm (@custom_rpms) {
 	my @rpm_array  = split(/\s+/,$rpm);
-
-#	print "input rpm = $rpm\n";
-#	print "rpm_array[0] = $rpm_array[0]\n";
-#	print "looking to match $rpm_name-$version_info[1]\n";
-	
-#	if ($rpm_array[0] =~ /^$rpm_name-$version_info[1]-(\S+).($rpm_arch)$/ ) {
-#	print "rpm = $rpm\n";
-#	print "looking for $rpm_array[0]\n";
-#	print "name = $rpm_name\n";
 
 	if ($rpm_array[0] =~ /^$rpm_name-(\S+)-(\S+).($rpm_arch)$/ ) {
 
@@ -1475,9 +1467,9 @@ sub add_custom_rpm {
 
     # Update LosF config to include desired custom package
 
-    my $new_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
-    my $ref_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config";
-    my $hist_dir = "$osf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
+    my $new_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir = "$losf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
@@ -1506,31 +1498,34 @@ sub add_custom_rpm {
     return;
 } # end sub add_custom_rpm
 
-sub register_alias {
-
-    MYERROR("This function deprecated....");
+sub add_alias {
 
     begin_routine();
     my $alias            = shift;
-    my $node_config_type = shift;
 
-    my $appliance = $node_config_type;
+    INFO("\n** Checking on possible addition of RPM package alias: $alias\n");
 
-    if ( $node_config_type eq "local" ) {
-	$appliance = $node_type;
-    } 
-	
-    INFO("\n** Checking on possible addition of custom RPM alias: $alias\n");
+    # Verify alias exists
 
-    INFO("   --> Cluster = $node_cluster, Node Type = $appliance\n");
+    my %custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+
+    INFO("   --> Cluster = $node_cluster, Node Type = $node_type\n");
+
+    if( ! exists $custom_aliases{$alias} ) {
+	MYERROR("--> Alias $alias requested but not defined\n");
+    }  else {
+	my $group_size =  @{$custom_aliases{$alias}};
+	INFO("   --> Alias \@$alias contains $group_size entries:\n");
+    }
+
     INFO("\n");
-    INFO("   --> Would you like to add $alias \n");
-    INFO("       to your local LosF config for $node_cluster:".$appliance." nodes?\n\n");
+    INFO("   --> Would you like to add \@$alias to your local LosF config for $node_cluster:".
+	 $node_type." nodes?\n\n");
 
-    my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
+    my $response = ask_user_for_yes_no("Enter yes/no to confirm (or -1 to add to multiple node types): ",2);
 
     if( $response == 0 ) {
-	INFO("   --> Did not add $alias to LosF config, terminating....\n");
+	INFO("       --> Did not add $alias to LosF config, terminating....\n");
 	exit(-22);
     } 
 
@@ -1538,47 +1533,43 @@ sub register_alias {
 
     INFO("\n");
     INFO("   --> Reading Custom package config file:\n");
-    INFO("       --> $osf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
+    INFO("       --> $losf_custom_config_dir/custom-packages/$node_cluster/packages.config\n");
 
-    my @custom_rpms = {};
+    my @custom_rpms  = {};
+    
+    @custom_rpms = query_cluster_config_custom_packages($node_cluster,$node_type);
 
-    @custom_rpms    = query_cluster_config_custom_packages($node_cluster,$appliance);
-
-    # check to see if alias is already registered
+    # Verify alias is not already included.
 
     foreach $rpm (@custom_rpms) {
-	if( $rpm =~ m/^@(\S+)/ ) {
-	    my $group = $1;
-	    if( "$group" eq "$alias" )  {
-		INFO("       --> $alias already configured - ignoring addition request\n");
-		$is_configured = 1;
-		return;
-	    }
+	my @rpm_array = split(/\s+/,$rpm);
+
+	if ($rpm_array[0] eq "\@$alias" ) {
+	    MYERROR("--> \@$alias is already configured - ignoring addition request\n");
 	}
     }
 
-    if (! $is_configured ) {
-	INFO("       --> $alias not previously configured - Registering for addition\n"); 
+    my $section = "Custom Packages";
+    my $name    = $node_type;
 
-	if($local_custom_cfg->exists("Custom Packages","$node_type")) {
-	    $local_custom_cfg->push("Custom Packages",$appliance,"@"."$alias");
-	} else {
-	    $local_custom_cfg->newval("Custom Packages",$appliance,"@"."$alias");
-	}
+    if($local_custom_cfg->exists($section,$name)) {
+	$local_custom_cfg->push($section,$name,"\@$alias");
+    } else {
+	$local_custom_cfg->newval($section,$name,"@$alias");
     }
 
-    SYSLOG("User requested addition of custom RPM alias: $alias (type=$appliance)");
+    SYSLOG("User requested addition of custom RPM alias: \@$alias (type=$node_type)");
 
     # Update LosF config to include desired custom package
 
-    my $new_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
-    my $ref_file = "$osf_custom_config_dir/custom-packages/$node_cluster/packages.config";
-    my $hist_dir = "$osf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
+    my $new_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config.new";
+    my $ref_file = "$losf_custom_config_dir/custom-packages/$node_cluster/packages.config";
+    my $hist_dir = "$losf_custom_config_dir/custom-packages/$node_cluster/previous_revisions";
 
     $local_custom_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
 
-    if ( ! -s $new_file ) { MYERROR("Error accessing valid OS file for update: $new_file"); }
-    if ( ! -s $ref_file ) { MYERROR("Error accessing valid OS file for update: $ref_file"); }
+    if ( ! -s $new_file ) { MYERROR("Error accessing valid custom package file for update: $new_file"); }
+    if ( ! -s $ref_file ) { MYERROR("Error accessing valid custom package file for update: $ref_file"); }
 
     if ( compare($new_file,$ref_file) != 0 ) {
 
@@ -1588,22 +1579,24 @@ sub register_alias {
 
 	my $timestamp=`date +%F:%H:%M`;
 	chomp($timestamp);
-	print "   --> Updating Custom RPM config file...\n";
-	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || MYERROR("Unable to save previous custom config file\n");
-	rename($new_file,$ref_file)                || MYERROR("Unable to update custom config file\n");
-	print "\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect\n";
+	INFO("   --> Updating Custom RPM config file...\n");
+	rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+	    MYERROR("Unable to save previous custom config file\n");
+	rename($new_file,$ref_file) ||
+	    MYERROR("Unable to update custom config file\n");
+	INFO("\n\nCustom RPM config update complete; you can now run \"update\" to make changes take effect.\n");
     } else {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
 
     end_routine();
     return;
-} # end sub register_alias
+} # end sub add_alias
 
 sub show_defined_aliases {
 
     begin_routine();
-
+    
     my %custom_aliases = ();
 
     INFO("\n");
@@ -1624,6 +1617,35 @@ sub show_defined_aliases {
     end_routine();
     return;
 } # end sub show_defined_aliases()
+
+sub show_defined_alias_members {
+
+    begin_routine();
+
+    my $alias          = shift;
+    my %custom_aliases = ();
+
+    INFO("\n");
+    INFO("Querying locally defined alias for Cluster:$node_cluster -> $alias\n");
+
+    %custom_aliases = query_cluster_config_custom_aliases($node_cluster);
+
+    if( ! exists $custom_aliases{$alias} ) {
+	MYERROR("--> Alias $alias requested but not defined\n");
+    }
+
+    my $group_size =  @{$custom_aliases{$alias}};
+
+    INFO("\nAlias \@$alias contains $group_size entries:\n");
+
+    foreach $entry (@{$custom_aliases{$alias}}) {
+	my @rpm = split(/\s+/,$entry);
+	INFO("   --> $rpm[0]\n");
+    }
+
+    end_routine();
+    return;
+} # end sub show_defined_alias_members()
 
 sub update_losf_config_file {
     begin_routine();
@@ -1663,6 +1685,9 @@ sub update_losf_config_file {
 #-------------------------------------------
 # Main front-end for losf command-line tool
 #-------------------------------------------
+
+# Only one LosF instance at a time
+losf_get_lock();
 
 my $datestring = "";
 my $comment    = "";
@@ -1705,9 +1730,9 @@ my $logr = get_logger(); $logr->level($ERROR);
 verify_sw_dependencies(); 
 (my $node_cluster, my $node_type) = determine_node_membership();
 
-init_local_config_file_parsing       ("$osf_custom_config_dir/config."."$node_cluster");
-init_local_os_config_file_parsing    ("$osf_custom_config_dir/os-packages/$node_cluster/packages.config");
-init_local_custom_config_file_parsing("$osf_custom_config_dir/custom-packages/$node_cluster/packages.config");
+init_local_config_file_parsing       ("$losf_custom_config_dir/config."."$node_cluster");
+init_local_os_config_file_parsing    ("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
+init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 $logr->level($INFO);
 
@@ -1716,20 +1741,27 @@ switch ($command) {
     # Do the deed
 
     case "add"            { add_node     ($argument) };
+    case "addalias"       { add_alias    ($argument) };
     case "del"            { del_node     ($argument) };
     case "delete"         { del_node     ($argument) };
     case "reinsert"       { reinsert_node($argument) };
     case "sync"           { sync         ()          };
     case "version"        { print_header ()          };
-
-    case "addpkg"         { add_distro_package($argument)     };
-    case "addgroup"       { add_distro_group  ($argument)     };
-    case "showalias"      { show_defined_aliases()            };
+    case "addpkg"         { add_distro_package     ($argument)};
+    case "addgroup"       { add_distro_group       ($argument)};
     case "updatepkg"      { update_distro_packages($argument) };
     case "updatepkgs"     { update_distro_packages("ALL")     };
     case "config-upgrade" { 
 	update_os_config();
 	update_custom_config();
+    };
+
+    case "showalias"{ 
+	if( $argument ne '') {
+	    show_defined_alias_members($argument);
+	} else {
+	    show_defined_aliases();
+	}
     };
 
     case "addrpm"   { 
@@ -1840,7 +1872,6 @@ switch ($command) {
 
 	# TODO: abstract for alternative resource managers
 
-#	print "/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"\n";
 	my $rc = system("/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"");
 	    
 	if( $rc != 0) {
@@ -1868,4 +1899,10 @@ switch ($command) {
     usage();
     exit(1);
 }
+
+# Done with lock
+
+close($LOSF_FH_lock);
+
+1;
 

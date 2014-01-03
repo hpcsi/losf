@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2013 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz <losf@koomie.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -27,10 +27,7 @@
 use LosF_paths;
 use LosF_rpm_topdir;
 
-use lib "$osf_log4perl_dir";
-###use lib "$osf_rpm2_dir";
-###use lib "$osf_rpm2_arch_dir";
-
+use lib "$losf_log4perl_dir";
 
 use Sys::Syslog;  
 use Digest::MD5;
@@ -189,7 +186,6 @@ sub verify_rpms {
 
     my $cmd = "rpm -Uvh "."@rpms_to_install";
     
-#    print "cmd = $cmd\n";
     system($cmd);
 
     my $ret = $?;
@@ -596,22 +592,6 @@ sub verify_custom_rpms_removed {
 
 	DEBUG("       --> Checking for version info for $rpm\n");
 
-###	foreach $option (@rpm_array) {
-###
-###	    DEBUG("       --> Option = $option\n");
-###	    if( $option =~ m/version=(\S+)/ ) { 
-###		$desired_version = $1;
-###		DEBUG("            --> found version = $1\n");
-###	    } elsif ( $option =~ m/release=(\S+)/ ) { 
-###		$desired_release = $1;
-###		DEBUG("            --> found release = $1\n");
-###	    } elsif ( $option =~ m/arch=(\S+)/ ) { 
-###		$desired_arch = $1;
-###		DEBUG("            --> found arch = $1\n");
-###	    }
-###	}
-###
-
 	if( $rpm_array[1] =~ m/name=(\S+)/ ) { 
 	    $desired_name = $1;
 	    DEBUG("            --> found version = $1\n");
@@ -647,12 +627,6 @@ sub verify_custom_rpms_removed {
 	my @installed_rpms     = is_os_rpm_installed("$desired_name.$desired_arch");
 	my $installed_versions = @installed_rpms;
 
-#	if( $installed_versions > 1 ) {
-#	    ERROR("[ERROR]: Attempting to remove $desired_name.$desired_arch");
-#	    MYERROR("Internal LosF assert triggered - more than 1 rpm to remove");
-#	}
-#
-
 	for(my $count = 0; $count < $installed_versions; $count++) {
 	    my @installed = split(' ',$installed_rpms[$count]);
 
@@ -661,14 +635,13 @@ sub verify_custom_rpms_removed {
 		print "   --> $installed[0]-$installed[1]-$installed[2] is installed....registering for removal\n";
 		SYSLOG("Registering locally installed $installed_rpm[0]-$installed[1]-$installed[2] for removal");
 
-#		push(@rpms_to_remove,$rpm_array[0]);   # update on 6/1/13 to use additional config data
 		push(@rpms_to_remove,"$installed[0]-$installed[1]-$installed[2].$installed[3]");
 	    }
 	}
 
     }
 
-    # Do the transactions with gool ol' rpm command line (cuz perl interface sucks).
+    # Do the transactions with gool ol' rpm command line (since perl interface is below subpar).
 
     my $count = @rpms_to_remove;
 
@@ -726,8 +699,6 @@ sub query_all_installed_rpms {
 	my @rpm_array  = split(/\s+/,$entry);
 	my $key = "$rpm_array[0].$rpm_array[3]";
 
-###	@{$losf_global_rpms_installed{$key}} = @rpm_array;
-
 	# data structure is a hash -> array. Each array entry is a
 	# string with 4 values separated by whitespace corresponding
 	# to name, version, release, and arch respectively.  An array
@@ -757,9 +728,6 @@ sub is_os_rpm_installed {
     if (exists $losf_global_rpms_installed{$packagename} ) {
 	@matching_rpms = @{$losf_global_rpms_installed{$packagename}};
     } 
-
-###    print "num matches   = ".@matching_rpms."\n";
-###    print "matching rpms = @matching_rpms\n";
 
     return(@matching_rpms);
 
@@ -813,11 +781,6 @@ sub rpm_version_from_file {
 
     @rpm_info = split(' ',`rpm --nosignature -qp --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $filename`);
     
-#    print "name    = $rpm_info[0]\n";
-#    print "version = $rpm_info[1]\n";
-#    print "release = $rpm_info[2]\n";
-#    print "arch    = $rpm_info[3]\n";
-
     end_routine();
     return(@rpm_info);
 }
@@ -833,7 +796,6 @@ sub rpm_package_string_from_header {
     my @version = @_;
 
     end_routine();
-#    return("$version[0]-$version[1]-$version[2] (arch=$version[3])");
     return("$version[0]-$version[1]-$version[2].$version[3]");
 }
 
@@ -844,10 +806,6 @@ sub rpm_arch_from_filename {
     my $config_arch;
 
     # Trim suffix of .rpm 
-
-#    if ($rpm =~ m/(\S+).rpm$/ ) {
-#	$rpm = $1;
-#    }
 
     if( $rpm =~ /^\S+.x86_64$/ ) {
 	$config_arch = "x86_64"; 

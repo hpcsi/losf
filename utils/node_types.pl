@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2013 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz <losf@koomie.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -28,15 +28,15 @@ use strict;
 use LosF_paths;
 use LosF_utils;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir/";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir/";
 
 use base 'Exporter';
 
-require "$osf_utils_dir/utils.pl";
-require "$osf_utils_dir/parse.pl";
-require "$osf_utils_dir/header.pl";
+require "$losf_utils_dir/utils.pl";
+require "$losf_utils_dir/parse.pl";
+require "$losf_utils_dir/header.pl";
 
 my $output_mode = $ENV{'LOSF_LOG_MODE'};
 my $standalone  = $ENV{'LOSF_STANDALONE_UTIL'};
@@ -88,7 +88,7 @@ BEGIN {
         # Global Parsing
         #---------------
 	
-	init_config_file_parsing("$osf_config_dir/config.machines");
+	init_config_file_parsing("$losf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
 
 	# Check for custom config_dir - environment variable takes precedence
@@ -99,7 +99,7 @@ BEGIN {
 	    my $dir = query_cluster_local_config_dir($node_cluster,$node_type,$host_name);
 	    if ( "$dir" ne "" ) {
 		DEBUG("\n[note]: $host_name -> Using custom config dir override = $dir\n\n");
-		our $osf_custom_config_dir = $dir;
+		our $losf_custom_config_dir = $dir;
 	    }
 	}
 
@@ -109,7 +109,7 @@ BEGIN {
 
 	if($standalone == 1) {
 	    print "[LosF] Node type:       $node_cluster -> $node_type\n";
-	    print "[LosF] Config dir:      $osf_custom_config_dir\n";
+	    print "[LosF] Config dir:      $losf_custom_config_dir\n";
 	}
 
 	return($node_cluster,$node_type);

@@ -4,7 +4,7 @@
 # 
 # LosF - a Linux operating system Framework for HPC clusters
 #
-# Copyright (C) 2007-2013 Karl W. Schulz
+# Copyright (C) 2007-2013 Karl W. Schulz <losf@koomie.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Version 2 GNU General
@@ -30,16 +30,16 @@
 use LosF_paths;
 use LosF_node_types;
 
-use lib "$osf_log4perl_dir";
-use lib "$osf_ini4perl_dir";
-use lib "$osf_utils_dir/";
+use lib "$losf_log4perl_dir";
+use lib "$losf_ini4perl_dir";
+use lib "$losf_utils_dir/";
 use File::Temp qw/tempfile/;
 use File::Compare;
 use File::Copy;
 
-require "$osf_utils_dir/utils.pl";
-require "$osf_utils_dir/parse.pl";
-require "$osf_utils_dir/header.pl";
+require "$losf_utils_dir/utils.pl";
+require "$losf_utils_dir/parse.pl";
+require "$losf_utils_dir/header.pl";
 
 my $hostfile_begin_delim='----------begin-sync-losf-$';
 my $hostfile_end_delim='------------end-sync-losf-$';
@@ -51,7 +51,7 @@ my $hostfile_end_delim='------------end-sync-losf-$';
 my $logr = get_logger();
 
 verify_sw_dependencies(); $logr->level($ERROR);
-init_local_config_file_parsing("$osf_custom_config_dir/config."."$node_cluster");
+init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 $logr->level($INFO);
 print_header();
 
@@ -69,7 +69,7 @@ print "   --> tmpfile = $tmpfile\n";
 if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
     if ( "$myval" eq "yes" ) {
 	INFO("   --> IPs assigned from file (ips.$node_cluster)\n");
-        if ( ! -e ("$osf_custom_config_dir/ips."."$node_cluster") ) {
+        if ( ! -e ("$losf_custom_config_dir/ips."."$node_cluster") ) {
 	    MYERROR("ips.$node_cluster file does not exist");
 	}
 	$assign_from_file = 1;
@@ -79,18 +79,6 @@ if (defined ($myval = $local_cfg->val("Network",assign_ips_from_file)) ) {
 if ( $assign_from_file != 1) {
     MYERROR("Assignment of IP addresses is currently only available using the assign_ips_from_file option");
 }
-
-###my %interfaces = query_cluster_config_host_network_definitions($node_cluster,$node_type);
-###print "just queried\n";
-
-###while ( my ($key,$value) = each(%interfaces) ) {
-###    INFO("   --> $key => $value\n");
-
-###     if ( -e $key || -d $key ) {
-### 	my $cmd_string = sprintf("chmod %i %s",$value,$key);
-### 	system($cmd_string);
-###     }
-###}
 
 #---------------------------------------------
 # Query cobbler for defined hosts/ips
@@ -106,8 +94,6 @@ if ( ! -s $tmpfile ) {
 open($IN1, "<$tmpfile")  || die "Cannot open $tmpfile for reading\n";
 
 while ($line1 = <$IN1>) {
-
-#    print "$line1";
 
     if($line1 =~ m/^Name\s+: (\S+)/ ) {
 	$current_host=$1;
