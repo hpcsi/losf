@@ -3,12 +3,12 @@
 LosF: A Linux operating system Framework for managing HPC clusters
 -------------------------------------------------------------------
 
-LosF is optionally designed to work with Cobbler
+LosF is optionally designed to coordinate with Cobbler
 (http://www.cobblerd.org), which is used to perform bare-metal
 provisioning. If you want to use LosF to manage the Cobbler
-provisioning mechanism, you will need to identify at least one master
-host on your cluster to serve as the provisioning server. If your
-master server has external network access, you can download the
+provisioning configuration, you will need to identify at least one
+master host on your cluster to serve as the provisioning server. If
+your master server has external network access, you can download the
 necessary packages to setup Cobbler from the EPEL repository
 (https://fedoraproject.org/wiki/EPEL). There are many resources
 available online regarding EPEL and Cobbler.
@@ -21,9 +21,12 @@ following sections.
 
 1. Install a master server from baseline OS distribution (e.g. CentOS)
 
-(a) Boot from installation media and install as desired. Cobbler will
-    mirror repositories in /var/www so consider providing ample space
-    to your /var partition (e.g. 40G or more).
+(a) Boot from installation media and install as desired. Note: if you
+    are planning to use Cobbler's functionality to mirror
+    repositories, be aware that the default storage location is
+    /var/www. Consequently, consider providing ample space to your
+    /var partition (e.g. 40G or more) during the base install
+    procedure.
 
 (b) Configure basic networking. At a minimum, you will likely want to
     configure two network interfaces: (1) one interface for internal
@@ -33,12 +36,15 @@ following sections.
 
     Register your master server with an EPEL repo. See
     http://fedoraproject.org/wiki/EPEL/FAQ for more information. An
-    example for CentOS6 is below
+    example for CentOS6 is below:
 
     $ rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
+(c) [Optional]: Install cobbler software and associated
+depenencies. Cobbler can be used for bare-metal provisioning, but LosF
+
 (b) Install cobbler software and necessary dependencies for LosF on
-    master server.
+master server.
 
     $ yum install cobbler
     $ yum install pykickstart
