@@ -181,6 +181,7 @@ should work with CentOS distributions is outlined in the following sections.
 
    (b) Update config.<YourClusterName> file.
 
+<<<<<<< HEAD
        Once the cluster and node types have been identified, the next file to update is
        the cluster-specific config file at $config_dir/config.<YourClusterName>. This
        keyword driven input file is used to define all of the desired configuration
@@ -195,6 +196,17 @@ should work with CentOS distributions is outlined in the following sections.
        [ConfigFiles] section), it is important to provide a reference template file for
        the node type in which you desire to synchronize the file. These reference
        templates should be maintained in:
+=======
+    Suggestion: Assuming you have additional drives available in your
+    master host, a reasonable place to install is into an admin
+    partition hosted by your master hosts.
+
+    $ git clone [url to go here]  /your/local/path
+
+(b) See the top-level LosF README for a brief introduction. You can
+    manage multiple clusters with a single LosF install, but you need
+    to first choose a
+>>>>>>> d547fece091d9c17dc6be889540ab8a55b98eb00
 
        $config_dir/const_files/<YourClusterName>/<Node Type>
 
