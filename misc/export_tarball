@@ -10,6 +10,14 @@ if [ "$RUNDIR" != "." ];then
     exit 1
 fi
 
+# optional branch name provided?
+
+if [ $# -gt 0 ];then
+    BRANCH=$1
+else
+    BRANCH="master"
+fi
+
 VERSION=`cat ../utils/VERSION`
 TARBALL=losf-$VERSION.tar.gz
 
@@ -17,10 +25,10 @@ if [ -e $TARBALL ];then
     rm $TARBALL
 fi
 echo " "
-echo "Packaging distribution tarball for LosF v$VERSION"
+echo "Packaging distribution tarball for LosF v$VERSION (branch = $BRANCH)"
 
 cd ..
-git archive --format=tar master --prefix=losf-$VERSION/ | gzip -n > ./misc/$TARBALL
+git archive --format=tar $BRANCH --prefix=losf-$VERSION/ | gzip -n > ./misc/$TARBALL
 
 if [ ! -s ./misc/$TARBALL ];then
    echo "Error generating tarball.."

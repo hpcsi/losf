@@ -16,9 +16,6 @@ if [ ! $IPMI_PASSWORD ]; then
     stty -echo
     read -p "Password: " passw; echo
     stty echo
-#    echo
-#    /usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis bootdev pxe
-#    echo
 fi
 
 # Do the deed for all requested hosts

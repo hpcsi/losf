@@ -21,7 +21,6 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-#
 # Input File Parsing Utilities: Used to query specific variables
 # from .ini style configuration files.
 #--------------------------------------------------------------------------
@@ -53,11 +52,10 @@ BEGIN {
 	# karl TODO: cannot return below in losf add host; figure out why...
 
 ###	if ($osf_init_global_config == 1) {
-###	    print "uh oh koomie\n";
 ###	    end_routine();
 ###	    return ($node_cluster,$node_type);
 ###	}	    
-###
+
 	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
 	foreach(@Clusters) {
@@ -155,10 +153,11 @@ BEGIN {
 	DEBUG("   --> Initializing input config file parsing ($shortname)\n");
 
 	if ( ! -e $infile) {
+	    ERROR("\n");
 	    ERROR("[ERROR]: The following file is not accessible: $infile\n");
-	    ERROR("[ERROR]: Please verify LosF config/ directory is available locally\n\n");
-            ERROR("Alternatively, you can use the \"LOSF_CONFIG_DIR\" environment\n");
-	    ERROR("variable to override the default LosF config location.\n\n");
+	    ERROR("[ERROR]: Please verify that LosF \$config_dir directory is correctly defined and available locally.\n\n");
+            ERROR("Alternatively, you can use the \"LOSF_CONFIG_DIR\" environment variable\n");
+	    ERROR("to override the default LosF config_dir location.\n");
 	    exit(1);
 	}
 
@@ -816,12 +815,22 @@ BEGIN {
 
 	DEBUG("   --> Looking for top-level rpm dir...($cluster)\n");
 
-	if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir_$type")) ) {
+	# 0.43.0 change - rpm_build_dir is a bit of a misnomer at this
+	# point. This path is really just a location where LosF can
+	# cache required rpms.  Updating variable name to simply be
+	# "rpm_dir"; allowing old name as well for backwards
+	# compatibility.
+
+	if (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_dir_$type")) ) {
+	    DEBUG("--> Read node specific topdir = $rpm_topdir\n");
+	} elsif (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_dir")) ) {
+	    DEBUG("--> Read topdir = $rpm_topdir\n");
+	} elsif (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir_$type")) ) {
 	    DEBUG("--> Read node specific topdir = $rpm_topdir\n");
 	} elsif (defined ($rpm_topdir = $global_cfg->val("$cluster","rpm_build_dir")) ) {
 	    DEBUG("--> Read topdir = $rpm_topdir\n");
 	} else {
-	    MYERROR("No rpm_build_dir defined for cluster $cluster");
+	    MYERROR("No rpm_dir defined for cluster $cluster");
 	}
 
 	# 10/5/12: add support for a local cache dir
