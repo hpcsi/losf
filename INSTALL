@@ -118,11 +118,11 @@ should work with CentOS distributions is outlined in the following sections.
    (b) Define LosF config path and initialize for the current cluster.
    
        Note that you can manage multiple clusters with a single LosF install, but you
-       need to first choose a top-level config directory (config_dir) and designate a
+       need to first choose a top-level config directory ($config_dir) and designate a
        unique identifier for the local cluster. There are two options for defining the
        local config directory:
    
-          (1) set in "config/config_dir" file in local LosF install dir
+          (1) set in "<losf-install>/config/config_dir" file in local LosF install dir
           (2) set via the "LOSF_CONFIG_DIR" environment variable
    
        For production usage, it is recommended to use option (1) to set the path directly
@@ -130,7 +130,7 @@ should work with CentOS distributions is outlined in the following sections.
        environment variable option provides a convenient way to override the default
        config path to test alternate config settings prior to a production rollout.
 
-       To set the config_dir via option (1), consider the following depending on whether
+       To set the $config_dir via option (1), consider the following depending on whether
        this is a new install or upgrade.
 
           (i)  New installs: A template file is provided that you can copy and edit to
@@ -152,9 +152,9 @@ should work with CentOS distributions is outlined in the following sections.
        Some rudimentary configuration example files are provided in the
        "config/config_example" directory for a cluster designated as "Bar". These can be
        used as the basis for creating the necessary configuration files for your cluster
-       in config_dir and help to illustrate some of the available options. Alternatively,
-       you can use the losf utility to initialize the cluster with a vanilla
-       configuration as follows:
+       in $config_dir and help to illustrate some of the available options.
+       Alternatively, you can use the losf utility to initialize the cluster with a
+       vanilla configuration as follows:
 
        $ losf initconfig <YourClusterName>
 
