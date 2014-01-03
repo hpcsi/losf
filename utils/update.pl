@@ -54,6 +54,20 @@ sub usage {
 	  
 }
 
+sub display_changes { 
+
+    my $num_changed = shift;
+    my $num_tracked = shift;
+
+    if ( $num_changed > 0) {
+	print color 'red';
+    }
+
+    print "$num_changed";
+    print color 'reset';
+    print "/$num_tracked";
+}
+
 # Only one LosF instance at a time
 losf_get_lock();
 
@@ -131,7 +145,7 @@ if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_up
     $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
     notify_local_log();
     print color 'red';
-    print "FAILED";
+    print "UPDATED";
 } else { 
     print color 'green';
     print "OK";
@@ -140,14 +154,16 @@ if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_up
 print color 'reset';
 print ": ";
 
-print "[RPMs: OS $losf_os_packages_updated/$losf_os_packages_total ";
-print " Custom $losf_custom_packages_updated/$losf_custom_packages_total] ";
-print "[Files: $losf_const_updated/$losf_const_total] ";
-print "[Links: $losf_softlinks_updated/$losf_softlinks_total] ";
-print "[Services: $losf_services_updated/$losf_services_total] ";
-print "[Perms: $losf_permissions_updated/$losf_permissions_total] ";
-print "-> $node_type";
+print "[RPMs: OS ";
+display_changes($losf_os_packages_updated,$losf_os_packages_total);         print "  Custom ";
+display_changes($losf_custom_packages_updated,$losf_custom_packages_total); print "] ";
 
+print "[Files: ";    display_changes($losf_const_updated,$losf_const_total);             print "] ";
+print "[Links: ";    display_changes($losf_softlinks_updated,$losf_softlinks_total);     print "] ";
+print "[Services: "; display_changes($losf_services_updated,$losf_services_total);       print "] ";
+print "[Perms: ";    display_changes($losf_permissions_updated,$losf_permissions_total); print "] ";
+
+print "-> $node_type";
 print "\n";
 
 
