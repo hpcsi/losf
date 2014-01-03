@@ -101,13 +101,15 @@ following sections.
     into a shared file system that will be available across the
     cluster. 
 
-    Suggestion: Assuming you have additional drives availabe in your
+    Suggestion: Assuming you have additional drives available in your
     master host, a reasonable place to install is into an admin
     partition hosted by your master hosts.
 
-   $ git clone [url to go here]  /your/local/path
+    $ git clone [url to go here]  /your/local/path
 
-(b) 
+(b) See the top-level LosF README for a brief introduction. You can
+    manage multiple clusters with a single LosF install, but you need
+    to first choose a
 
    
 
