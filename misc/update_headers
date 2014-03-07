@@ -11,13 +11,13 @@ for i in $TOP_LEVEL_UTILS ; do
 done
 
 for i in `ls ../utils/*.pm`; do 
-    if [ ! -L ../$i ];then
+    if [ ! -h ../utils/$i ];then
 	./update_license.pl ../LICENSE $i
     fi
 done
 
 for i in `ls ../utils/*.pl`; do 
-    if [ ! -L ../$i ];then
+    if [ ! -L ../utils/$i ];then
 	./update_license.pl ../LICENSE $i
     fi
 done
