@@ -1,19 +1,25 @@
 #!/bin/bash
 
-# Simple convenience utility to update headers.
+# Simple convenience utility to update headers. Skip soft links.
 
 TOP_LEVEL_UTILS="losf node_types rpm_topdir sync_config_files update update update_hosts initconfig"
 
 for i in $TOP_LEVEL_UTILS ; do
-    ./update_license.pl ../LICENSE ../$i
+    if [ ! -L ../$i ];then
+	./update_license.pl ../LICENSE ../$i
+    fi
 done
 
 for i in `ls ../utils/*.pm`; do 
-    ./update_license.pl ../LICENSE $i
+    if [ ! -L ../$i ];then
+	./update_license.pl ../LICENSE $i
+    fi
 done
 
 for i in `ls ../utils/*.pl`; do 
-    ./update_license.pl ../LICENSE $i
+    if [ ! -L ../$i ];then
+	./update_license.pl ../LICENSE $i
+    fi
 done
 
 
