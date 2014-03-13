@@ -37,7 +37,13 @@ my $changedFlag  = 0;
 $newCluster = shift || '';
 
 if( $newCluster eq '') {
-    print "[ERROR]: A unique cluster name must be provided with initconfig command\n"
+    print "initconfig: convenience utility used to create a basic starting\n";
+    print "configuration for a new LosF cluster designation.\n";
+    print "\n";
+    print "usage: initconfig <cluster-name>\n";
+    print "\n";
+
+    exit 1;
 }
 
 my ($filename,$basename) = fileparse($0);
