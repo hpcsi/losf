@@ -28,7 +28,7 @@
 use POSIX;
 require "getopts.pl";
 
-do Getopts("r:i:m:t:h:w:c:x:f:v");
+Getopts("r:i:m:t:h:w:c:x:f:v");
 
 $timeout = 5*60;
 $n = @ARGV;
@@ -231,10 +231,10 @@ foreach $host (@hosts) {
     $pidh{$pid} = $host;
     $pido{$pid} = $output;
     $pide{$pid} = $error;
-    do wait_for_it(0);
+    wait_for_it(0);
 }
 
-do wait_for_it(1);
+wait_for_it(1);
 
 
 sub wait_for_it {
