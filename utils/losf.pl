@@ -1491,8 +1491,6 @@ sub add_custom_rpm {
 	unlink($new_file) || MYERROR("Unable to remove temporary file: $new_file\n");
     }
 
-
-
     end_routine();
     return;
 } # end sub add_custom_rpm
@@ -1554,7 +1552,7 @@ sub add_alias {
     if($local_custom_cfg->exists($section,$name)) {
 	$local_custom_cfg->push($section,$name,"\@$alias");
     } else {
-	$local_custom_cfg->newval($section,$name,"@$alias");
+	$local_custom_cfg->newval($section,$name,"\@$alias");
     }
 
     SYSLOG("User requested addition of custom RPM alias: \@$alias (type=$node_type)");
