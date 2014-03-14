@@ -1,8 +1,8 @@
-Version 0.44.0 
+Version 0.44.0 (In Progress)
 
   * use environment perl path as opposed to hard-coded path
   * update help to indicate initconfig option
-  * improved error handling for initconfig utility
+  * bug fix in error handling for initconfig utility
 
 Version 0.43.0 (03 January 2014)
 
