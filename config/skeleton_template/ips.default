@@ -29,7 +29,7 @@
 # c100-101 172.10.1.1   a1:a1:a1:a1:a1:a5 eth0 255.255.0.0
 
 # -----------------------------------------------------------------------------
-# Add desired network settings for your specific cluster (without comment
-# delimiter).
+# Please add desired network settings for your specific cluster (without comment
+# delimiter) here.
 # -----------------------------------------------------------------------------
 
