@@ -37,8 +37,8 @@ my $changedFlag  = 0;
 $newCluster = shift || '';
 
 if( $newCluster eq '') {
-    print "initconfig: convenience utility used to create a basic starting\n";
-    print "configuration for a new LosF cluster designation.\n";
+    print "\ninitconfig: convenience utility used to create a basic starting\n";
+    print "configuration template for a new LosF cluster designation.\n";
     print "\n";
     print "usage: initconfig <cluster-name>\n";
     print "\n";
