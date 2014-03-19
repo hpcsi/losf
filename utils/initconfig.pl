@@ -159,6 +159,21 @@ if ( ! -e "$config_dir/config.$newCluster" ) {
     $changedFlag = 1;
 }
 
+# Cluster-specific IPs file
+
+if ( ! -e "$config_dir/ips.$newCluster" ) {
+    print "--> creating $config_dir/ips.$newCluster file\n";
+    
+    my $template = "$losf_top_dir/config/skeleton_template/ips.default";
+    if ( ! -s $template ) {
+	print "ERROR: Missing template file -> $template\n";
+	exit 1;
+    }
+    
+    copy("$template","$config_dir/ips.$newCluster") || print "ERROR: Unable to update ips.$newCluster\n";
+    $changedFlag = 1;
+}
+
 # OS Packages config file
 
 if ( ! -e "$config_dir/os-packages/$newCluster/packages.config" ) {
