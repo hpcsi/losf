@@ -1,6 +1,6 @@
 Version 0.44.0 (In Progress)
 
-
+  * fixed missing final update notification when file ownership/permissions changed
   * initconfig utility now includes example networking config file
   * use environment perl path in favor of hard-coded path
   * update help to indicate initconfig option
