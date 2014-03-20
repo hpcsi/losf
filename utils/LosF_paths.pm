@@ -95,7 +95,9 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 ###	INFO("Using LOSF_CONFIG_DIR environment variable for config_dir\n");
 ###	our $osf_custom_config = 1;
     } else {
-	print ("[ERROR]: LOSF_CONFIG_DIR provided path does not exist ($config_dir)\n");
+	print "\n";
+	print "[ERROR]: LOSF_CONFIG_DIR provided path does not exist or is not\n";
+	print "         a directory. ($config_dir)\n";
 	exit 1;
     }
 } else {
