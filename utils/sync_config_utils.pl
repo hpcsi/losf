@@ -661,9 +661,6 @@ BEGIN {
 
 	MYERROR("Source and destination files must exist") unless -e $oldfile && -e $newfile;
 
-#	my $mode_old = (stat($oldfile))[2] & 0777;
-#	my $mode_new = (stat($newfile))[2] & 0777;
-
 	my $st_old = stat($oldfile);
 	my $st_new = stat($newfile);
 
@@ -677,36 +674,43 @@ BEGIN {
 
 	DEBUG("   --> Desired sync file permission = $mode_old\n");
 
+	# init flag to track any perm/ownership changes. We count any of the
+	# following as a single change wrt to the update display_changes tally.
+
+	my $localChange = 0;
+	my $basename = basename($newfile);
+
 	if($mode_old != $mode_new) {
 
-	    my $basename = basename($newfile);
-	    
-#	    ERROR("   --> UPDATING: [$basename] updating sync file permissions...\n") 
-#		unless ($display_change_message == 0);
-
 	    if ( $display_change_message != 0) {
-		print "   --> "; 
-		print color 'red';
-		print "UPDATING";
-		print color 'reset';
-		print ": [$basename] updating sync file permissions...\n";
+		print_error_in_red("UPDATING");
+		ERROR(": [$basename] updating sync file permissions...\n");
 	    }
 
 	    chmod ($mode_old, $newfile) || MYERROR ("Unable to chmod permissions for $newfile");
+	    if($localChange == 0) {$localChange = 1;}
+	    
 	}
 
 	# make sure ownership is consistent as well
 
 	if ($display_change_message && $uid_old != $uid_new) {
-	    ERROR( "   --> UPDATING: updating sync file  ownership...\n")
+	    print_error_in_red("UPDATING");
+	    ERROR(": [$basename] updating file  ownership...\n");
+	    if($localChange == 0) {$localChange = 1;}
 	}
+
 	if ($display_change_message && $gid_old != $gid_new) {
-	    ERROR( "   --> UPDATING: updating sync group ownership...\n")
+	    print_error_in_red("UPDATING");
+	    ERROR(": [$basename] updating group ownership...\n");
+	    if($localChange == 0) {$localChange = 1;}
 	}
 
 	my $cnt = chown $uid_old,$gid_old, $newfile;
 
 	if( $cnt != 1 ) { MYERROR("Unable to chown permissions for $newfile");}
+
+	if($localChange == 1) {$losf_const_updated++;}
 
 	end_routine();
 	return;
