@@ -28,7 +28,6 @@ use LosF_paths;
 use base 'Exporter';
 use lib "$losf_log4perl_dir";
 use Sys::Syslog;  
-###use Switch;
 use Fcntl qw(:flock);
 
 # Global vars to count any detected changes
