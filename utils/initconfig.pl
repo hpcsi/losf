@@ -95,6 +95,7 @@ if ( $config_dir_specified == 0) {
     
 print "\n";
 print "Initializing basic configuration skeleton for new cluster -> $newCluster\n";
+print "Using LosF config dir -> $config_dir\n";
 
 if ( ! -d $config_dir ) {
     print "--> creating path for $config_dir\n";
@@ -122,8 +123,8 @@ if ( ! -s "$config_dir/config.machines" ) {
 	    print OUT "clusters = $newCluster\n";
 	} elsif ($line =~ /^\[FOO\]/) {
 	    print OUT "\[$newCluster\]\n";
-	} elsif ($line =~ /^default\s+=\s+default/) {
-	    print OUT "default = $hostname\n";
+	} elsif ($line =~ /^master\s+=\s+default/) {
+	    print OUT "master = $hostname\n";
 	} elsif ($line =~ /^domainname\s+=\s+yourdomain.org/) {
 	    print OUT "domainname = $domain_name\n";
 	} elsif ($line =~ /^rpm_dir\s+=\s+default/) {
@@ -214,8 +215,23 @@ if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
     $changedFlag = 1;
 }
 
+# const_files directory
+
+if ( ! -d "$config_dir/const_files/$newCluster" ) {
+    mkpath("$config_dir/const_files/$newCluster") || 
+	die("[ERROR]: Unable to create path for const_files/$newCluster");
+    print "--> creating $config_dir/const_files/$newCluster directory\n";
+
+    if ( ! -d "$config_dir/const_files/$newCluster/master" ) {
+	mkpath("$config_dir/const_files/$newCluster/master") || 
+	    die("[ERROR]: Unable to create path for const_files/$newCluster/master");
+	print "--> creating $config_dir/const_files/$newCluster/master directory\n";
+    }
+    $changedFlag = 1;
+}
+
 if ( $changedFlag == 0) {
-    print "--> Basic config files for cluster $newCluster already present\n";
+    print "--> Basic config files for cluster \"$newCluster\" already present\n";
     print "\nNo additional initialization required.\n";
 } else {
     print "\nBasic initialization complete.\n";
