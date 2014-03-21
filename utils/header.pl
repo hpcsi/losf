@@ -27,7 +27,7 @@
 
 sub print_header {
 
-    my $width = 23;
+    my $width = 24;
     my $logr  = get_logger();
     my $ver   = "";
 
