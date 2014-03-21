@@ -340,6 +340,32 @@ BEGIN {
 	    }
 	}
 
+	# Allow for appliance-specific config file syncing (this is a subtle
+	# use case where an admin may have soft-linked the const_files
+	# directory between to node types, but wants fine grain control over a
+	# particular file sync on only one of the types).
+
+	DEBUG("   --> Looking for node-specific defined files to perform sync...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("ConfigFiles/$host") ) {
+	    DEBUG("No Input section found for cluster $cluster [ConfigFiles/$host]\n");
+	}
+
+	my @defined_files_override = $local_cfg->Parameters("ConfigFiles/$host");
+
+	foreach(@defined_files_override) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("ConfigFiles/$host",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		if ( "$myval" eq "yes" ) {
+		    DEBUG("   -->  Sync defined for $_\n");
+		    push(@sync_files,$_);
+		}
+	    } else {
+		MYERROR("ConfigFile defined with no value ($_)");
+	    }
+	}
+
 	end_routine();
 
 	return(@sync_files);
@@ -543,7 +569,7 @@ BEGIN {
 		    push(@sync_partials,$_);
 		}
 	    } else {
-		MYERROR("ConfigFile defined with no value ($_)");
+		MYERROR("PartialConfigFile defined with no value ($_)");
 	    }
 	}
 
