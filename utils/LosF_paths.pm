@@ -58,9 +58,14 @@ sub print_no_defined_config_path_message {
     print "  (2) Set the LOSF_CONFIG_DIR environment variable\n\n";
     print "Example configuration files are availabe at -> $losf_top_dir/config/config_example\n";
 
-    print "\nFor new systems, you can also run \"initconfig <YourClusterName>\" to create\n";
-    print "a vanilla NOOP configuration.\n\n";
+    print_initconfig_suggestion();
+
     exit(1);
+}
+
+sub print_initconfig_suggestion {
+    print "\nNote: for new systems, you can also run \"initconfig <YourClusterName>\" to create\n";
+    print "a starting LosF configuration template.\n\n";
 }
 
 # ----------------------------------------------------------------------
@@ -92,12 +97,11 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 	}
 	our $losf_config_dir        = $config_dir;
 	our $losf_custom_config_dir = $config_dir;
-###	INFO("Using LOSF_CONFIG_DIR environment variable for config_dir\n");
-###	our $osf_custom_config = 1;
     } else {
 	print "\n";
-	print "[ERROR]: LOSF_CONFIG_DIR provided path does not exist or is not\n";
-	print "         a directory. ($config_dir)\n";
+	print "[ERROR]: LOSF_CONFIG_DIR provided path does not exist or is not a directory.\n\n";
+	print "Using LosF config dir -> $config_dir\n";
+	print_initconfig_suggestion();
 	exit 1;
     }
 } else {
