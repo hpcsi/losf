@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #-----------------------------------------------------------------------bl-
 #--------------------------------------------------------------------------
 # 
@@ -126,7 +126,8 @@ BEGIN {
 
 	if( $found == 0 ) {
 	    MYERROR("Unable to determine node type for this host/domainname ($host/$domain)",
-		    "Please verify global configuration settings and local domainname configuration.\n");
+		    "Please verify global configuration settings and local domainname configuration.",
+                    "Using LosF config dir -> $losf_config_dir\n");
 	} else {
 	    DEBUG("   --> Node type determination successful\n");
 	}
@@ -155,9 +156,12 @@ BEGIN {
 	if ( ! -e $infile) {
 	    ERROR("\n");
 	    ERROR("[ERROR]: The following file is not accessible: $infile\n");
-	    ERROR("[ERROR]: Please verify that LosF \$config_dir directory is correctly defined and available locally.\n\n");
+	    ERROR("[ERROR]: Please verify that LosF \$config_dir directory is correctly defined and populated.\n\n");
             ERROR("Alternatively, you can use the \"LOSF_CONFIG_DIR\" environment variable\n");
 	    ERROR("to override the default LosF config_dir location.\n");
+
+	    ERROR("\nNote: for new systems, you can also run \"initconfig <YourClusterName>\" to create\n");
+	    ERROR("a starting LosF configuration template.\n\n");
 	    exit(1);
 	}
 
@@ -490,11 +494,18 @@ BEGIN {
 	my %alias_rpms = ();
 
 	foreach $alias (@aliases) {
-	    if(defined ( @myvals = $local_custom_cfg->val("Custom Packages/Aliases",$alias)) ) {
+	    if($local_custom_cfg->exists("Custom Packages/Aliases",$alias)) {
+		@myvals = $local_custom_cfg->val("Custom Packages/Aliases",$alias);
 		foreach $rpm (@myvals) {
 		    push(@{$alias_rpms{$alias}},$rpm);
 		}
 	    }
+
+###	    if(defined ( @myvals = $local_custom_cfg->val("Custom Packages/Aliases",$alias)) ) {
+###		foreach $rpm (@myvals) {
+###		    push(@{$alias_rpms{$alias}},$rpm);
+###		}
+###	    }
 	}
 
 	end_routine();
@@ -660,50 +671,50 @@ BEGIN {
 	return(%sync_softlinks);
     }
 
-    sub query_cluster_config_host_network_definitions {
-
-	begin_routine();
-
-	my $cluster       = shift;
-	my $host          = shift;
-		          
-	my $logr          = get_logger();
-	my %interfaces    = ();
-
-	INFO("   --> Looking for host interface network definitions...($cluster->$host)\n");
-
-	if ( ! $local_cfg->SectionExists("HostInterfaces") ) {
-	    MYERROR("No Input section found for cluster $cluster [HostInterfaces]\n");
-	}
-
-	my @defined_hosts = $local_cfg->Parameters("HostInterfaces");
-
-	my $num_hosts = @defined_hosts;
-
-	INFO("   --> \# of hosts defined = $num_hosts\n");
-
-	foreach(@defined_hosts) {
-	    DEBUG("   --> Read value for $_\n");
-	    if (defined (@myvalues = $local_cfg->val("HostInterfaces",$_)) ) {
-		print "size of array = ", @myvalues."\n";
-#		push(@interfaces,$_);
-###		push(@interfaces,@myvalues);
-		$interfaces{$_} = @myvalues[0];
-#		DEBUG("   --> Value = $myval\n");
-#		if ( "$myval" eq "yes" ) {
-#		    INFO("   --> Sync defined for $_\n");
-#		    push(@sync_files,$_);
-#		}
-		
-	    } else {
-		MYERROR("HostInterfaces defined with no value ($_)");
-	    }
-	}
-
-	end_routine();
-
-	return(%interfaces);
-    }
+##### deprecated ###     sub query_cluster_config_host_network_definitions {
+##### deprecated ### 
+##### deprecated ### 	begin_routine();
+##### deprecated ### 
+##### deprecated ### 	my $cluster       = shift;
+##### deprecated ### 	my $host          = shift;
+##### deprecated ### 		          
+##### deprecated ### 	my $logr          = get_logger();
+##### deprecated ### 	my %interfaces    = ();
+##### deprecated ### 
+##### deprecated ### 	INFO("   --> Looking for host interface network definitions...($cluster->$host)\n");
+##### deprecated ### 
+##### deprecated ### 	if ( ! $local_cfg->SectionExists("HostInterfaces") ) {
+##### deprecated ### 	    MYERROR("No Input section found for cluster $cluster [HostInterfaces]\n");
+##### deprecated ### 	}
+##### deprecated ### 
+##### deprecated ### 	my @defined_hosts = $local_cfg->Parameters("HostInterfaces");
+##### deprecated ### 
+##### deprecated ### 	my $num_hosts = @defined_hosts;
+##### deprecated ### 
+##### deprecated ### 	INFO("   --> \# of hosts defined = $num_hosts\n");
+##### deprecated ### 
+##### deprecated ### 	foreach(@defined_hosts) {
+##### deprecated ### 	    DEBUG("   --> Read value for $_\n");
+##### deprecated ### 	    if (defined (@myvalues = $local_cfg->val("HostInterfaces",$_)) ) {
+##### deprecated ### 		print "size of array = ", @myvalues."\n";
+##### deprecated ### #		push(@interfaces,$_);
+##### deprecated ### ###		push(@interfaces,@myvalues);
+##### deprecated ### 		$interfaces{$_} = @myvalues[0];
+##### deprecated ### #		DEBUG("   --> Value = $myval\n");
+##### deprecated ### #		if ( "$myval" eq "yes" ) {
+##### deprecated ### #		    INFO("   --> Sync defined for $_\n");
+##### deprecated ### #		    push(@sync_files,$_);
+##### deprecated ### #		}
+##### deprecated ### 		
+##### deprecated ### 	    } else {
+##### deprecated ### 		MYERROR("HostInterfaces defined with no value ($_)");
+##### deprecated ### 	    }
+##### deprecated ### 	}
+##### deprecated ### 
+##### deprecated ### 	end_routine();
+##### deprecated ### 
+##### deprecated ### 	return(%interfaces);
+##### deprecated ###     }
 
     sub query_cluster_config_services {
 
