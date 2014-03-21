@@ -91,11 +91,34 @@ if ( $config_dir_specified == 0) {
     exit 1;
 }
 
-# Do the deed for non-existent config files
+# Verify some basic networking requirements for hostname and dnsdomainname.
     
 print "\n";
 print "Initializing basic configuration skeleton for new cluster -> $newCluster\n";
 print "Using LosF config dir -> $config_dir\n";
+
+my $hostname    = `hostname -s`; chomp($hostname);
+my $domain_name = `dnsdomainname 2> /dev/null`; chomp($domain_name);
+
+if($hostname eq "" ) {
+    print "\n";
+    print "ERROR: Unable to determine local host name.\n\n";
+    print "LosF uses the host name to differentiate between node types.\n";
+    print "Please update you local network configuration so that the \n";
+    print "\"hostname\" command returns a non-empty string.\n\n";
+    exit 1;
+}
+
+if($domain_name eq "" ) {
+    print "\n";
+    print "ERROR: Unable to determine DNS domain name.\n\n";
+    print "LosF uses the DNS domain name to differentiate between clusters.\n";
+    print "Please update you local network configuration so that the \n";
+    print "\"dnsdomainname\" command returns a non-empty string.\n\n";
+    exit 1;
+}
+
+# Do the deed for non-existent config files
 
 if ( ! -d $config_dir ) {
     print "--> creating path for $config_dir\n";
@@ -114,9 +137,6 @@ if ( ! -s "$config_dir/config.machines" ) {
 
     open(IN, "<$template")                    || die "Cannot open $template\n";
     open(OUT,">$config_dir/config.machines")  || die "Cannot create $config_dir/config.machines\n";
-
-    my $hostname    = `hostname -s`; chomp($hostname);
-    my $domain_name = `dnsdomainname 2> /dev/null`; chomp($domain_name);
 
     while(my $line=<IN>) {
 	if($line =~ /^clusters\s+=\s+FOO/) {
