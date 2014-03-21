@@ -1,3 +1,4 @@
+# -*- mode: Fundamental; fill-column: 89 -*-
 
 -------------------------------------------------------------------------------------------------
 LosF: A Linux operating system Framework for managing HPC clusters
@@ -108,14 +109,19 @@ should work with CentOS distributions is outlined in the following sections.
 
 3. Install and perform baseline configuration for LosF.
 
-   (a) Untar a release tarball (or clone desired version for GitHub directly), preferably
+   (a) Untar a release tarball (or clone desired version from GitHub directly), preferably
        into a shared file system that will be available across the cluster.
    
        Suggestion: Assuming you have additional drives available in your master host, a
        reasonable place to install is into an admin directory or partition hosted by your
        chosen master host.
+
+   (b) Verify basic networking requirements. LosF relies on the output from standard
+       Linux commands like "hostname" and "dnsdomainname" in order to delineate between
+       different node types and clusters. Make sure these commands return reasonable
+       (non-empty) values and update your local network config if necessary.
    
-   (b) Define LosF config path and initialize for the current cluster.
+   (c) Define LosF config path and initialize for the current cluster.
    
        Note that you can manage multiple clusters with a single LosF install, but you
        need to first choose a top-level config directory ($config_dir) and designate a
@@ -147,7 +153,7 @@ should work with CentOS distributions is outlined in the following sections.
        config_dir for LosF; in that case, the path you choose will be created during the
        following initialization step.
 
-   (c) Create necessary baseline configuration files for the current cluster.
+   (d) Create necessary baseline configuration files for the current cluster.
 
        Rudimentary configuration example files are provided in the
        "config/config_example" directory for a cluster designated as "Bar". These can be
@@ -159,14 +165,14 @@ should work with CentOS distributions is outlined in the following sections.
 
        $ <losf-install> initconfig <YourClusterName>
 
-       This utility will define a single "default" node type based on the local hostname
+       This utility will define a single "master" node type based on the local hostname
        and domainname of the host on which it is executed. If the basic initialization is
-       complet, it should be possible to run the "update" utility. Example output after
-       running initconfig is shown below indicating that no specifi configuration
+       complete, it should be possible to run the "update" utility. Example output after
+       running initconfig is shown below indicating that no specific configuration
        features have been requested and host is presently up to date.
 
        $ update -q
-       OK: [RPMs: OS 0/0  Custom 0/0] [Files: 0/0] [Links: 0/0] [Services: 0/0] [Perms: 0/0] -> default
+       OK: [RPMs: OS 0/0  Custom 0/0] [Files: 0/0] [Links: 0/0] [Services: 0/0] [Perms: 0/0] -> master
 
 -------------------------------------------------------------------------------------------------
 
@@ -179,15 +185,19 @@ should work with CentOS distributions is outlined in the following sections.
 
    (a) Update config.machines file.
 
-       To begin, the first file to edit is the $config_dir/config.machines file to define
-       the domainname of your new cluster, provide desired node type definitions
-       (e.g. logins, compute, io, etc), and define the location to house RPMs registered
-       with LosF.  The configuration files are simple, ascii keyword driven files that
-       are organized by [sections] and can be edited directly.
+       To begin, the first file to edit is the $config_dir/config.machines file to
+       potentially customize the domainname of your new cluster, provide desired node
+       type definitions (e.g. logins, compute, io, etc), and define the location to house
+       RPMs registered with LosF.  The configuration files are simple, ascii keyword
+       driven files that are organized by [sections] and can be edited directly.
 
-       See <losf-install>/config/config.machines for more details and example syntax.
+       An example file highlighting example syntax and multiple cluster
+       definitions is provided at:
 
-       $ <losf-install>/update -q
+       <losf-install>config/config_example/config.machines
+
+       Alternatively, if you used the "initconfig" utility, you should have a basic
+       working file installed already at $config_dir/config.machines.
 
    (b) Update config.<YourClusterName> file.
 
@@ -197,7 +207,7 @@ should work with CentOS distributions is outlined in the following sections.
        options pertaining to host configuration files, runtime services, file
        permissions, soft links, and (optionally), cobbler provisioning options.
 
-       If you used the "initconfig" option to initialize your configuration,
+       If you used the "initconfig" utility to initialize your configuration,
        the initial file will be very minimal with no configuration options registered.
        See <losf-install>/config/config.Bar for details on example syntax and options. 
 
@@ -208,8 +218,13 @@ should work with CentOS distributions is outlined in the following sections.
 
        $config_dir/const_files/<YourClusterName>/<Node Type>
 
-   Suggestion: for traceability, it is recommended to track your local config changes
-   using your favorite version control system (e.g. git, subversion, etc.).
+       Unless overridden by specific permission options you add to the
+       config.<YourClusterName> file, LosF will mimic the file ownership and permissions
+       of the synchronized files to match the reference template version.
+
+   Suggestion: for traceability, it is recommended to track your local config
+   file changes using your favorite version control system (e.g. git,
+   subversion, etc.).
 
 -------------------------------------------------------------------------------------------------
 
@@ -317,5 +332,5 @@ should work with CentOS distributions is outlined in the following sections.
         update on all of them in parallel. Note that the "-q" option to update is enabled
         automatically when run remotely via koomie_cf.
 
-	$ koomie_cf -x login[104] <losf-install/update 
+	$ koomie_cf -x login[1-4] <losf-install/update 
 
