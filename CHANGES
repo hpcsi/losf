@@ -74,7 +74,7 @@ Version 0.30.0 (23 October 2009)
 
   * os-update mechanism upgraded to support yum
   * bug fix for rpm queries with arithmetic characters included
-  * infrastructure updates to support multiple machines
+  * infrastructure updates to support multiple clusters
   * rebaseline to use perl-based utilities
 
 Versions prior to 0.30.0 (2007 thru 2009)
