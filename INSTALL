@@ -97,6 +97,11 @@ should work with CentOS distributions is outlined in the following sections.
    
        $ cobbler import --path=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
          	      --name=epel6 --arch=x86_64
+
+       To access this repo, you will want to associate it with the provisioning OS distro
+       you defined. An example for the CentOS6.5 profile above is:
+
+       $  cobbler profile edit --name=CentOS6.5-x86_64 --repos=epel6
    
    (e) Mirror the newly defined EPEL repository (note: this will take some time).
    
