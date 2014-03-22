@@ -1,0 +1,96 @@
+#platform=x86, AMD64, or Intel EM64T
+# System authorization information
+auth  --useshadow  --enablemd5
+# System bootloader configuration
+
+####   bootloader --location=mbr --append="console=tty1 console=ttyS1,115200n8"
+bootloader --location=mbr 
+
+# Partition clearing information
+clearpart --all --initlabel
+# Use text mode install
+text
+# Firewall configuration
+firewall --enabled
+# Run the Setup Agent on first boot
+firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_US
+# Installation logging level
+logging --level=info
+# Use network installation
+url --url=$tree
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+$yum_repo_stanza
+# Network information
+$SNIPPET('network_config')
+# Reboot after installation
+reboot
+
+#Root password
+rootpw --iscrypted $default_password_crypted
+# SELinux configuration
+selinux --disabled
+# Do not configure the X Window System
+skipx
+# System timezone
+timezone  America/Chicago
+# Install OS instead of upgrade
+install
+# Clear the Master Boot Record
+zerombr
+
+# partition order is /, /var, and rest goes to /tmp
+
+part /     --fstype="ext3" --size=133120   --ondisk=sda
+part /var  --fstype="ext3" --size=20480    --ondisk=sda
+part /tmp  --fstype="ext3" --grow --size=1 --ondisk=sda
+
+%pre
+$SNIPPET('log_ks_pre')
+$kickstart_start
+$SNIPPET('pre_install_network_config')
+# Enable installation monitoring
+$SNIPPET('pre_anamon')
+$SNIPPET('keep_ssh_host_keys')
+
+%packages --ignoremissing
+@ Base
+@ Emacs
+@ Development Tools
+@ Network file system client
+emacs
+gnuplot
+subversion
+pam
+# Following required for LosF
+yum-plugin-downloadonly
+perl-Log-Log4perl
+perl-Config-IniFiles
+
+
+
+%post
+$SNIPPET('log_ks_post')
+# Start yum configuration 
+$yum_config_stanza
+# End yum configuration
+$SNIPPET('post_install_kernel_options')
+$SNIPPET('post_install_network_config')
+$SNIPPET('download_config_files')
+$SNIPPET('redhat_register')
+$SNIPPET('cobbler_register')
+
+# Enable post-install boot notification
+$SNIPPET('post_anamon')
+
+# Local customization...
+
+$SNIPPET('LosF/update')
+
+
+# Start final steps
+$kickstart_done
+# End final steps
