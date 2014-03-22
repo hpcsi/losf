@@ -83,8 +83,13 @@ should work with CentOS distributions is outlined in the following sections.
    (b) Start cobbler.
    
        $ /etc/init.d/cobbler start
+
+   (c) Check for other cobbler pre-requisites. You can run "cobbler check" which will
+       help point you to any other remaining requirements (like having http enabled, allowing rsync
+       through xinetd, etc). Note that you can safely ignore warnings about a missing debmirror, 
+       fencing tools, or boot-loaders.
    
-   (c) Import an OS distribution (e.g. from the media used to install the initial
+   (d) Import an OS distribution (e.g. from the media used to install the initial
        server). Assuming a CentOS distribution DVD is in the cdrom drive on your master
        host, you can mount an import as follows:
    
@@ -92,7 +97,7 @@ should work with CentOS distributions is outlined in the following sections.
        $ cobbler import --path=/mnt/cdrom --name=CentOS6.5 --arch=x86_64
        $ cobbler sync
    
-   (d) Import an EPEL distribution (this will mirror the repo for use locally throughout
+   (e) Import an EPEL distribution (this will mirror the repo for use locally throughout
        your cluster). An example for CentOS6 is below:
    
        $ cobbler import --path=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
@@ -103,13 +108,10 @@ should work with CentOS distributions is outlined in the following sections.
 
        $  cobbler profile edit --name=CentOS6.5-x86_64 --repos=epel6
    
-   (e) Mirror the newly defined EPEL repository (note: this will take some time).
+   (f) Mirror the newly defined EPEL repository (note: this will take some time).
    
        $ cobbler reposync
    
-   (f) Run cobbler check and fix any remaining errors. Note that you can safely ignore
-       warnings about a missing debmirror or fencing tools.
-
 -------------------------------------------------------------------------------------------------
 
 3. Install and perform baseline configuration for LosF.
