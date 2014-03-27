@@ -82,6 +82,13 @@ sub print_initconfig_suggestion {
 # The environment variable takes precedence over config_dir setting
 # ----------------------------------------------------------------------
 
+# Privigied credentials
+
+if ($ENV{'ROOT'} ne "root" ) {
+    print "[ERROR]: LosF required elevated credentials for execution.\n";
+    exit 1;
+}
+
 # Allow for potential separation of LosF install path and LosF
 # configuration path. By default, we assume a config/ dir local to the
 # LosF install but this can be overridden by an environment variable.
