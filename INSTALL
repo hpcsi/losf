@@ -89,19 +89,40 @@ should work with CentOS distributions is outlined in the following sections.
        through xinetd, etc). Note that you can safely ignore warnings about a missing debmirror, 
        fencing tools, or boot-loaders.
    
-   (d) Import an OS distribution (e.g. from the media used to install the initial
-       server). Assuming a CentOS distribution DVD is in the cdrom drive on your master
-       host, you can mount an import as follows:
-   
-       $ mount /dev/cdrom /mnt/cdrom
-       $ cobbler import --path=/mnt/cdrom --name=CentOS6.5 --arch=x86_64
+   (d) Import an OS distribution (e.g. from the media used to install the initial server
+       or from downloaded ISO images). Assuming CentOS ISO images are available locally
+       on your master host, you can mount and import as follows:
+
+       $ export DISTRO=CentOS6.5   
+       $ mkdir /mnt/centOS6.5-dvd1
+       $ mount -o loop CentOS-6.5-x86_64-bin-DVD1.iso /mnt/centOS6.5-dvd1
+       $ cobbler import --path=/mnt/dvd1 --name=${DISTRO} --arch=x86_64
+
+       Tip: in order to support the possible provisioning of all available CentOS
+       packages, consider importing the 2nd DVD ISO image as well. This requires adding
+       packages to the distro profile created from the DVD1 import and updating the
+       repository metadata. An example of this process is below: 
+
+       $ mkdir /mnt/centOS6.5-dvd2
+       $ mount -o loop CentOS-6.5-x86_64-bin-DVD2.iso /mnt/centOS6.5-dvd2
+       $ rsync -a '/mnt/centos6.5-dvd2/' /var/www/cobbler/ks_mirror/CentOS6.5-x86_64/ --exclude-from=/etc/cobbler/rsync.exclude
+       $ export COMPSXML=`ls /var/www/cobbler/ks_mirror/${DISTRO}-x86_64/repodata/*comps*.xml`
+       $ createrepo -c cache -s sha --groupfile ${COMPSXML} /var/www/cobbler/ks_mirror/${DISTRO}-x86_64
+
+       # With the distro defined, it is a good time to synchronize cobbler.
+
        $ cobbler sync
    
    (e) Import an EPEL distribution (this will mirror the repo for use locally throughout
        your cluster). An example for CentOS6 is below:
+
+       $ cobbler repo add --mirror=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
+       	 	      --name=epel6 --arch=x86_64
    
-       $ cobbler import --path=http://dl.fedoraproject.org/pub/epel/6/x86_64 \
-         	      --name=epel6 --arch=x86_64
+       Tip: if your master server is behind a proxy, you can augment the repo mirroring
+       environment to include an http proxy. For example:
+
+       $ cobbler repo edit --name=epel6 --environment="http_proxy=http://proxy.yourcompany.com:1111"
 
        To access this repo, you will want to associate it with the provisioning OS distro
        you defined. An example for the CentOS6.5 profile above is:
@@ -230,12 +251,12 @@ should work with CentOS distributions is outlined in the following sections.
        of the synchronized files to match the reference template version.
 
    Suggestion: for traceability, it is recommended to track your local config
-   file changes using your favorite version control system (e.g. git,
-   subversion, etc.).
+   file changes using your favorite version control system (e.g. git or
+   subversion).
 
 -------------------------------------------------------------------------------------------------
 
-5. Manage/update your snazzy HPC cluster.
+5. Managing your HPC cluster.
 
    With a working LosF install and configuration in place (and OS distribution repository
    defined via external network access or from local Cobbler mirroring), you should be
