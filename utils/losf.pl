@@ -58,10 +58,13 @@ sub usage {
     print "  Host Registration:\n";
     print color 'reset';
 
-    print "     add      [host]                      Register a new host for provisioning\n";
-    print "     del      [host]                      Delete an existing host\n";
-    print "     reinsert [host]                      Reinsert an existing host\n";
+    print "     add <OPTIONS> [host]                 Register a new host for provisioning\n";
+    print "     del           [host]                 Delete an existing host\n";
+    print "     reinsert      [host]                 Reinsert an existing host\n";
     print "     sync                                 Sync host provisioning config with Cobbler\n";
+    print "\n";
+    print "     OPTIONS:\n";
+    print "        --noprovision                     External host not for provisioning\n";
     print "\n";
 
     print color 'bold blue';
@@ -210,24 +213,40 @@ sub add_node  {
     # OS Imaging Config
     #-------------------
 
-    my $kickstart          = query_cluster_config_kickstarts          ($node_cluster,$node_type);
-    my $profile            = query_cluster_config_profiles            ($node_cluster,$node_type);
-    my $name_server        = query_cluster_config_name_servers        ($node_cluster,$node_type);
-    my $name_server_search = query_cluster_config_name_servers_search ($node_cluster,$node_type);
-    my $kernel_options     = query_cluster_config_kernel_boot_options ($node_cluster,$node_type);
-    my $kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
-    my $dns_options        = query_cluster_config_dns_options         ($node_cluster,$node_type);
+    my ($name_server,$name_server_search, $kernel_options,$kernel_options_post,$dns_options ) = ("noprovision") x 5;
+
+    if($noprovision) {
+	$kickstart = "$losf_top_dir/kickstarts/empty.kickstart";
+
+	# cobbler will not add a host with out a profile. Grab the first one defined here.
+	$profile = `cobbler profile list | head -1`;
+	chomp($profile);
+	$profile =~ s/^\s+//;
+	if($profile eq "" ) {
+	    MYERROR("Cobbler requires at least one profile to be defined. Please update your Cobbler configuration\n");
+	}
+    } else {
+	# Query desired provisionoing settings from user
+
+	$kickstart          = query_cluster_config_kickstarts               ($node_cluster,$node_type);
+	$profile            = query_cluster_config_profiles                 ($node_cluster,$node_type);
+	$name_server        = query_cluster_config_name_servers             ($node_cluster,$node_type);
+	$name_server_search = query_cluster_config_name_servers_search      ($node_cluster,$node_type);
+	$kernel_options     = query_cluster_config_kernel_boot_options      ($node_cluster,$node_type);
+	$kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
+	$dns_options        = query_cluster_config_dns_options              ($node_cluster,$node_type);
+    }
 
     print "\n";
-    print "   --> Kickstart         = $kickstart\n";
-    print "   --> Profile           = $profile\n";
-    print "   --> Name Server       = $name_server (search = $name_server_search)\n";
+    print "   --> Kickstart           = $kickstart\n";
+    print "   --> Profile             = $profile\n";
+    print "   --> Name Server         = $name_server (search = $name_server_search)\n";
 
     my $kopts    = "";
     my $dns_opts = "";
 
     if( $kernel_options ne "" ) {
-	print "   --> Kernel Options = $kernel_options\n";
+	print "   --> Kernel Options      = $kernel_options\n";
 	$kopts = " --kopts=$kernel_options";
     }
 
@@ -237,14 +256,23 @@ sub add_node  {
     }
 
     if ($dns_options eq "yes" ) {
-	print "   --> DNS enabled       = yes ($host.$domain_name on first defined interface)\n";
+	print "   --> DNS enabled         = yes ($host.$domain_name on first defined interface)\n";
 	$dns_opts = "--dns=$host.$domain_name";
     } else {
-	print "   --> DNS enabled       = no\n";
+	print "   --> DNS enabled         = no\n";
+    }
+
+    # Only define mac if this is intended as a provisional host - allows admins to specify bogus mac and not have
+    # cobbler complain about duplicates.
+
+    my $mac_cmd="";
+
+    if(! $noprovision) {
+	$mac_cmd="--mac=$mac[0]";
     }
 
     $cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
-	."--mac=$mac[0] $dns_opts " 
+	."$mac_cmd $dns_opts " 
 	."--subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
 	."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search "
 	."$kopts";
@@ -1696,6 +1724,7 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 	   "install"       => \$install, 
 	   "alias=s"       => \$alias_option,
 	   "yes"           => \$assume_yes,
+	   "noprovision"   => \$noprovision,
 	   "comment=s"     => \$comment,
 	   "date=s"        => \$datestring,
 	   "nocertify"     => \$nocertify,

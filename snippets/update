@@ -1,0 +1,35 @@
+# Initial s/w update, mount fs and run as usual...
+
+/bin/hostname -f          >> /root/losf.log 2>&1
+/sbin/ifconfig            >> /root/losf.log 2>&1
+/bin/cat /etc/resolv.conf >> /root/losf.log 2>&1
+/bin/echo "cobbler server IP = $server" >> /root/losf.log 2>&1
+
+# Services for NFS...
+
+/etc/init.d/iptables stop >> /root/losf.log 2>&1
+
+# Mount LosF config dir from cobbler master
+
+/bin/mkdir -p /home >> /root/losf.log 2>&1
+/bin/mount -o nfsvers=3,nolock $server:/home /home  >> /root/losf.log 2>&1
+
+# Get updated user list prior to performing install
+
+#/admin/build/admin/hpc_stack/sync_config_files /etc/passwd       >> /root/losf.log 2>&1
+#/admin/build/admin/hpc_stack/sync_config_files /etc/shadow       >> /root/losf.log 2>&1
+#/admin/build/admin/hpc_stack/sync_config_files /etc/group        >> /root/losf.log 2>&1
+#/admin/build/admin/hpc_stack/sync_config_files /etc/rsyslog.conf >> /root/losf.log 2>&1
+
+# Restart rsyslog so we see can record installs during initial PXE on master syslog
+
+#/etc/init.d/rsyslog restart >> /root/losf.log 2>&1
+
+/usr/bin/logger -p local0.notice losf: beginning update via PXE install
+
+# Update the node with all configured OS packages and local RPMs
+
+/home/admin/losf/update >> /root/losf.log 2>&1
+
+/usr/bin/logger -p local0.notice losf: losf update finished during PXE install
+

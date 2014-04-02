@@ -1,5 +1,7 @@
 Version 0.44.0 (In Progress)
 
+  * added --noprovision option to losf add; allows addition without
+    normal provisioning definition requirements (convenient for switches, BMCs, etc)
   * enhancement to allow for node-type specific config file syncing control
   * fixed missing final update notification when file ownership/permissions changed
   * initconfig utility now includes example networking config file

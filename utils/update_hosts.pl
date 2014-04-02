@@ -24,8 +24,6 @@
 # Utility functions for populating a master /etc/hosts file 
 #--------------------------------------------------------------------------
 
-# $Id$
-
 #use strict;
 use LosF_paths;
 use LosF_node_types;
@@ -126,7 +124,7 @@ chomp($domainname=`dnsdomainname`);
 
 
 if ( $domainname eq "" ) {
-    MYERRROR("Unable to ascertain local domainname\n");
+    MYERROR("Unable to ascertain local domainname\n");
 }
 
 #------------------------
@@ -143,18 +141,17 @@ while (<$IN>) {
     if(/$hostfile_begin_delim/../$hostfile_end_delim/) {
 	$found_delim=1;
 	if (/--begin-sync-losf-$/) {
-	    print $TMPFILE "#--------------------------------------------------------------begin-sync-losf-\n";
+	    print $TMPFILE "#-------------------------------------------------------------------begin-sync-losf-\n";
 	    print $TMPFILE "#\n";
 	    print $TMPFILE "# Auto-generated host entries; please do not edit entries between the begin/end\n";
-	    print $TMPFILE "# delimiters as these hosts are managed via PXE installs. However, feel free to\n";
-	    print $TMPFILE "# knock yourself out adding customizations to the rest of the file as anything\n";
-	    print $TMPFILE "# outside of the delimited section will be preserved.  Power to the people.\n";
+	    print $TMPFILE "# delimiters as these hosts are managed via LosF provisioning settings installs.\n";
+	    print $TMPFILE "# However, any edits outside of the delimited section will be preserved.\n"; 
 	    print $TMPFILE "#\n";
 
 	    foreach $key (sort (keys(%managed_hosts))) {
 		print $TMPFILE "$managed_hosts{$key} $key.$domainname $key\n";
 	    }
-	    print $TMPFILE "#----------------------------------------------------------------end-sync-losf-\n";
+	    print $TMPFILE "#---------------------------------------------------------------------end-sync-losf-\n";
 	}
     } else {
 	print $TMPFILE $_;
@@ -181,6 +178,4 @@ $size = scalar keys %managed_hosts;
 
 print "--> scan complete (number of defined hosts = $size)\n\n";
 
-
-
-
+1;
