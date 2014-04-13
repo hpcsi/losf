@@ -41,7 +41,7 @@ require "$losf_utils_dir/header.pl";
 my $output_mode = $ENV{'LOSF_LOG_MODE'};
 my $standalone  = $ENV{'LOSF_STANDALONE_UTIL'};
 
-determine_node_membership();
+determine_node_membership(@ARGV);
 
 BEGIN {
     my $osf_membership_init = 0;        # initialization flag 
@@ -107,9 +107,21 @@ BEGIN {
 	
 	$osf_membership_init = 1;
 
-	if($standalone == 1) {
-	    print "[LosF] Node type:       $node_cluster -> $node_type\n";
-	    print "[LosF] Config dir:      $losf_custom_config_dir\n";
+	# Query node type regex if requested via command-line
+	# argument; otherwise, output node_type for locally running
+	# host.
+
+	if( @_ >= 1 ) {
+	    my $node_type=shift;
+
+	    my $regex = query_regex_for_node_type($node_cluster,$node_type);
+	    print "$regex\n";
+	    if( "$regex" eq "unknown") {exit 1;}
+	} else {
+	    if($standalone == 1) {
+		print "[LosF] Node type:       $node_cluster -> $node_type\n";
+		print "[LosF] Config dir:      $losf_custom_config_dir\n";
+	    }
 	}
 
 	return($node_cluster,$node_type);

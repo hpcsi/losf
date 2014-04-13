@@ -28,7 +28,7 @@
 use POSIX;
 require "getopts.pl";
 
-Getopts("r:i:m:t:h:w:c:x:f:v");
+Getopts("r:i:m:n:t:h:w:c:x:f:v");
 
 $timeout = 5*60;
 $n = @ARGV;
@@ -52,6 +52,7 @@ OPTIONS:
   -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
   -f <hostfile>           operate on hosts specified in provided hostfile
   -m <max_ssh>            maximum number of commands to run in parallel (default = 288)
+  -n <node_type>          operate on a defined LosF node type 
   -t <timeout>            timeout period for command completion in seconds (default = 5 minutes)
   -x <regex>              operate on hosts which match supplied regex pattern
   -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
@@ -73,7 +74,7 @@ if ($opt_m) { $max_ssh = $opt_m; }
 if ($opt_v) { $environment = ""; }
 
 #------------------------------------------------
-# Koomie'fied version of building up host lists:
+# Building up host list:
 #------------------------------------------------
 
 # Chassis Options
@@ -103,9 +104,6 @@ if ( $opt_r ne "" ) {
 	    $rack_begin = $1;
 	    $rack_end   = $2;
 	    
-#	    print "rack_begin = $rack_begin\n";
-#	    print "rack_end   = $rack_end\n";
-
 	    if($rack_end < $rack_begin) {
 		die ("Ending rack number is less than beginning rack number ($rack_begin,$rack_end)");
 	    }
@@ -127,12 +125,23 @@ if ( $opt_r ne "" ) {
     if ( $opt_r == "login" ) {
 	$racks_desired = login;
     }
+}
 
+# 2014: New feature - allow user to specifiy a node type and query
+# LosF directly for corresponding regex to use.  Mutually exclussive
+# with -x option.
 
+if ( $opt_n ne "" && $opt_x ne "" ) {
+    print "ERROR: The \"-n\" and \"-x\" options are mutually exclusive.\n";
+    print "ERROR: Please choose only one.\n";
+    exit 1;
+}
 
-#    print "rack_desired = $racks_desired\n";
-#   exit(1);
-
+if ( $opt_n ne "" ) {
+    my $LOSF_TOP_DIR=$ENV{'TOP_DIR'};
+    my $result = `$LOSF_TOP_DIR/node_types $opt_n`;
+    chomp($result);
+    $opt_x = $result;
 }
 
 # Hostfile Options
@@ -172,12 +181,10 @@ if ( $opt_f ne "" ) {
 	
 	
 	if (/\bc(\d\d\d)[-](\d)(\d\d)\b/) {
-	    $myhost    = "c$1-$2"."$3"; # full hostname        (e.g. 301-105)
-	    $myrack    = $1;	    # rack number          (e.g. 301)
-	    $myblade   = $2.$3;	    # chassis/host number  (e.g. 105)
+	    $myhost    = "c$1-$2"."$3";     # full hostname        (e.g. 301-105)
+	    $myrack    = $1;	            # rack number          (e.g. 301)
+	    $myblade   = $2.$3;	            # chassis/host number  (e.g. 105)
 	    $mychassis = "$1-$2";	    # chassis number       (e.g. 301-1)
-	    
-#	print "Checking on host $myhost\n";
 	    
 	    if ( $opt_r ne "" ) {
 		if ( $myrack =~ /$racks_desired/ ) {
@@ -190,19 +197,22 @@ if ( $opt_f ne "" ) {
 		}		
 		
 	    }
-	} elsif ( /\boss(\d+?)\b/ && $opt_r eq "oss" ) {
-	    $rank   = $1;
-	    $myhost = "oss$rank";
-	    
-#	print "Checking on oss host $myhost\n";
-	    $hosts{$myhost} = $rank;
-	    
-	} elsif ( /\blogin(\d+?)\b/ && $opt_r eq "login" ) {
-	    $rank   = $1;
-	    $myhost = "login$rank";
-	    $hosts{$myhost} = $rank;
-	} 
-	
+	}
+# depreciating -r login and -r oss in favor of -n login and -n oss
+# 
+###	elsif ( /\boss(\d+?)\b/ && $opt_r eq "oss" ) {
+###	    $rank   = $1;
+###	    $myhost = "oss$rank";
+###	    
+####	print "Checking on oss host $myhost\n";
+###	    $hosts{$myhost} = $rank;
+###	    
+###	} elsif ( /\blogin(\d+?)\b/ && $opt_r eq "login" ) {
+###	    $rank   = $1;
+###	    $myhost = "login$rank";
+###	    $hosts{$myhost} = $rank;
+###	} 
+###	
     }
 }
 

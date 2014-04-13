@@ -35,4 +35,4 @@ fi
 export LOSF_LOG_MODE="INFO"
 export LOSF_STANDALONE_UTIL=1
 
-$TOP_DIR/utils/node_types.pl 
+$TOP_DIR/utils/node_types.pl "$@"

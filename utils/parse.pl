@@ -1141,6 +1141,25 @@ BEGIN {
 	return($value);
     }
 
+    sub query_regex_for_node_type {
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $regex = "unknown";
+
+	if ( defined (my $val = $global_cfg->val($cluster,$host_type)) ) {
+	    $regex = $val;
+	} 
+
+	end_routine();
+	return($regex);
+
+    }
+
 }
 
 1;
