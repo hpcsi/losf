@@ -184,7 +184,6 @@ BEGIN {
 	begin_routine();
 
 	if ( $osf_sync_services == 0 ) {
-#	    INFO("\n** Syncing runlevel services\n\n");
 	    $osf_sync_services = 1;
 	} else {
 	    return;
@@ -245,7 +244,7 @@ BEGIN {
 	
 	# Customization - although we group hosts into specific node
 	# types (e.g. logins, computes), we allow for special
-	# customization on a host by host based for configuration
+	# customization on a host by host basis for configuration
 	# files.  If a configfile.<hostname> exists, we choose this
 	# file to sync in favor of the default configfile.
 
@@ -349,14 +348,12 @@ BEGIN {
 	# Sync file permission convention: if no additional
 	# file-specific file conventions are supplied by the user via
 	# the config files, we mirror the permissions of the template
-	# config file; otherwise we enforce permissions specified in
-	# config file.
+	# config file; otherwise the permissions will be set in
+	# subsequent call to parse_and_sync_permissions().
+
 
 	if(defined $perm_files{"$file"}) {
-	    if ( -e $file ) {
-		my $cmd_string = sprintf("chmod %i %s",$perm_files{"$file"},$file);
-		system($cmd_string); 
-	    }
+	    DEBUG("   --> skipping mirrorPermisisons - specific user permissions provided\n");
 	} else {
 	    mirrorPermissions("$sync_file","$file");
 	}
@@ -583,11 +580,14 @@ BEGIN {
 	begin_routine();
 
 	if ( $osf_sync_permissions == 0 ) {
-	    DEBUG("** Syncing file/directory permissions\n\n");
 	    $osf_sync_permissions = 1;
+	} else {
+	    return;
 	}
 
 	(my $node_cluster, my $node_type) = determine_node_membership();
+
+	INFO("** Syncing file/directory permissions ($node_cluster:$node_type)\n");
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);

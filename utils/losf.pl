@@ -76,7 +76,7 @@ sub usage {
     print "\n";
 
     print "     addpkg     [package]                 Add new OS package (and dependencies)\n";
-    print "     delpkg     [package]                 Remove previously added OS package\n";
+###    print "     delpkg     [package]                 Remove previously added OS package\n";
     print "     addgroup   [ group ]                 Add new OS group (and dependencies)\n";
     print "     updatepkg  [package]                 Update specific OS packages (and dependencies)\n";
     print "     updatepkgs                           Update all local OS packages (and dependencies)\n";

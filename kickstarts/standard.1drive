@@ -86,11 +86,18 @@ $SNIPPET('cobbler_register')
 # Enable post-install boot notification
 $SNIPPET('post_anamon')
 
-# Local customization...
+#----------------------
+# Local customization
+#----------------------
 
+# Disable graphical boot
+sed -i "s/rhgb quiet//g" /boot/grub/grub.conf
+
+# Update motd
 $SNIPPET('LosF/motd')
-$SNIPPET('LosF/update')
 
+# Bring node into latest production state with LosF
+$SNIPPET('LosF/update')
 
 # Start final steps
 $SNIPPET('kickstart_done')
