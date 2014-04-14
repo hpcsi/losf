@@ -1,7 +1,9 @@
 Version 0.44.0 (13 April 2014)
 
   * new option for koomie_cf: use -n <node_type> to run parallel commands
-    across a pre-defined LosF node-type.
+    across a pre-defined LosF node-type
+  * example kickstart files for use with LosF included in top-level kickstarts/
+    directory along with Cobbler snippets in corresponding snippets directory
   * added --noprovision option to losf add; allows addition without
     normal provisioning definition requirements (convenient for switches, BMCs, etc.)
   * enhancement to allow for node-type specific config file syncing control
