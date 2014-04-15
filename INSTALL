@@ -197,7 +197,7 @@ should work with CentOS distributions is outlined in the following sections.
        and domainname of the host on which it is executed. If the basic initialization is
        complete, it should be possible to run the "update" utility. Example output after
        running initconfig is shown below indicating that no specific configuration
-       features have been requested and host is presently up to date.
+       features have been requested and that the host is presently up to date.
 
        $ update -q
        OK: [RPMs: OS 0/0  Custom 0/0] [Files: 0/0] [Links: 0/0] [Services: 0/0] [Perms: 0/0] -> master
