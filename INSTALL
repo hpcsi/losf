@@ -78,7 +78,7 @@ should work with CentOS distributions is outlined in the following sections.
        password to a strong password of your own choosing. You can define the crypted
        hash via:
    
-       $openssl passwd -1 -salt 'random-phrase-here' 'your-password-here'
+       $ openssl passwd -1 -salt 'random-phrase-here' 'your-password-here'
    
    (b) Start cobbler.
    
