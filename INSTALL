@@ -40,7 +40,7 @@ should work with CentOS distributions is outlined in the following sections.
    
        $ rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
    
-   (c) [ Optional ]: Install baseline cobbler software and it's associated dependencies
+   (c) [ Optional ]: Install baseline cobbler software and its associated dependencies
        (available from the EPEL repo above). Cobbler can be used for bare-metal
        provisioning, but LosF is used for configuration management after a base install,
        so other provisioning mechanisms can be used as desired.  Assuming your master
