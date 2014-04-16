@@ -191,7 +191,7 @@ should work with CentOS distributions is outlined in the following sections.
        Alternatively, you can use a convenience utility to initialize the cluster with a
        vanilla configuration as follows:
 
-       $ <losf-install> initconfig <YourClusterName>
+       $ <losf-install>/initconfig <YourClusterName>
 
        This utility will define a single "master" node type based on the local hostname
        and domainname of the host on which it is executed. If the basic initialization is
@@ -222,7 +222,7 @@ should work with CentOS distributions is outlined in the following sections.
        An example file highlighting example syntax and multiple cluster
        definitions is provided at:
 
-       <losf-install>config/config_example/config.machines
+       <losf-install>/config/config_example/config.machines
 
        Alternatively, if you used the "initconfig" utility, you should have a basic
        working file installed already at $config_dir/config.machines.
