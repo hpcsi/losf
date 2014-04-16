@@ -206,7 +206,7 @@ should work with CentOS distributions is outlined in the following sections.
 
 4. Customize cluster configuration
 
-   See the top-level LosF README for a brief introduction on the primary-command line
+   See the top-level LosF README for a brief introduction on the primary command-line
    utilities available. In addition, running "losf" with no command-line options will
    provide documentation on the available options and syntax. Prior to running any
    commands, customize the cluster configuration:
