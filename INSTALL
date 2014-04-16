@@ -312,7 +312,7 @@ should work with CentOS distributions is outlined in the following sections.
    (d) Sync config files only.
 
        The "update" utility is normally used to verify that all configuration files and
-       OS/Custom packages are in sync. A convenience utility is provided in cases where
+       OS/Custom packages are in sync. A convenient utility is provided in cases where
        you only modified a configuration file or runtime service and want to bring a host
        in sync without checking all RPM packages.  
 
