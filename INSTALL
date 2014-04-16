@@ -21,7 +21,7 @@ should work with CentOS distributions is outlined in the following sections.
 
 1. Install a master server from baseline OS distribution (e.g. CentOS).
 
-   (a) Boot from installation media and install as desired. 
+   (a) Boot from installation media and install as desired.
    
        Note: if you are planning to use Cobbler's functionality to mirror repositories,
        be aware that the default storage location is /var/www. Consequently, consider
@@ -43,7 +43,7 @@ should work with CentOS distributions is outlined in the following sections.
    (c) [ Optional ]: Install baseline cobbler software and its associated dependencies
        (available from the EPEL repo above). Cobbler can be used for bare-metal
        provisioning, but LosF is used for configuration management after a base install,
-       so other provisioning mechanisms can be used as desired.  Assuming your master
+       so other provisioning mechanisms can be used as desired. Assuming your master
        server has external network access, the necessary packages can be installed as
        follows:
    
@@ -127,7 +127,7 @@ should work with CentOS distributions is outlined in the following sections.
        To access this repo, you will want to associate it with the provisioning OS distro
        you defined. An example for the CentOS6.5 profile above is:
 
-       $  cobbler profile edit --name=CentOS6.5-x86_64 --repos=epel6
+       $ cobbler profile edit --name=CentOS6.5-x86_64 --repos=epel6
    
    (f) Mirror the newly defined EPEL repository (note: this will take some time).
    
@@ -216,7 +216,7 @@ should work with CentOS distributions is outlined in the following sections.
        To begin, the first file to edit is the $config_dir/config.machines file to
        potentially customize the domainname of your new cluster, provide desired node
        type definitions (e.g. logins, compute, io, etc), and define the location to house
-       RPMs registered with LosF.  The configuration files are simple, ascii keyword
+       RPMs registered with LosF. The configuration files are simple, ascii keyword
        driven files that are organized by [sections] and can be edited directly.
 
        An example file highlighting example syntax and multiple cluster
@@ -267,7 +267,7 @@ should work with CentOS distributions is outlined in the following sections.
 
        The "update" utility is used to bring a node to the latest configuration status
        (via the installation/removal of desired packages and synchronization of
-       configuration files and services).  Basic usage is below (or see
+       configuration files and services). Basic usage is below (or see
        "<losf-install>/update -h"):
 
        usage: update [OPTIONS]
@@ -355,7 +355,7 @@ should work with CentOS distributions is outlined in the following sections.
          -v                      run LosF in verbose mode 
 
         A common occurrence when performing cluster updates is to use the "koomie_cf"
-        utility in concert with "update".  For example, assuming we have 4 login nodes
+        utility in concert with "update". For example, assuming we have 4 login nodes
         available named login1,login2,login3, and login4, the following example will run
         update on all of them in parallel. Note that the "-q" option to update is enabled
         automatically when run remotely via koomie_cf.
