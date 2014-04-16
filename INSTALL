@@ -82,7 +82,7 @@ should work with CentOS distributions is outlined in the following sections.
    
    (b) Start cobbler.
    
-       $ /etc/init.d/cobbler start
+       $ /etc/init.d/cobblerd start
 
    (c) Check for other cobbler pre-requisites. You can run "cobbler check" which will
        help point you to any other remaining requirements (like having http enabled, allowing rsync
