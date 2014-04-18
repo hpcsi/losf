@@ -62,7 +62,7 @@ raid /tmp --level=RAID1 --device=md2 --fstype=ext3 raid.03 raid.13
 
 %pre
 $SNIPPET('log_ks_pre')
-$kickstart_start
+$SNIPPET('kickstart_start')
 $SNIPPET('pre_install_network_config')
 # Enable installation monitoring
 $SNIPPET('pre_anamon')
@@ -102,5 +102,5 @@ $SNIPPET('post_anamon')
 $SNIPPET('LosF/update')
 
 # Start final steps
-$kickstart_done
+$SNIPPET('kickstart_done')
 # End final steps
