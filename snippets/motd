@@ -1,5 +1,5 @@
 # basic motd
 
-/bin/echo "LosF 0.45.0pre" >> /etc/motd
+/bin/echo "LosF 0.45.1" >> /etc/motd
 /bin/echo "Provisioned on `date +'%d-%b-%Y at %H:%M'`" >> /etc/motd
 /bin/echo " " >> /etc/motd

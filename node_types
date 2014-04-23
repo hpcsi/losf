@@ -35,4 +35,11 @@ fi
 export LOSF_LOG_MODE="INFO"
 export LOSF_STANDALONE_UTIL=1
 
+if [ $# -ge 1 ];then
+    export LOSF_NODE_TYPE_REGEX_QUERY=1
+else
+    unset LOSF_NODE_TYPE_REGEX_QUERY
+fi
+
+
 $TOP_DIR/utils/node_types.pl "$@"

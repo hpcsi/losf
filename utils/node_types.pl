@@ -111,7 +111,7 @@ BEGIN {
 	# argument; otherwise, output node_type for locally running
 	# host.
 
-	if( @_ >= 1 ) {
+	if ( defined $ENV{'LOSF_NODE_TYPE_REGEX_QUERY'} ) {
 	    my $node_type=shift;
 
 	    my $regex = query_regex_for_node_type($node_cluster,$node_type);
