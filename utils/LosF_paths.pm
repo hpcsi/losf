@@ -85,7 +85,7 @@ sub print_initconfig_suggestion {
 # Privigied credentials
 
 if ($ENV{'USER'} ne "root" ) {
-    print "[ERROR]: LosF required elevated credentials for execution.\n";
+    print "[ERROR]: LosF requires elevated credentials for execution.\n";
     exit 1;
 }
 
