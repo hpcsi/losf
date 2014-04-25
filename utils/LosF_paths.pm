@@ -82,9 +82,9 @@ sub print_initconfig_suggestion {
 # The environment variable takes precedence over config_dir setting
 # ----------------------------------------------------------------------
 
-# Check for priviliged credentials
+# Check for privileged credentials
 
-if ($ENV{'USER'} ne "root" ) {
+if ($> > 0) {
     print "[ERROR]: LosF requires elevated credentials for execution.\n";
     exit 1;
 }
