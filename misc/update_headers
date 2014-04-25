@@ -23,3 +23,8 @@ for i in `ls ../utils/*.pl`; do
 done
 
 
+for i in `ls ../misc/config_latest_install`; do 
+    if [ ! -h ../misc/$i ];then
+	./update_license.pl ../LICENSE $i
+    fi
+done
