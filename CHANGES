@@ -1,5 +1,6 @@
 Version 0.45.0 (In Progress)
 
+  * typo/grammar edits in INSTALL directions
   * addition of simple upgrade utility to help configure LosF after downloading
     an updated release tarball.  Running "misc/config_latest_install" will update
     a top-level losf soft link to point at the downloaded version, and will
