@@ -1,5 +1,11 @@
 Version 0.45.0 (In Progress)
 
+  * addition of simple upgrade utility to help configure LosF after downloading
+    an updated release tarball.  Running "misc/config_latest_install" will update
+    a top-level losf soft link to point at the downloaded version, and will
+    update the config/config_dir setting based on previously installed
+    configurations.
+
 Version 0.44.1 (23 April 2014)
 
   * bug fix for sync_config_file failure introduced after addition of koomie_cf -n option

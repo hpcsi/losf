@@ -175,7 +175,10 @@ should work with CentOS distributions is outlined in the following sections.
 
 	  (ii) Upgrades: if you have been using a previous version of LosF and are
 	       upgrading to a newer release, you can simply copy your previous
-	       config/config_dir file into the latest install path.
+	       config/config_dir file into the latest install path. Alternatively, you
+	       can run the "misc/config_latest_install" utility and it will search for
+	       the most recently installed config_dir setting, and update the latest
+	       install accordingly.
 
        Note that for a first-time install, you will likely not have a pre-existing
        config_dir for LosF; in that case, the path you choose will be created during the

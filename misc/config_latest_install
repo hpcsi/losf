@@ -1,0 +1,101 @@
+#!/bin/bash
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
+# 
+# LosF - a Linux operating system Framework for HPC clusters
+#
+# Copyright (C) 2007-2014 Karl W. Schulz <losf@koomie.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
+# Utility to update losf soft link to latest release and copy previous
+# config_dir settings.
+#-------------------------------------------------------------------------
+
+export MISC_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+export LOSF_DIR=$(dirname $MISC_DIR)
+export INSTALL_DIR=$(dirname $LOSF_DIR)
+
+version=$(basename $LOSF_DIR)
+
+echo " "
+echo "LosF: Updating top-level losf soft link"
+echo "--> $INSTALL_DIR/losf -> $version"
+
+cd $INSTALL_DIR
+if [ $? -ne 0 ];then
+    echo "ERROR: Unable to access $INSTALL_DIR"
+    exit 1
+fi
+
+cmd="ln -sf $version losf"
+`$cmd`
+if [ $? -ne 0 ];then
+    echo "ERROR: Unable to update soft link"
+    exit 1
+fi
+
+if [ ! -h losf ];then
+    echo "ERROR: Soft link not created"
+    exit 1
+fi
+
+echo "--> Soft link updated"
+
+echo " "
+echo "LosF: Checking for top-level config_dir"
+
+if [ -n "$LOSF_CONFIG_DIR" ];then
+    echo "--> LOSF_CONFIG_DIR environment variable defined -> $LOSF_CONFIG_DIR"
+    echo "--> Not attempting to update local config/config_dir"
+    exit 0
+fi
+
+if [ -e "losf/config/config_dir" ];then
+    echo "--> config_dir already defined...no update necessary"
+    exit 0
+else
+    echo "--> No local config_dir defined, checking for previous installs...."
+    igot=`ls losf-*/config/config_dir | tail -1 2> /dev/null`
+    if [ $? -ne 0 ];then
+	echo "--> No previous config_dir files detected. Please define desired LosF configuration"
+	echo "    directory in config/config_dir or use LOSF_CONFIG_DIR environment variable to complete"
+	echo "    your local installation."
+	exit 1
+    else
+	if [ -s $igot ];then
+	    echo "--> Previous config_dir file detected: $igot"
+	    cp -p $igot losf/config/config_dir
+	    if [ $? -ne 0 ];then
+		echo "ERROR: Unable to update losf/config/config_dir file"
+		exit 1
+	    fi
+	    echo "--> Copied previously defined config_dir to latest installation"
+	    local_config_dir=`cat $igot`
+
+	    echo "--> $version config dir updated to use $local_config_dir"
+
+	else
+	    echo "ERROR: Unable to access $config_dir"
+	    exit 1
+	fi
+    fi
+
+    
+fi
+
+exit 0
+
