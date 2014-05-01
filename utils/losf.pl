@@ -197,10 +197,10 @@ sub add_node  {
 	    print "\n";
 	    print "   Defined Interface:\n";
 	    
-	    INFO("   --> IP address        = $ip[$count]\n");
-	    INFO("   --> MAC               = $mac[$count]\n");
-	    INFO("   --> Interface         = $interface[$count]\n");
-	    INFO("   --> Netmask           = $netmask[$count]\n");
+	    INFO("   --> IP address          = $ip[$count]\n");
+	    INFO("   --> MAC                 = $mac[$count]\n");
+	    INFO("   --> Interface           = $interface[$count]\n");
+	    INFO("   --> Netmask             = $netmask[$count]\n");
 	}
     } else {
 	ERROR("\n[ERROR]: $host not defined in $filename\n");
@@ -238,6 +238,7 @@ sub add_node  {
     }
 
     print "\n";
+    print "   Provisioning Settings:\n";
     print "   --> Kickstart           = $kickstart\n";
     print "   --> Profile             = $profile\n";
     print "   --> Name Server         = $name_server (search = $name_server_search)\n";
