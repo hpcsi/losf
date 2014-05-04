@@ -1,12 +1,12 @@
 #!/usr/bin/env perl
 
-use Test::More;
-#use Term::ANSIColor 2.01 qw(colorstrip);
+#use Test::More;
+use Test::More tests => 21;
 #use Test::Files;
 use File::Basename;
 use File::Temp qw(tempfile);
 use Cwd 'abs_path';
-use test_utils;
+use LosF_test_utils;
 
 
 print "---------------------\n";
