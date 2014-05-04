@@ -75,7 +75,7 @@ if [ $? -ne 0 ];then
     exit 1
 fi
 
-cmd="ln -sf $version losf"
+cmd="ln -sfn $version losf"
 `$cmd`
 if [ $? -ne 0 ];then
     echo "ERROR: Unable to update soft link"
