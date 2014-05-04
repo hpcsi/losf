@@ -69,7 +69,6 @@ if [ -e "losf/config/config_dir" ];then
     exit 0
 else
     echo "--> No local config_dir defined, checking for previous installs...."
-#    igot=`ls losf-*/config/config_dir | tail -1 2> /dev/null`
     igot=`ls losf-*/config/config_dir 2> /dev/null`
     if [ $? -ne 0 ];then
 	echo "--> No previous config_dir files detected. Please define desired LosF configuration"
@@ -96,7 +95,6 @@ else
 	fi
     fi
 
-    
 fi
 
 exit 0
