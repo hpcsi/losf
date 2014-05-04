@@ -127,7 +127,8 @@ else
 
 	    output "--> $version config dir updated to use $local_config_dir"
 
-	    if [ CLEAN ];then
+	    if $CLEAN ;then
+		output "--> removing config_dir file from older install"
 		rm $latest
 	    fi
 
