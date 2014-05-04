@@ -32,11 +32,15 @@ export INSTALL_DIR=$(dirname $LOSF_DIR)
 version=$(basename $LOSF_DIR)
 
 VERBOSE=true
+CLEAN=false
 
-while getopts ":q" arg; do
+while getopts ":q:c" arg; do
     case $arg in 
 	q)
 	    VERBOSE=false
+	    ;;
+	c)
+	    CLEAN=true
 	    ;;
 	esac
 done
@@ -122,6 +126,10 @@ else
 	    local_config_dir=`cat $latest`
 
 	    output "--> $version config dir updated to use $local_config_dir"
+
+	    if [ CLEAN ];then
+		rm $latest
+	    fi
 
 	else
 	    echo "ERROR: Unable to access $config_dir"
