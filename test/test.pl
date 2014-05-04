@@ -1,4 +1,30 @@
 #!/usr/bin/env perl
+#-----------------------------------------------------------------------bl-
+#--------------------------------------------------------------------------
+# 
+# LosF - a Linux operating system Framework for HPC clusters
+#
+# Copyright (C) 2007-2014 Karl W. Schulz <losf@koomie.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the Version 2 GNU General
+# Public License as published by the Free Software Foundation.
+#
+# These programs are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc. 51 Franklin Street, Fifth Floor, 
+# Boston, MA  02110-1301  USA
+#
+#-----------------------------------------------------------------------el-
+# LosF Regression testing driver.
+#--------------------------------------------------------------------------
+
+use strict;
 
 #use Test::More;
 use Test::More tests => 21;
@@ -7,7 +33,6 @@ use File::Basename;
 use File::Temp qw(tempfile);
 use Cwd 'abs_path';
 use LosF_test_utils;
-
 
 print "---------------------\n";
 print "LosF Regression Tests\n";
@@ -21,17 +46,17 @@ my $redirect = "1> /dev/null";
 
 print "\nChecking install manifest:\n";
 
-@BINS=("losf","update","node_types","koomie_cf",
+my @BINS=("losf","update","node_types","koomie_cf",
        "initconfig","sync_config_files","update_hosts");
 
-foreach $bin (@BINS) {
+foreach my $bin (@BINS) {
     test_binary_existence("$losf_dir/$bin");
 }
 
 #------------------------------------------------------
 
 print "\nInitializing test config ";
-my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || die("Unable to create temporary directory");
+my $tmpdir = File::Temp->newdir(DIR=>my $dir, CLEANUP => 1) || die("Unable to create temporary directory");
 print "--> tmpdir = $tmpdir\n";
 
 $ENV{'LOSF_CONFIG_DIR'} = "$tmpdir";
@@ -63,7 +88,7 @@ ok(system("$losf_dir/rpm_topdir -q 1> $tmpdir/.result" ) == 0,"rpm_topdir runs")
 
 open(IN,"<$tmpdir/.result")     || die "Cannot open $tmpdir/.result\n";
 
-$line = <IN>; chomp($line);
+my $line = <IN>; chomp($line);
 ok($line =~ m/^\[LosF\] Node type:       test -> master$/,"rpm_topdir -> correct node type");
 
 $line = <IN>; chomp($line);
