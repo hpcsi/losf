@@ -31,11 +31,45 @@ export INSTALL_DIR=$(dirname $LOSF_DIR)
 
 version=$(basename $LOSF_DIR)
 
-echo " "
-echo "LosF: Updating top-level losf soft link"
-echo "--> $INSTALL_DIR/losf -> $version"
+VERBOSE=true
+
+while getopts ":q" arg; do
+    case $arg in 
+	q)
+	    VERBOSE=false
+	    ;;
+	esac
+done
+
+function output () {
+    if $VERBOSE ; then
+	echo "$1"
+    fi
+}
+
+# Verify that we appear to be running from a release tarball
 
 cd $INSTALL_DIR
+
+if [ -s $version/VERSION ];then
+    release=`cat $version/VERSION`
+    if [ "$version" != "losf-$release" ];then
+	echo "ERROR: The local LosF install does not appear to have come from a standard release mechanism."
+	echo "ERROR: Expecting top-level path of losf-$release but found $version"
+	echo " "
+	echo "Exiting..."
+	exit 1
+    fi
+else
+    echo "ERROR: Unable to access required VERSION file"
+    exit 1
+fi
+
+output " "
+output "LosF: Updating top-level losf soft link"
+output "--> $INSTALL_DIR/losf -> $version"
+
+
 if [ $? -ne 0 ];then
     echo "ERROR: Unable to access $INSTALL_DIR"
     exit 1
@@ -53,41 +87,41 @@ if [ ! -h losf ];then
     exit 1
 fi
 
-echo "--> Soft link updated"
+output "--> Soft link updated"
 
-echo " "
-echo "LosF: Checking for top-level config_dir"
+output " "
+output "LosF: Checking for top-level config_dir"
 
 if [ -n "$LOSF_CONFIG_DIR" ];then
-    echo "--> LOSF_CONFIG_DIR environment variable defined -> $LOSF_CONFIG_DIR"
-    echo "--> Not attempting to update local config/config_dir"
+    output "--> LOSF_CONFIG_DIR environment variable defined -> $LOSF_CONFIG_DIR"
+    output "--> Not attempting to update local config/config_dir"
     exit 0
 fi
 
 if [ -e "losf/config/config_dir" ];then
-    echo "--> config_dir already defined...no update necessary"
+    output "--> config_dir already defined...no update necessary"
     exit 0
 else
-    echo "--> No local config_dir defined, checking for previous installs...."
+    output "--> No local config_dir defined, checking for previous installs...."
     igot=`ls losf-*/config/config_dir 2> /dev/null`
     if [ $? -ne 0 ];then
-	echo "--> No previous config_dir files detected. Please define desired LosF configuration"
-	echo "    directory in config/config_dir or use LOSF_CONFIG_DIR environment variable to complete"
-	echo "    your local installation."
-	exit 1
+	output "--> No previous config_dir files detected. Please define desired LosF configuration"
+	output "    directory in config/config_dir or use LOSF_CONFIG_DIR environment variable to complete"
+	output "    your local installation."
+	exit 0
     else
 	latest=`echo $igot | tail -1`
 	if [ -s $latest ];then
-	    echo "--> Previous config_dir file detected: $latest"
+	    output "--> Previous config_dir file detected: $latest"
 	    cp -p $latest losf/config/config_dir
 	    if [ $? -ne 0 ];then
 		echo "ERROR: Unable to update losf/config/config_dir file"
 		exit 1
 	    fi
-	    echo "--> Copied previously defined config_dir to latest installation"
+	    output "--> Copied previously defined config_dir to latest installation"
 	    local_config_dir=`cat $latest`
 
-	    echo "--> $version config dir updated to use $local_config_dir"
+	    output "--> $version config dir updated to use $local_config_dir"
 
 	else
 	    echo "ERROR: Unable to access $config_dir"
