@@ -34,7 +34,7 @@ version=$(basename $LOSF_DIR)
 VERBOSE=true
 CLEAN=false
 
-while getopts "q:c:" arg; do
+while getopts "qc" arg; do
     case $arg in 
 	q)
 	    VERBOSE=false
