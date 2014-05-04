@@ -1,3 +1,7 @@
+Version 0.46.0 (in progress)
+
+  * bug fix for config_latest_install utility when config_dir is not defined
+
 Version 0.45.0 (25 April 2014)
 
   * typo/grammar edits in INSTALL directions

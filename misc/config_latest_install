@@ -69,22 +69,24 @@ if [ -e "losf/config/config_dir" ];then
     exit 0
 else
     echo "--> No local config_dir defined, checking for previous installs...."
-    igot=`ls losf-*/config/config_dir | tail -1 2> /dev/null`
+#    igot=`ls losf-*/config/config_dir | tail -1 2> /dev/null`
+    igot=`ls losf-*/config/config_dir 2> /dev/null`
     if [ $? -ne 0 ];then
 	echo "--> No previous config_dir files detected. Please define desired LosF configuration"
 	echo "    directory in config/config_dir or use LOSF_CONFIG_DIR environment variable to complete"
 	echo "    your local installation."
 	exit 1
     else
-	if [ -s $igot ];then
-	    echo "--> Previous config_dir file detected: $igot"
-	    cp -p $igot losf/config/config_dir
+	latest=`echo $igot | tail -1`
+	if [ -s $latest ];then
+	    echo "--> Previous config_dir file detected: $latest"
+	    cp -p $latest losf/config/config_dir
 	    if [ $? -ne 0 ];then
 		echo "ERROR: Unable to update losf/config/config_dir file"
 		exit 1
 	    fi
 	    echo "--> Copied previously defined config_dir to latest installation"
-	    local_config_dir=`cat $igot`
+	    local_config_dir=`cat $latest`
 
 	    echo "--> $version config dir updated to use $local_config_dir"
 
