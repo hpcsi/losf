@@ -138,11 +138,16 @@ should work with CentOS distributions is outlined in the following sections.
 3. Install and perform baseline configuration for LosF.
 
    (a) Untar a release tarball (or clone desired version from GitHub directly), preferably
-       into a shared file system that will be available across the cluster.
+       into a shared file system that will be available across the cluster. 
    
        Suggestion: Assuming you have additional drives available in your master host, a
        reasonable place to install is into an admin directory or partition hosted by your
        chosen master host.
+
+       Note: you can also build a self-contained losf RPM for use locally using the distribution
+       tarball as follows:
+
+       $ rpmbuild -tb losf-<version>.tar.gz
 
    (b) Verify basic networking requirements. LosF relies on the output from standard
        Linux commands like "hostname" and "dnsdomainname" in order to delineate between
