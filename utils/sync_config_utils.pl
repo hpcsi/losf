@@ -109,7 +109,7 @@ BEGIN {
 
 	# Now, sync partial contents...
 
-	INFO("** Syncing configuration files (partial contents)\n");
+	INFO("** Syncing partial file contents ($node_cluster:$node_type)\n");
 	
 	foreach(@partial_files) {
 	    sync_partial_file("$_");
@@ -117,7 +117,7 @@ BEGIN {
 
 	# Now, verify non-existence of certain files
 
-	INFO("** Syncing non-existence of configuration files\n");
+	INFO("** Syncing non-existence of configuration files ($node_cluster:$node_type)\n");
 
 	my @delete_files = query_cluster_config_delete_sync_files($node_cluster,$node_type);
 
@@ -901,15 +901,16 @@ BEGIN {
 
 	verify_sw_dependencies();
 	begin_routine();
+
+	(my $node_cluster, my $node_type) = determine_node_membership();
 	
 	if ( $osf_sync_custom_packages == 0 ) {
-	    INFO("** Syncing Custom packages\n");
+	    INFO("** Syncing Custom packages ($node_cluster:$node_type)\n");
 	    $osf_sync_custom_packages = 1;
 	} else {
 	    return;
 	}
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
 	init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 	my %custom_aliases = ();
