@@ -61,13 +61,13 @@ echo "RPM_INSTALL_PREFIX=$RPM_INSTALL_PREFIX"
 # link and config_dir.
 
 if [ "$1" = 0 ];then
-    top_dir=$(dirname $RPM_INSTALL_PREFIX)
+    top_dir=$(dirname %{prefix})
     if [ -L $top_dir/losf ];then
 	rm $top_dir/losf
     fi
 
-    if [ -s $RPM_INSTALL_PREFIX/config/config_dir ];then
-	rm $RPM_INSTALL_PREFIX/config/config_dir
+    if [ -s %{prefix}/config/config_dir ];then
+	rm %{prefix}/config/config_dir
     fi
 fi
 
