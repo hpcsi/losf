@@ -114,7 +114,7 @@ else
 	output "    your local installation."
 	exit 0
     else
-	latest=`echo $igot | tail -1`
+	latest=`echo $igot | awk '{print $NF}'`
 	if [ -s $latest ];then
 	    output "--> Previous config_dir file detected: $latest"
 	    cp -p $latest losf/config/config_dir
