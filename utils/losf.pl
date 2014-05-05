@@ -1179,7 +1179,6 @@ sub add_distro_group {
 		# Stage downloaded RPM files into LosF repository
 
 		my $basename = basename($file);
-		print "rpm_topdir = $rpm_topdir\n";
 
 		if(! -d "$rpm_topdir/$rpm_arch" ) {
 		    INFO("  --> Creating rpm housing directory: $rpm_topdir/$rpm_arch");
