@@ -879,7 +879,6 @@ sub add_distro_package {
 
     my $check_pkg = "yum-plugin-downloadonly";
     my @igot = is_rpm_installed($check_pkg);
-#    my @igot = is_os_rpm_installed("$check_pkg.noarch");
 
     if ( @igot  eq 0 ) {
 	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
@@ -970,19 +969,17 @@ sub add_distro_package {
 	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
 
 	    my $rpm_name    = $version_info[0];
-###	    my $rpm_version = $version_info[1]."-".$version_info[2];
 	    my $rpm_arch    = $version_info[3];
 
 	    my $is_configured = 0;
+	    my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
 
 	    foreach $rpm (@os_rpms) {
 
-		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+		if ( "$rpm" eq "$config_string" ) {
 		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
-#		    push(@rpms_to_update,$file);
-#		    $is_configured = 1;
+		    $is_configured = 1;
 		    last;
-#		    return;
 		}
 	    }
 
@@ -1153,15 +1150,15 @@ sub add_distro_group {
 	    INFO("   --> Adding ".rpm_package_string_from_header(@version_info)."\n");
 
 	    my $rpm_name    = $version_info[0];
-###	    my $rpm_version = $version_info[1]-$version_info[2];
 	    my $rpm_arch    = $version_info[3];
 
 	    my $is_configured = 0;
+	    my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
 
 	    foreach $rpm (@os_rpms) {
-		if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
+
+		if ( "$rpm" eq "$config_string" ) {
 		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
-#		    push(@rpms_to_update,$file);
 		    $is_configured = 1;
 		    last;
 		}
