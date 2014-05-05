@@ -52,7 +52,8 @@ rm -rf $RPM_BUILD_ROOT
 # recent install. Use -c option to clean up previous config_dir file for clean
 # RPM upgrades.
 
-$RPM_INSTALL_PREFIX/misc/config_latest_install -c -q
+echo "RPM_INSTALL_PREFIX=$RPM_INSTALL_PREFIX"
+%{prefix}/misc/config_latest_install -c -q
 
 %postun
 
