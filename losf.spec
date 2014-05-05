@@ -8,7 +8,8 @@ BuildArch: noarch
 URL: https://github.com/hpcsi/losf 
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Prefix: /opt/losf-%{version}
+
+%{!?prefix: %define prefix /opt/losf-%{version}}
 
 provides: perl(LosF_node_types)
 provides: perl(LosF_rpm_topdir)
@@ -21,9 +22,6 @@ requires: yum-plugin-downloadonly
 %define __spec_install_post %{nil}
 %define debug_package %{nil}
 %define __os_install_post %{_dbpath}/brp-compress
-%{!?quiet: %define quiet -q}
-
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 
