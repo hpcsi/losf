@@ -8,10 +8,8 @@ BuildArch: noarch
 URL: https://github.com/hpcsi/losf 
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Prefix: /opt/losf-%{version}
 
-# {!?prefix: %define prefix /opt/losf-%{version}}
-#%define prefix /opt/losf-%{version}
+%{!?prefix: %define prefix /opt/losf-%{version}}
 
 provides: perl(LosF_node_types)
 provides: perl(LosF_rpm_topdir)
