@@ -49,7 +49,7 @@ rm -rf %{buildroot}/%{prefix}/test
 
 # shell login scripts
 
-%{__cat} << EOF > %{buildroot}/etc/profile.d/losf.sh
+%{__cat} << EOF > %{buildroot}/%{prefix}/misc/losf.sh
 #!/bin/sh
 
 # Setup default path for LosF
@@ -67,7 +67,7 @@ EOF
 
 # shell login scripts
 
-%{__cat} << EOF > %{buildroot}/etc/profile.d/losf.csh
+%{__cat} << EOF > %{buildroot}/%{prefix}/misc/losf.csh
 #!/bin/sh
 
 # Setup default path for LosF
@@ -115,7 +115,6 @@ fi
 %files
 %defattr(-,root,root,-)
 %{prefix}
-/etc/profile.d/losf.sh
-/etc/profile.d/losf.csh
+
 
 
