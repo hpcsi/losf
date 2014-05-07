@@ -36,6 +36,7 @@ use LosF_node_types;
 use LosF_utils;
 use LosF_rpm_utils;
 use LosF_history_utils;
+use LosF_provision;
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
@@ -81,6 +82,9 @@ sub usage {
     print "     updatepkg  [package]                 Update specific OS packages (and dependencies)\n";
     print "     updatepkgs                           Update all local OS packages (and dependencies)\n";
     print "     config-upgrade                       Upgrade existing packages.config to latest syntax format\n";
+    print "\n";
+    print "     OPTIONS:\n";
+    print "        --type [name]                     Add package to specific node type (for use with chroot provisioning)\n";
 
     print "\n";
 
@@ -871,6 +875,19 @@ sub add_distro_package {
     begin_routine();
     my $package = shift;
 
+    my $override_type="";
+    my $chroot="";
+
+    if (@ARGV >= 1) {
+	$override_type = shift;
+	$chroot        = shift;
+	$node_type     = $override_type; # override based on "--type=<node> option"
+	
+	if ( ! -d $chroot) {
+	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+	}
+    }
+
     INFO("\n** Checking on possible addition of requested distro package: $package\n");
     SYSLOG("Checking on addition of distro package $package");
 
@@ -901,8 +918,13 @@ sub add_distro_package {
 
     my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+    
+    my $yum_chroot="";
+    if($chroot ne "") {
+	$yum_chroot="--installroot=$chroot";
+    }
 
-    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir install $package >& /dev/null";
+    my $cmd="yum -y $yum_chroot -q --downloadonly --downloaddir=$tmpdir install $package >& /dev/null";
     DEBUG("   --> Running yum command \"$cmd\"\n");
 
    `$cmd`;
@@ -1055,6 +1077,19 @@ sub add_distro_group {
     begin_routine();
     my $package = shift;
 
+    my $override_type="";
+    my $chroot="";
+
+    if (@ARGV >= 1) {
+	$override_type = shift;
+	$chroot        = shift;
+	$node_type     = $override_type; # override based on "--type=<node> option"
+	
+	if ( ! -d $chroot) {
+	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+	}
+    }
+
     INFO("\n** Checking on possible addition of requested distro group: $package\n");
     SYSLOG("losf: Checking on addition of distro group $package");
 
@@ -1086,7 +1121,12 @@ sub add_distro_group {
     my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
-    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir groupinstall \"$package\" >& /dev/null";
+    my $yum_chroot="";
+    if($chroot ne "") {
+	$yum_chroot="--installroot=$chroot";
+    }
+
+    my $cmd="yum -y $yum_chroot -q --downloadonly --downloaddir=$tmpdir groupinstall \"$package\" >& /dev/null";
     DEBUG("   --> Running yum command \"$cmd\"\n");
 
    `$cmd`;
@@ -1731,6 +1771,7 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 	   "noprovision"   => \$noprovision,
 	   "comment=s"     => \$comment,
 	   "date=s"        => \$datestring,
+	   "type=s"        => \$local_node_type,
 	   "nocertify"     => \$nocertify,
 	   "logonly"       => \$logonly,
 	   "version"       => \$version,
@@ -1769,6 +1810,14 @@ init_local_config_file_parsing       ("$losf_custom_config_dir/config."."$node_c
 init_local_os_config_file_parsing    ("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
 init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
+if($losf_provisioner eq "Warewulf") {
+    if($local_node_type) {
+	$chroot = query_warewulf_chroot($node_cluster,$local_node_type);
+    } else {
+	MYERROR("Please specify desired node type with \"--type\" for Warewulf RPM package management\n");
+    }
+}
+
 $logr->level($INFO);
 
 switch ($command) {
@@ -1782,8 +1831,20 @@ switch ($command) {
     case "reinsert"       { reinsert_node($argument) };
     case "sync"           { sync         ()          };
     case "version"        { print_header ()          };
-    case "addpkg"         { add_distro_package     ($argument)};
-    case "addgroup"       { add_distro_group       ($argument)};
+    case "addpkg"         { 
+	if($local_node_type) {
+	    add_distro_package($argument,$local_node_type,$chroot)
+	} else {
+	    add_distro_package($argument);
+        }
+    }
+    case "addgroup"       { 
+	if($local_node_type) {
+	    add_distro_group($argument,$local_node_type,$chroot);
+	} else {
+	    add_distro_group($argument)
+	}
+    };
     case "updatepkg"      { update_distro_packages($argument) };
     case "updatepkgs"     { update_distro_packages("ALL")     };
     case "config-upgrade" { 

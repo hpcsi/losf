@@ -184,7 +184,21 @@ sub verify_rpms {
     # This is for OS packages, for which there can be only 1 version
     # installed; hence we always upgrade
 
-    my $cmd = "rpm -Uvh "."@rpms_to_install";
+    my $rpm_root = "";
+
+    # Add support for chroot install 
+
+    if($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	my $chroot = query_warewulf_chroot($node_cluster,$node_type);
+	if ( ! -d $chroot) {
+	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+	} else {
+	    INFO(" --> Using Warewulf chroot dir = $chroot\n");
+	    $rpm_chroot = "--root $chroot";
+	}
+    }
+
+    my $cmd = "rpm -Uvh $rpm_chroot "."@rpms_to_install";
     
     system($cmd);
 
@@ -689,18 +703,19 @@ sub query_all_installed_rpms {
 
     DEBUG("   --> Caching all currently installed RPMs...\n");
 
-    my $rpm_root = "";
-    print "rpm query - node type = $node_type\n";
-    if($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
-	my $chroot = query_warewulf_chroot($node_cluster,$node_type);
-	if ( ! -d $chroot) {
-	    print "uh oh\n";
-	    MYERROR("Specified chroot directory is not available ($chroot)\n");
-	}
-	$rpm_chroot = "--root=$chroot";
-    }
+     my $rpm_root = "";
 
-    @rpms_installed = split('_LOSF_DELIM',`rpm -qa $rpm_root --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
+    # Add support for chroot query
+     if($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+ 	my $chroot = query_warewulf_chroot($node_cluster,$node_type);
+ 	if ( ! -d $chroot) {
+ 	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+ 	} else {
+	    $rpm_chroot = "--root $chroot";
+	}
+     }
+     
+    @rpms_installed = split('_LOSF_DELIM',`rpm -qa $rpm_chroot --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
 
     # we now have all the rpms and their associated version,
     # release, and arch. cache the results in a global hash table for

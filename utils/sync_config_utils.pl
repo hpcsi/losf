@@ -831,20 +831,19 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 	
-	if ( $osf_sync_os_packages == 0 ) {
-	    $osf_sync_os_packages = 1;
-	} else {
-	    return;
-	}
+#	if ( $osf_sync_os_packages == 0 ) {
+#	    $osf_sync_os_packages = 1;
+#	} else {
+#	    return;
+#	}
+#
+	INFO("** Syncing OS packages ($main::node_cluster:$main::node_type)\n");
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
-	INFO("** Syncing OS packages ($node_cluster:$node_type)\n");
-
-	init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
+	init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$main::node_cluster/packages.config");
 
 	# now, verify that all desired os packages are installed
 
-	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
+	my @os_rpms = query_cluster_config_os_packages($main::node_cluster,$main::node_type);
 
 	verify_rpms(@os_rpms);
 

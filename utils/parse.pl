@@ -47,7 +47,7 @@ BEGIN {
 	my $logr   = get_logger();
 	my $found  = 0;
 
-	# return direcly if we have already been called previously with this
+	# return directly if we have already been called previously with this
 
 	# karl TODO: cannot return below in losf add host; figure out why...
 
@@ -1160,6 +1160,48 @@ BEGIN {
 
     }
 
+    sub query_provisioning_system {
+	begin_routine();
+
+	if ( $osf_init_local_config == 0 ) {
+	    init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
+	}
+
+	my $logr           = get_logger();
+        my $default_system = "Cobbler";
+	
+	if ( ! $local_cfg->SectionExists("Provisioning") ) {
+	    DEBUG("No [Provisioning] section defined - assuming $default_system\n");
+	    return($default_system);
+	} elsif ( defined ($myval = $local_cfg->val("Provisioning","mode")) ) {
+	    DEBUG("   --> Read provisoning mode = $myval\n");
+	    return($myval);
+	} else {
+	    return($default_system);
+	}
+    }
+	
+    sub query_warewulf_chroot {
+	begin_routine();
+
+	if ( $osf_init_local_config == 0 ) {
+	    init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
+	}
+	    
+	my $cluster        = shift;
+	my $host_type      = shift;
+	my $logr           = get_logger();
+	
+	if ( ! $local_cfg->SectionExists("Warewulf") ) {
+	    MYERROR("No [Warewulf] section defined - please update config\n");
+	} elsif ( defined ($myval = $local_cfg->val("Warewulf",$host_type)) ) {
+	    DEBUG("   --> Read provisoning chroot image = $myval\n");
+	    return($myval);
+	} else {
+	    MYERROR("Warewulf chroot directory not defined for node type $host_type - please update config.\n");
+	}
+    }
+    
 }
 
 1;

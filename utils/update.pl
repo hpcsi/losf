@@ -40,6 +40,7 @@ use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
+use LosF_provision;
 use Getopt::Long;
 
 require "$losf_utils_dir/sync_config_utils.pl";
@@ -105,71 +106,84 @@ if (@ARGV >= 1) {
     }
 }
 
-# Initialize update tracking flags
+# Perform the updates - normally this is done only on the local
+# host. However, there is an exception for a "master" node type when
+# using Warewulf. In that case, each node type is checked if a chroot
+# environment is available.
 
-our $losf_os_packages_updated     = 0;
-our $losf_os_packages_total       = 0;
+my @update_types=($node_type);
 
-our $losf_custom_packages_updated = 0;
-our $losf_custom_packages_total   = 0;
-
-our $losf_const_updated           = 0;
-our $losf_const_total             = 0;
-
-our $losf_softlinks_updated       = 0;
-our $losf_softlinks_total         = 0;
-
-our $losf_services_updated        = 0;
-our $losf_services_total          = 0;
-
-our $losf_permissions_updated     = 0;
-our $losf_permissions_total       = 0;
-
-# Check for any necessary updates
-
-INFO("** Config dir -> $losf_config_dir\n");
-
-parse_and_uninstall_os_packages();
-parse_and_uninstall_custom_packages();
-
-parse_and_sync_os_packages();
-parse_and_sync_custom_packages();
-parse_and_sync_const_files();
-parse_and_sync_softlinks();
-parse_and_sync_services();
-parse_and_sync_permissions();
-
-INFO("\n");
-
-if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
-    $losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
-    notify_local_log();
-    print color 'red';
-    print "UPDATED";
-} else { 
-    print color 'green';
-    print "OK";
+if ($losf_provisioner eq "Warewulf") {
+    push(@update_types,"compute");
 }
 
-print color 'reset';
-print ": ";
+foreach our $node_type (@update_types) {
 
-print "[RPMs: OS ";
-display_changes($losf_os_packages_updated,$losf_os_packages_total);         print "  Custom ";
-display_changes($losf_custom_packages_updated,$losf_custom_packages_total); print "] ";
+    query_all_installed_rpms();
 
-print "[Files: ";    display_changes($losf_const_updated,$losf_const_total);             print "] ";
-print "[Links: ";    display_changes($losf_softlinks_updated,$losf_softlinks_total);     print "] ";
-print "[Services: "; display_changes($losf_services_updated,$losf_services_total);       print "] ";
-print "[Perms: ";    display_changes($losf_permissions_updated,$losf_permissions_total); print "] ";
+    # Initialize update tracking flags
+    
+    our $losf_os_packages_updated     = 0;
+    our $losf_os_packages_total       = 0;
+    
+    our $losf_custom_packages_updated = 0;
+    our $losf_custom_packages_total   = 0;
+    
+    our $losf_const_updated           = 0;
+    our $losf_const_total             = 0;
+    
+    our $losf_softlinks_updated       = 0;
+    our $losf_softlinks_total         = 0;
+    
+    our $losf_services_updated        = 0;
+    our $losf_services_total          = 0;
 
-print "-> $node_type";
-print "\n";
+    our $losf_permissions_updated     = 0;
+    our $losf_permissions_total       = 0;
+    
+# Check for any necessary updates
+    
+    INFO("** Config dir -> $losf_config_dir\n");
+    
+    parse_and_uninstall_os_packages();
+    parse_and_uninstall_custom_packages();
+    parse_and_sync_os_packages();
+    parse_and_sync_custom_packages();
+    parse_and_sync_const_files();
+    parse_and_sync_softlinks();
+    parse_and_sync_services();
+    parse_and_sync_permissions();
+    
+    INFO("\n");
+    
+    if ($losf_os_packages_updated || $losf_custom_packages_updated || $losf_const_updated ||
+	$losf_softlinks_updated   || $losf_services_updated        || $losf_permissions_updated ) {
+	notify_local_log();
+	print color 'red';
+	print "UPDATED";
+    } else { 
+	print color 'green';
+	print "OK";
+    }
+    
+    print color 'reset';
+    print ": ";
+    
+    print "[RPMs: OS ";
+    display_changes($losf_os_packages_updated,$losf_os_packages_total);         print "  Custom ";
+    display_changes($losf_custom_packages_updated,$losf_custom_packages_total); print "] ";
+    
+    print "[Files: ";    display_changes($losf_const_updated,$losf_const_total);             print "] ";
+    print "[Links: ";    display_changes($losf_softlinks_updated,$losf_softlinks_total);     print "] ";
+    print "[Services: "; display_changes($losf_services_updated,$losf_services_total);       print "] ";
+    print "[Perms: ";    display_changes($losf_permissions_updated,$losf_permissions_total); print "] ";
+    
+    print "-> $node_type";
+    print "\n";
+}
 
 
 # (Optionally) run custom site-specific utility for the cluster
-
-###(my $node_cluster, my $node_type) = determine_node_membership();
 
 my $custom_file = "$losf_top_dir/update.$node_cluster";
 
