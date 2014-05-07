@@ -1811,9 +1811,9 @@ init_local_os_config_file_parsing    ("$losf_custom_config_dir/os-packages/$node
 init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 if($losf_provisioner eq "Warewulf") {
-    if($local_node_type) {
+    if($local_node_type ne "" ) {
 	$chroot = query_warewulf_chroot($node_cluster,$local_node_type);
-    } else {
+    } elsif ( $node_type ne "master" ) {
 	MYERROR("Please specify desired node type with \"--type\" for Warewulf RPM package management\n");
     }
 }
