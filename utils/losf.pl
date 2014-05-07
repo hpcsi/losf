@@ -1758,9 +1758,10 @@ sub update_losf_config_file {
 # Only one LosF instance at a time
 losf_get_lock();
 
-my $datestring = "";
-my $comment    = "";
-my $noerror    = 0;
+my $datestring      = "";
+my $comment         = "";
+my $noerror         = 0;
+my $local_node_type = "";
 
 GetOptions("relocate=s{2}" => \@relocate_options,
 	   "all"           => \$all,
