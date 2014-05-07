@@ -40,7 +40,48 @@ cluster.
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}/%{prefix}
+mkdir -p %{buildroot}/etc/profile.d
 cp -a * %{buildroot}/%{prefix}
+
+# Remove separate test dir to minimize dependencies
+
+rm -rf %{buildroot}/%{prefix}/test
+
+# shell login scripts
+
+%{__cat} << EOF > %{buildroot}/etc/profile.d/losf.sh
+#!/bin/sh
+
+# Setup default path for LosF
+
+LOSF_DIR=%{prefix}
+TOP_DIR=\`dirname \${LOSF_DIR}\`
+
+if [ -h \${TOP_DIR}/losf ];then
+   export PATH=\${TOP_DIR}/losf:\${PATH}
+elif [ -d \${LOSF_DIR} ];then
+   export PATH=\${LOSF_DIR}/losf:\${PATH}
+fi
+	
+EOF
+
+# shell login scripts
+
+%{__cat} << EOF > %{buildroot}/etc/profile.d/losf.csh
+#!/bin/sh
+
+# Setup default path for LosF
+
+set LOSF_DIR=%{prefix}
+set TOP_DIR=\`dirname \${LOSF_DIR}\`
+
+if ( -l \${TOP_DIR}/losf ) then
+   set path = (\${TOP_DIR}/losf\${PATH} \$path)
+else if ( -d \${LOSF_DIR} ) then
+   set path = (\${LOSF_DIR}/losf \$path)
+endif
+	
+EOF
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -74,9 +115,7 @@ fi
 %files
 %defattr(-,root,root,-)
 %{prefix}
+/etc/profile.d/losf.sh
+/etc/profile.d/losf.csh
 
-
-%changelog
-* Sat May  3 2014  <karl@maclinux1.localdomain> - 
-- Initial build.
 
