@@ -689,7 +689,18 @@ sub query_all_installed_rpms {
 
     DEBUG("   --> Caching all currently installed RPMs...\n");
 
-    @rpms_installed = split('_LOSF_DELIM',`rpm -qa --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
+    my $rpm_root = "";
+    print "rpm query - node type = $node_type\n";
+    if($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	my $chroot = query_warewulf_chroot($node_cluster,$node_type);
+	if ( ! -d $chroot) {
+	    print "uh oh\n";
+	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+	}
+	$rpm_chroot = "--root=$chroot";
+    }
+
+    @rpms_installed = split('_LOSF_DELIM',`rpm -qa $rpm_root --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
 
     # we now have all the rpms and their associated version,
     # release, and arch. cache the results in a global hash table for
