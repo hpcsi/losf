@@ -878,7 +878,7 @@ sub add_distro_package {
     my $override_type="";
     my $chroot="";
 
-    if (@ARGV >= 1) {
+    if (@_ >= 1) {
 	$override_type = shift;
 	$chroot        = shift;
 	$node_type     = $override_type; # override based on "--type=<node> option"
@@ -1080,7 +1080,7 @@ sub add_distro_group {
     my $override_type="";
     my $chroot="";
 
-    if (@ARGV >= 1) {
+    if (@_ >= 1) {
 	$override_type = shift;
 	$chroot        = shift;
 	$node_type     = $override_type; # override based on "--type=<node> option"
