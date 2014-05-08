@@ -1821,6 +1821,10 @@ if($losf_provisioner eq "Warewulf") {
 
 $logr->level($INFO);
 
+if($assume_yes) {
+    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
+}
+
 switch ($command) {
 
     # Do the deed
@@ -1891,10 +1895,6 @@ switch ($command) {
 	    }
 	    $ENV{'LOSF_REGISTER_MULTI'} = '1';
 	    $options = $options . "INSTALL MULTI";
-	}
-
-	if($assume_yes) {
-	    $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
 	}
 
 	add_custom_rpm  ($argument,$nodetype,$options,$alias);
