@@ -1221,12 +1221,12 @@ sub add_distro_group {
 		my $basename = basename($file);
 
 		if(! -d "$rpm_topdir/$rpm_arch" ) {
-		    INFO("  --> Creating rpm housing directory: $rpm_topdir/$rpm_arch");
+		    INFO("  --> Creating rpm housing directory: $rpm_topdir/$rpm_arch\n");
 		    mkdir("$rpm_topdir/$rpm_arch",0700) || MYERROR("Unable to create rpm directory: $rpm_topdir/$rpm_arch");
 		}
 
 		if ( ! -s "$rpm_topdir/$rpm_arch/$basename" ) {
-		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch) \n");
+		    INFO("       --> Copying $basename to RPM repository (arch = $rpm_arch)\n");
 		    copy($file,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename to $rpm_topdir/$rpm_arch\n");
 		}
 	    }
