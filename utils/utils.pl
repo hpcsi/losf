@@ -368,6 +368,15 @@ sub losf_get_lock() {
 
     my $lockFile = "/tmp/.losf_lock__";
 
+    # If a parent process already has a lock, we return. Otherwise,
+    # grab a lock. This allows losf commands to call themselves
+    # recursively.
+
+    if ( $ENV{'LOSF_LOCK'}  eq "TRUE" ) { 
+	our $LOSF_LOCK++;
+	return;
+    }
+
     open($LOSF_FH_lock, ">$lockFile") || MYERROR("Unable to open $lockFile\n");
 
     if (! flock($LOSF_FH_lock,LOCK_EX|LOCK_NB))  {
@@ -376,8 +385,20 @@ sub losf_get_lock() {
 	exit(23);
     }
 
+    $ENV{'LOSF_LOCK'} = 'TRUE';
+    our $LOSF_LOCK=0;
     DEBUG("flock obtained\n");
     end_routine();
+}
+
+sub losf_release_lock() {
+
+    if($LOSF_LOCK > 0 ) {
+	$LOSF_LOCK--;
+	return;
+    }
+
+    close($LOSF_FH_lock);
 }
 
 1;

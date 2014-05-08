@@ -1999,7 +1999,7 @@ switch ($command) {
 
 # Done with lock
 
-close($LOSF_FH_lock);
+losf_release_lock();
 
 1;
 
