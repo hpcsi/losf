@@ -75,9 +75,8 @@ BEGIN {
 	    $osf_sync_const_file = 1;
 	}
 	
-	(my $node_cluster, my $node_type) = determine_node_membership();
-	
-	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
 
 	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
@@ -103,7 +102,7 @@ BEGIN {
 
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
-		sync_const_file("$_");
+		sync_const_file("$_",$node_cluster,$node_type);
 	    }
 	}
 
@@ -145,13 +144,15 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 	
-	if ( $osf_sync_soft_links == 0 ) {
-	    $osf_sync_soft_links = 1;
-	} else {
-	    return;
-	}
+###	if ( $osf_sync_soft_links == 0 ) {
+###	    $osf_sync_soft_links = 1;
+###	} else {
+###	    return;
+###	}
+###
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing soft links ($node_cluster:$node_type)\n");
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
@@ -183,13 +184,15 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-	if ( $osf_sync_services == 0 ) {
-	    $osf_sync_services = 1;
-	} else {
-	    return;
-	}
+###	if ( $osf_sync_services == 0 ) {
+###	    $osf_sync_services = 1;
+###	} else {
+###	    return;
+###	}
+###
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Syncing runlevel services ($node_cluster:$node_type)\n");
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
@@ -225,6 +228,9 @@ BEGIN {
 	begin_routine();
 
 	my $file       = shift;	# input filename to sync
+	my $cluster    = shift;	# cluster name
+	my $type       = shift;	# node type
+
 	my $logr       = get_logger();
 	my $found      = 0;
 	my $host_name;                       
@@ -232,7 +238,7 @@ BEGIN {
 
 	chomp($host_name=`hostname -s`);
 
-	(my $cluster, my $type) = determine_node_membership();
+#	(my $cluster, my $type) = determine_node_membership();
 	my %perm_files          = query_cluster_config_sync_permissions($cluster,$type);
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
@@ -579,13 +585,14 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-	if ( $osf_sync_permissions == 0 ) {
-	    $osf_sync_permissions = 1;
-	} else {
-	    return;
-	}
-
-	(my $node_cluster, my $node_type) = determine_node_membership();
+###	if ( $osf_sync_permissions == 0 ) {
+###	    $osf_sync_permissions = 1;
+###	} else {
+###	    return;
+###	}
+###
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
 
 	INFO("** Syncing file/directory permissions ($node_cluster:$node_type)\n");
 
@@ -806,13 +813,15 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-	if ( $osf_sync_os_packages_delete == 0 ) {
-	    $osf_sync_os_packages_delete = 1;
-	} else {
-	    return;
-	}
+###	if ( $osf_sync_os_packages_delete == 0 ) {
+###	    $osf_sync_os_packages_delete = 1;
+###	} else {
+###	    return;
+###	}
+###
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
 	INFO("** Checking on OS packages to remove ($node_cluster:$node_type)\n");
 
 	init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
@@ -854,13 +863,15 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-	if ( $osf_sync_custom_packages_delete == 0 ) {
-	    $osf_sync_custom_packages_delete = 1;
-	} else {
-	    return;
-	}
+###	if ( $osf_sync_custom_packages_delete == 0 ) {
+###	    $osf_sync_custom_packages_delete = 1;
+###	} else {
+###	    return;
+###	}
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
+
 	init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 
 	INFO("** Checking on Custom packages to remove ($node_cluster:$node_type)\n");
@@ -901,14 +912,16 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-	(my $node_cluster, my $node_type) = determine_node_membership();
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
 	
-	if ( $osf_sync_custom_packages == 0 ) {
+###	if ( $osf_sync_custom_packages == 0 ) {
+###	    $osf_sync_custom_packages = 1;
+###	} else {
+###	    return;
+###	}
+
 	    INFO("** Syncing Custom packages ($node_cluster:$node_type)\n");
-	    $osf_sync_custom_packages = 1;
-	} else {
-	    return;
-	}
 
 	init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 

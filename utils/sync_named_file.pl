@@ -97,7 +97,7 @@ BEGIN {
 
 	if (grep {$_ eq $file } @sync_files ) {
 	    $found=1;
-	    sync_const_file($file);
+	    sync_const_file($file,$node_cluster,$node_type);
 	    exit(0);  
 	}
 
