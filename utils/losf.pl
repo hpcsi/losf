@@ -903,7 +903,7 @@ sub add_distro_package {
 
     # (1) Check if already installed....
 
-    @igot = is_rpm_installed($package);
+    @igot = is_rpm_installed($package,$chroot);
 
     if( @igot ne 0 ) {
 	INFO("   --> package $package is already installed locally\n");

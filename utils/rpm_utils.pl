@@ -770,13 +770,23 @@ sub is_rpm_installed {
     begin_routine();
 
     my $packagename   = shift;
+
+    my $chroot="";
+    if(@_ >= 1) {
+	$chroot = shift;
+    }
+	
     my @matching_rpms = ();
     my @empty_list    = ();
 
     DEBUG("   --> Checking if $packagename RPM is installed locally\n");
 
+    if($chroot ne "") {
+	$rpm_chroot = "--root $chroot";
+    }
+
     @matching_rpms  = 
-	split(' ',`rpm -q --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
+	split(' ',`rpm -q $rpm_chroot --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
 
     if( $? != 0) {
 	@matching_rpms = @empty_list;
