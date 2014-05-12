@@ -100,6 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 if [ -s /etc/profile.d/losf.sh ];then
    . /etc/profile.d/losf.sh
 fi	
+export PATH
 
 
 %postun
