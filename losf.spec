@@ -95,6 +95,14 @@ rm -rf $RPM_BUILD_ROOT
 
 %{prefix}/misc/config_latest_install -c -q
 
+# Initialize env
+
+if [ -n $BASH ];then
+   if [ -s /etc/profile.d/losf.sh ];then
+   . /etc/profile.d/losf.sh
+   fi	
+fi
+
 %postun
 
 # Following occurs when removing last version of the package. Clean up soft
