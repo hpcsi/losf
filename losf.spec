@@ -97,11 +97,10 @@ rm -rf $RPM_BUILD_ROOT
 
 # Initialize env
 
-if [ -n $BASH ];then
-   if [ -s /etc/profile.d/losf.sh ];then
+if [ -s /etc/profile.d/losf.sh ];then
    . /etc/profile.d/losf.sh
-   fi	
-fi
+fi	
+
 
 %postun
 
