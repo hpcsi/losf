@@ -114,6 +114,14 @@ sub verify_rpms {
 	    $filename = "$rpm_topdir/$desired_arch/$full_rpm_name.rpm";
 	}
 
+	# Pull down RPM if not cached locally
+
+	if ( ! -s "$filename") {
+	    my $cmd="yumdownloader -q --destdir=$rpm_topdir/$desired_arch $full_rpm_name";
+	    INFO("   --> Downloading OS rpm -> $full_rpm_name\n");
+	    system($cmd);
+	}
+
 	if ( ! -s "$filename" ) {
 	    MYERROR("Unable to locate local OS rpm-> $filename\n");
 	}
@@ -419,6 +427,14 @@ sub verify_custom_rpms {
 	    $filename = "$SRC_DIR/$desired_arch/$full_rpm_name.rpm";
 	} else {
 	    $filename = "$rpm_topdir/$desired_arch/$full_rpm_name.rpm";
+	}
+
+	# Pull down RPM if not cached locally
+
+	if ( ! -s "$filename") {
+	    my $cmd="yumdownloader -q --destdir=$rpm_topdir/$desired_arch $full_rpm_name";
+	    INFO("   --> Downloading custom rpm -> $full_rpm_name\n");
+	    system($cmd);
 	}
 
 	if ( ! -s "$filename" ) {
