@@ -33,6 +33,7 @@ use File::Copy;
 my $newCluster   = "";
 my $losf_top_dir = "";
 my $changedFlag  = 0;
+my $template_dir = "";
 
 $newCluster = shift || '';
 
@@ -40,11 +41,13 @@ if( $newCluster eq '') {
     print "\ninitconfig: convenience utility used to create a basic starting\n";
     print "configuration template for a new LosF cluster designation.\n";
     print "\n";
-    print "usage: initconfig <cluster-name>\n";
+    print "usage: initconfig <cluster-name> [template-dir]\n";
     print "\n";
 
     exit 1;
 }
+
+
 
 my ($filename,$basename) = fileparse($0);
 
@@ -54,6 +57,28 @@ if ($basename =~ m/(.*)\/utils\/$/) {
     $losf_top_dir = $1;
 } else {
     $losf_top_dir = $basename;
+}
+
+if( @ARGV >= 1 ) {
+    $template_dir = shift;
+    my $resolve_dir = 0;
+    if ( -d $template_dir) {
+	$resolve_dir = 1;
+    } elsif ( -d "$losf_top_dir/config/$template_dir") {
+	$template_dir = "$losf_top_dir/config/$template_dir";
+	$resolve_dir = 1;
+    }
+    
+    if( $resolve_dir == 0) {
+	print "ERROR: Unable to access requested template directory -> $template_dir\n";
+	exit 1;
+    }
+}
+
+# Use default template_dir if none provided 
+
+if ($template_dir eq "") {
+    $template_dir = "$losf_top_dir/config/skeleton_template";
 }
 
 # Determine config_dir
@@ -129,7 +154,8 @@ if ( ! -d $config_dir ) {
 if ( ! -s "$config_dir/config.machines" ) {
     print "--> creating $config_dir/config.machines file\n";
 
-    my $template = "$losf_top_dir/config/skeleton_template/config.machines";
+    my $template = "$template_dir/config.machines";
+
     if ( ! -s $template ) {
 	print "ERROR: Missing template file -> $template\n";
 	exit 1;
@@ -169,8 +195,9 @@ if ( ! -s "$config_dir/config.machines" ) {
 
 if ( ! -e "$config_dir/config.$newCluster" ) {
     print "--> creating $config_dir/config.$newCluster file\n";
-    
-    my $template = "$losf_top_dir/config/skeleton_template/config.default";
+
+    my $template = "$template_dir/config.default";
+
     if ( ! -s $template ) {
 	print "ERROR: Missing template file -> $template\n";
 	exit 1;
@@ -204,7 +231,7 @@ if ( ! -e "$config_dir/os-packages/$newCluster/packages.config" ) {
 	mkpath("$config_dir/os-packages/$newCluster") || die("[ERROR]: Unable to create path for os-packages");
     }
 
-    my $template = "$losf_top_dir/config/skeleton_template/os-packages/packages.config";
+    my $template = "$template_dir/os-packages/packages.config";
     if ( ! -s $template ) {
 	print "ERROR: Missing template file -> $template\n";
 	exit 1;
@@ -224,7 +251,7 @@ if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
 	mkpath("$config_dir/custom-packages/$newCluster") || die("[ERROR]: Unable to create path for custom-packages");
     }
 
-    my $template = "$losf_top_dir/config/skeleton_template/custom-packages/packages.config";
+    my $template = "$template_dir/custom-packages/packages.config";
     if ( ! -s $template ) {
 	print "ERROR: Missing template file -> $template\n";
 	exit 1;
