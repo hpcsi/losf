@@ -28,10 +28,7 @@ use strict;
 use LosF_paths;
 use LosF_utils;
 
-use lib "$losf_log4perl_dir";
-use lib "$losf_ini4perl_dir";
 use lib "$losf_utils_dir/";
-
 use base 'Exporter';
 
 require "$losf_utils_dir/utils.pl";
