@@ -26,6 +26,7 @@
 # --------------------------------------------------------------------------
 
 use POSIX;
+use Time::HiRes qw(sleep);
 require "getopts.pl";
 
 Getopts("r:i:m:n:t:h:w:c:x:f:v");
@@ -282,6 +283,13 @@ sub wait_for_it {
 	} else {
 	    if ($n < $max_ssh) { return;}
 	}
-	sleep(1);
+
+	# shorter sleep interval if num hosts is < 10
+
+	if ( @hosts < 10 ) { 
+	    sleep(0.25);
+	} else {
+	    sleep(1);
+	}
     }
 }
