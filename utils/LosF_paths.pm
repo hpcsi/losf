@@ -32,9 +32,9 @@ use File::Basename;
 our @EXPORT            = qw($losf_top_dir 
 			    $losf_config_dir
                             $losf_custom_config_dir
-		            $losf_utils_dir
-		            $losf_log4perl_dir
-		            $losf_ini4perl_dir);
+		            $losf_utils_dir);
+#		            $losf_log4perl_dir
+#		            $losf_ini4perl_dir);
 
 # Determine full path to LosF install
 		       
@@ -137,7 +137,7 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 }
 
 our $losf_utils_dir         = "$losf_top_dir/utils";
-our $losf_log4perl_dir      = "$losf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
-our $losf_ini4perl_dir      = "$losf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
+###our $losf_log4perl_dir      = "$losf_utils_dir/dependencies/mschilli-log4perl-d124229/lib";
+###our $losf_ini4perl_dir      = "$losf_utils_dir/dependencies/Config-IniFiles-2.68/lib";
 
 1;

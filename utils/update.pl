@@ -34,8 +34,6 @@ use File::Copy;
 use File::Temp qw(tempfile);
 use Term::ANSIColor;
 
-use lib "$losf_log4perl_dir";
-use lib "$losf_ini4perl_dir";
 use lib "$losf_utils_dir";
 
 use LosF_node_types;

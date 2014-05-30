@@ -29,10 +29,7 @@ use strict;
 use LosF_paths;
 use LosF_node_types;
 
-use lib "$losf_log4perl_dir";
-use lib "$losf_ini4perl_dir";
 use lib "$losf_utils_dir/";
-
 require "$losf_utils_dir/utils.pl";
 require "$losf_utils_dir/parse.pl";
 require "$losf_utils_dir/header.pl";
