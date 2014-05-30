@@ -755,22 +755,17 @@ BEGIN {
 
 	DEBUG("   --> Desired setting = $enable_service\n");
 
-	# make sure chkconfig is setup - have to read stderr for this one....
 
- 	use IPC::Open3;
- 	use File::Spec;
- 	use Symbol qw(gensym);
- 	open(NULL, ">", File::Spec->devnull);
- 	my $pid = open3(gensym, ">&NULL", \*PH, "/sbin/chkconfig --list $service");
- 	while( <PH> ) {
-	    if ( $_ =~ m/service $service supports chkconfig, but is not referenced/ ) {
-		chomp(my $setting=`chkconfig --add $service`);
-	    }
+	my $setting = `/sbin/chkconfig --list $service 2>&1`;
+
+	# make sure chkconfig is setup - have to check stderr for this one....
+
+	if ( $setting =~ m/service $service supports chkconfig, but is not referenced/ ) {
+	    `/sbin/chkconfig --add $service`;
+	    $setting = `/sbin/chkconfig --list $service 2>&1`;
 	}
 
- 	waitpid($pid, 0);
-
-	chomp(my $setting=`/sbin/chkconfig --list $service`);
+	chomp($setting);
 
 	if ( $setting =~ m/3:on/ ) {
 	    DEBUG("   --> $service is ON\n");
