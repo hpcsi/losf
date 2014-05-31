@@ -31,9 +31,7 @@ use LosF_utils;
 use lib "$losf_utils_dir/";
 use base 'Exporter';
 
-require "$losf_utils_dir/utils.pl";
 require "$losf_utils_dir/parse.pl";
-require "$losf_utils_dir/header.pl";
 
 my $output_mode = $ENV{'LOSF_LOG_MODE'};
 my $standalone  = $ENV{'LOSF_STANDALONE_UTIL'};
@@ -46,6 +44,8 @@ BEGIN {
     my $node_type;			# node type for local host
 
     sub determine_node_membership {
+
+
 
 	# Global Variables
 
@@ -68,7 +68,6 @@ BEGIN {
 	}
 
 	if ( $osf_membership_init == 1 ) {
-	    DEBUG("--> Returning from determine_node_membership\n");
 	    return($node_cluster,$node_type);
 	}
 

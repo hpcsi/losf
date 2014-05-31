@@ -26,7 +26,6 @@
 
 use LosF_paths;
 use base 'Exporter';
-use lib "$losf_log4perl_dir";
 use Sys::Syslog;  
 use Fcntl qw(:flock);
 

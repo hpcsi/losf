@@ -27,8 +27,6 @@
 use LosF_paths;
 use LosF_rpm_topdir;
 
-use lib "$losf_log4perl_dir";
-
 use Sys::Syslog;  
 use Digest::MD5;
 use Env qw(SRC_DIR MODE);
