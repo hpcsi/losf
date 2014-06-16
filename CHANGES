@@ -1,5 +1,6 @@
 Version 0.46.0 (in progress)
 
+  * losf add/del node support added for Warewulf
   * initconfig utility now supports optional directory to use as a template config
   * allow non-interactive option for addalias command
   * inclusion of .spec file to support RPM packaging

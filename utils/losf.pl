@@ -215,92 +215,108 @@ sub add_node  {
     # OS Imaging Config
     #-------------------
 
-    my ($name_server,$name_server_search, $kernel_options,$kernel_options_post,$dns_options ) = ("noprovision") x 5;
+    if($losf_provisioner eq "Cobbler") {
 
-    if($noprovision) {
-	$kickstart = "$losf_top_dir/kickstarts/empty.kickstart";
+	my ($name_server,$name_server_search, $kernel_options,$kernel_options_post,$dns_options ) = ("noprovision") x 5;
 
-	# cobbler will not add a host with out a profile. Grab the first one defined here.
-	$profile = `cobbler profile list | head -1`;
-	chomp($profile);
-	$profile =~ s/^\s+//;
-	if($profile eq "" ) {
-	    MYERROR("Cobbler requires at least one profile to be defined. Please update your Cobbler configuration\n");
+	if($noprovision) {
+	    $kickstart = "$losf_top_dir/kickstarts/empty.kickstart";
+
+	    # cobbler will not add a host with out a profile. Grab the first one defined here.
+	    $profile = `cobbler profile list | head -1`;
+	    chomp($profile);
+	    $profile =~ s/^\s+//;
+	    if($profile eq "" ) {
+		MYERROR("Cobbler requires at least one profile to be defined. Please update your Cobbler configuration\n");
+	    }
+	} else {
+	    # Query desired provisionoing settings from user
+	    
+	    $kickstart          = query_cluster_config_kickstarts               ($node_cluster,$node_type);
+	    $profile            = query_cluster_config_profiles                 ($node_cluster,$node_type);
+	    $name_server        = query_cluster_config_name_servers             ($node_cluster,$node_type);
+	    $name_server_search = query_cluster_config_name_servers_search      ($node_cluster,$node_type);
+	    $kernel_options     = query_cluster_config_kernel_boot_options      ($node_cluster,$node_type);
+	    $kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
+	    $dns_options        = query_cluster_config_dns_options              ($node_cluster,$node_type);
 	}
-    } else {
-	# Query desired provisionoing settings from user
+	
+	print "\n";
+	print "   Provisioning Settings:\n";
+	print "   --> Kickstart           = $kickstart\n";
+	print "   --> Profile             = $profile\n";
+	print "   --> Name Server         = $name_server (search = $name_server_search)\n";
 
-	$kickstart          = query_cluster_config_kickstarts               ($node_cluster,$node_type);
-	$profile            = query_cluster_config_profiles                 ($node_cluster,$node_type);
-	$name_server        = query_cluster_config_name_servers             ($node_cluster,$node_type);
-	$name_server_search = query_cluster_config_name_servers_search      ($node_cluster,$node_type);
-	$kernel_options     = query_cluster_config_kernel_boot_options      ($node_cluster,$node_type);
-	$kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
-	$dns_options        = query_cluster_config_dns_options              ($node_cluster,$node_type);
-    }
+	my $kopts    = "";
+	my $dns_opts = "";
+	
+	if( $kernel_options ne "" ) {
+	    print "   --> Kernel Options      = $kernel_options\n";
+	    $kopts = " --kopts=$kernel_options";
+	}
+	
+	if( $kernel_options_post ne "" ) {
+	    print "   --> Kernel Post Options = $kernel_options_post\n";
+	    $kopts = "$kopts --kopts-post=$kernel_options_post";
+	}
+	
+	if ($dns_options eq "yes" ) {
+	    print "   --> DNS enabled         = yes ($host.$domain_name on first defined interface)\n";
+	    $dns_opts = "--dns=$host.$domain_name";
+	} else {
+	    print "   --> DNS enabled         = no\n";
+	}
+	
+	# Only define mac if this is intended as a provisional host - allows admins to specify bogus mac and not have
+	# cobbler complain about duplicates.
 
-    print "\n";
-    print "   Provisioning Settings:\n";
-    print "   --> Kickstart           = $kickstart\n";
-    print "   --> Profile             = $profile\n";
-    print "   --> Name Server         = $name_server (search = $name_server_search)\n";
+	my $mac_cmd="";
 
-    my $kopts    = "";
-    my $dns_opts = "";
-
-    if( $kernel_options ne "" ) {
-	print "   --> Kernel Options      = $kernel_options\n";
-	$kopts = " --kopts=$kernel_options";
-    }
-
-    if( $kernel_options_post ne "" ) {
-	print "   --> Kernel Post Options = $kernel_options_post\n";
-	$kopts = "$kopts --kopts-post=$kernel_options_post";
-    }
-
-    if ($dns_options eq "yes" ) {
-	print "   --> DNS enabled         = yes ($host.$domain_name on first defined interface)\n";
-	$dns_opts = "--dns=$host.$domain_name";
-    } else {
-	print "   --> DNS enabled         = no\n";
-    }
-
-    # Only define mac if this is intended as a provisional host - allows admins to specify bogus mac and not have
-    # cobbler complain about duplicates.
-
-    my $mac_cmd="";
-
-    if(! $noprovision) {
-	$mac_cmd="--mac=$mac[0]";
-    }
-
-    $cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
-	."$mac_cmd $dns_opts " 
-	."--subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
-	."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search "
-	."$kopts";
-
-    my $returnCode = system($cmd);
-
-    if($returnCode != 0) {
-	print "\n$cmd\n\n";	
-	MYERROR("Cobbler insertion failed ($returnCode)\n");
-    }
-
-    # now, add any additional interfaces
-
-    for my $count (1 .. ($num_interfaces-1)) {
-	$cmd="cobbler system edit --name=$host --interface=$interface[$count] --static=true "
-	    ."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] ";
-
-	#print "\n$cmd\n\n";
+	if(! $noprovision) {
+	    $mac_cmd="--mac=$mac[0]";
+	}
+	
+	$cmd="cobbler system add --name=$host --hostname=$host.$domain_name --interface=$interface[0] --static=true "
+	    ."$mac_cmd $dns_opts " 
+	    ."--subnet=$netmask[0] --profile=$profile --ip-addres=$ip[0] "
+	    ."--kickstart=$kickstart --name-servers=$name_server --name-servers-search=$name_server_search "
+	    ."$kopts";
+	
 	my $returnCode = system($cmd);
-
+	
 	if($returnCode != 0) {
 	    print "\n$cmd\n\n";	
-	    MYERROR("Cobbler edit for additional network interfaces failed ($returnCode)\n");
+	    MYERROR("Cobbler insertion failed ($returnCode)\n");
 	}
+
+	# now, add any additional interfaces
+
+	for my $count (1 .. ($num_interfaces-1)) {
+	    $cmd="cobbler system edit --name=$host --interface=$interface[$count] --static=true "
+		."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] ";
+	    
+	    #print "\n$cmd\n\n";
+	    my $returnCode = system($cmd);
+	    
+	    if($returnCode != 0) {
+		print "\n$cmd\n\n";	
+		MYERROR("Cobbler edit for additional network interfaces failed ($returnCode)\n");
+	    }
+	}
+    } elsif ($losf_provisioner eq "Warewulf") {
+	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0]";
+	print "cmd = $cmd\n";
+
+	my $returnCode = system($cmd);
+	
+	if($returnCode != 0) {
+	    print "\n$cmd\n\n";	
+	    MYERROR("Warewulf insertion failed ($returnCode)\n");
+	}
+    }	else {
+	MYERROR("Unknown provisioning system");
     }
+
 }
 
 sub del_node {
@@ -308,9 +324,20 @@ sub del_node {
 
     print "\n** Removing existing node $host\n";
 
-    $cmd="cobbler system remove --name=$host";
+    if($losf_provisioner eq "Cobbler") {
+	$cmd="cobbler system remove --name=$host";
+    } elsif ($losf_provisioner eq "Warewulf") {
+	$cmd="wwsh -y node delete $host";
+    } else {
+	MYERROR("Unknown provisioning system");
+    }
 
-    `$cmd`;
+    my $returnCode = system($cmd);
+    if($returnCode != 0) {
+	print "\n$cmd\n\n";	
+	MYERROR("Host removal failed ($returnCode)\n");
+    }
+
 }
 
 sub reinsert_node {
