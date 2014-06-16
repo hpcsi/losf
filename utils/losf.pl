@@ -1817,7 +1817,19 @@ if($losf_provisioner eq "Warewulf") {
     }
 }
 
-$logr->level($INFO);
+my $output_mode = "";
+if ( $ENV{'LOSF_LOG_MODE'} ) {
+    my $output_mode = $ENV{'LOSF_LOG_MODE'};
+}
+
+if ( "$output_mode" eq "INFO"  || 
+     "$output_mode" eq "ERROR" ||
+     "$output_mode" eq "WARN"  ||
+     "$output_mode" eq "DEBUG" ) {
+    $logr->level($output_mode);
+} else {
+    $logr->level($INFO);
+}
 
 if($assume_yes) {
     $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
