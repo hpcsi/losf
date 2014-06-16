@@ -1819,7 +1819,7 @@ if($losf_provisioner eq "Warewulf") {
 
 my $output_mode = "";
 if ( $ENV{'LOSF_LOG_MODE'} ) {
-    my $output_mode = $ENV{'LOSF_LOG_MODE'};
+    $output_mode = $ENV{'LOSF_LOG_MODE'};
 }
 
 if ( "$output_mode" eq "INFO"  || 
