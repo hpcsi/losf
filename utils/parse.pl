@@ -58,6 +58,7 @@ BEGIN {
 
 	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
+
 	foreach(@Clusters) {
 
 	    my $loc_cluster = $_;
@@ -86,7 +87,11 @@ BEGIN {
 
 			    # Look for a matching hostname (exact match first)
 
-			    my $loc_name = $global_cfg->val($loc_cluster,$_);
+			    my @loc_name = $global_cfg->val($loc_cluster,$_);
+			    my $num_found = @loc_name;
+			    if($num_found > 1 ) {
+				MYERROR("Duplicate node type definition detected for $_");
+			    }
 			    DEBUG("      --> Read $_ = $loc_name\n");
 			    if("$host" eq "$loc_name") {
 				DEBUG("      --> Found exact match\n");
