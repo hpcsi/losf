@@ -98,9 +98,18 @@ BEGIN {
 
 	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
-		sync_const_file("$_",$node_cluster,$node_type);
+		sync_const_file($chroot . $_,$node_cluster,$node_type);
 	    }
 	}
 
@@ -109,7 +118,7 @@ BEGIN {
 	INFO("** Syncing partial file contents ($node_cluster:$node_type)\n");
 	
 	foreach(@partial_files) {
-	    sync_partial_file("$_");
+	    sync_partial_file($chroot . $_);
 	}
 
 	# Now, verify non-existence of certain files
@@ -122,8 +131,9 @@ BEGIN {
 	    $losf_const_total++;
 
 	    my $basename = basename("$_");
+	    my $file_test = $chroot . $_;
 
-	    if ( -e "$_") {
+	    if ( -e $file_test ) {
 		$losf_const_updated++;
 		print_error_in_red("UPDATING");
 		ERROR(": [$basename] File present: deleting\n");
@@ -236,8 +246,7 @@ BEGIN {
 
 	chomp($host_name=`hostname -s`);
 
-#	(my $cluster, my $type) = determine_node_membership();
-	my %perm_files          = query_cluster_config_sync_permissions($cluster,$type);
+	my %perm_files  = query_cluster_config_sync_permissions($cluster,$type);
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
 	    DEBUG("   --> Warning: production file $file not found - adding new sync file\n");
@@ -599,14 +608,25 @@ BEGIN {
 
 	$losf_permissions_total = scalar keys %perm_files;
 
-	while ( my ($key,$value) = each(%perm_files) ) {
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
+	while ( my ($key_path ,$value) = each(%perm_files) ) {
+
+	    my $key = $chroot . $key_path;
 
 	    DEBUG("   --> $key => $value\n");
 
 	    my $parent_dir = dirname($key);
 
 	    # Check on existence of user-desired directory.
-	    # Directoreis are designated via the presence of a
+	    # Directories are designated via the presence of a
 	    # trailing /
 
 	    if( $key =~ /(.*)\/$/) {
