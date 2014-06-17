@@ -732,7 +732,9 @@ BEGIN {
 
 	my $enable_service = 0;
 
-	(my $cluster, my $type) = determine_node_membership();
+	my $cluster    = $main::node_cluster;
+	my $type       = $main::node_type;
+	my $chrootFlag = 0;
 
 	DEBUG("   --> Syncing run-level services for: $service\n");
 
@@ -742,29 +744,38 @@ BEGIN {
 	    $enable_service = 0;
 	}
 
-	# NOOP if init.d script is not present
+	# Support for chroot (e.g. alternate provisioning mechanisms).
 
-	if ( ! -s "/etc/init.d/$service" ) {
+	my $chroot = "/";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($cluster,$type);
+	    $chrootFlag = 1;
+	    DEBUG("   --> using alternate chroot for type = $type, chroot = $chroot\n");
+	}
+	    
+	# NOOP if init.d script is not present
+	
+	if ( ! -s "$chroot/etc/init.d/$service" ) {
 	    TRACE("   --> NOOP: $service not installed, ignoring sync request\n");
 	    return;
 	}
-
+	
 	$losf_services_total++;
-
+	
 	DEBUG("   --> Desired setting = $enable_service\n");
-
-
-	my $setting = `/sbin/chkconfig --list $service 2>&1`;
-
+	
+	my $setting = `chroot $chroot /sbin/chkconfig --list $service 2>&1`;
+	
 	# make sure chkconfig is setup - have to check stderr for this one....
-
+	
 	if ( $setting =~ m/service $service supports chkconfig, but is not referenced/ ) {
-	    `/sbin/chkconfig --add $service`;
-	    $setting = `/sbin/chkconfig --list $service 2>&1`;
+	    `chroot $chroot /sbin/chkconfig --add $service`;
+	    $setting = `chroot $chroot /sbin/chkconfig --list $service 2>&1`;
 	}
-
+	
 	chomp($setting);
-
+	
 	if ( $setting =~ m/3:on/ ) {
 	    DEBUG("   --> $service is ON\n");
 	    if($enable_service) {
@@ -774,11 +785,13 @@ BEGIN {
 		$losf_services_updated++;
 		print_error_in_red("UPDATING");
 		ERROR( ": disabling $service\n");
-		`/sbin/chkconfig $service off`;
-		`/etc/init.d/$service stop`;
-		chomp(my $setting=`/sbin/chkconfig --list $service`);
-		if ( $setting =~ m/3:on/ ) {
-		    MYERROR("Unable to chkconfig $service off");
+		`chroot $chroot /sbin/chkconfig $service off`;
+		if($chrootFlag == 0) {
+		    `chroot $chroot /etc/init.d/$service stop`;
+		    chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
+		    if ( $setting =~ m/3:on/ ) {
+			MYERROR("Unable to chkconfig $service off");
+		    }
 		}
 	    }
 	} elsif ( $setting =~ m/3:off/ ) {
@@ -787,18 +800,20 @@ BEGIN {
 		$losf_services_updated++;
 		print_error_in_red("UPDATING");
 		ERROR(": enabling $service\n");
-		`/sbin/chkconfig $service on`;
-		`/etc/init.d/$service start`;
-		chomp(my $setting=`/sbin/chkconfig --list $service`);
-		if ( $setting =~ m/3:off/ ) {
-		    MYERROR("Unable to chkconfig $service on");
+		`chroot $chroot /sbin/chkconfig $service on`;
+		if($chrootFlag == 0) {
+		    `chroot $chroot /etc/init.d/$service start`;
+		    chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
+		    if ( $setting =~ m/3:off/ ) {
+			MYERROR("Unable to chkconfig $service on");
+		    }
 		}
 	    } else {
 		print_info_in_green("OK");
 		INFO (": $service is OFF\n");
 	    }
 	}
-
+	
     }
 
     sub parse_and_uninstall_os_packages {
