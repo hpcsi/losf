@@ -619,6 +619,7 @@ BEGIN {
 		          
 	my $logr          = get_logger();
 	my @sync_partials = ();
+	my @sync_deletes  = ();
 
 	DEBUG("   --> Looking for defined files to remove...($cluster->$host)\n");
 

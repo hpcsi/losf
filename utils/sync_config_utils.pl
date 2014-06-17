@@ -137,10 +137,10 @@ BEGIN {
 		$losf_const_updated++;
 		print_error_in_red("UPDATING");
 		ERROR(": [$basename] File present: deleting\n");
-		unlink("$_") || MYERROR("Unable to remove file: $_");
+		unlink($file_test) || MYERROR("Unable to remove file: $_");
 	    } else {
 		print_info_in_green("OK");
-		INFO(": $_ not present\n");
+		INFO(": $chroot$_ not present\n");
 	    }
 	}
 	    
@@ -165,11 +165,20 @@ BEGIN {
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%sync_files) ) {
-	    TRACE("   --> $key => $value\n");
-	    sync_soft_link_file($key,$value);
+	    TRACE("   --> $chroot$key => $chroot$value\n");
+	    sync_soft_link_file($chroot.$key,$chroot.$value);
 	}
 
 	# Global soft link settings; any node-specific settings
@@ -178,9 +187,9 @@ BEGIN {
 	my %sync_files_global = query_cluster_config_softlink_sync_files($node_cluster,"LosF-GLOBAL-NODE-TYPE");
 
 	while ( my ($key,$value) = each(%sync_files_global) ) {
-	    TRACE("   --> $key => $value\n");
+	    TRACE("   --> $chroot$key => $chroot$value\n");
 	    if ( ! exists $sync_files{$key} ) {
-		sync_soft_link_file($key,$value);
+		sync_soft_link_file($chroot.$key,$chroot.$value);
 	    }
 	}
 
