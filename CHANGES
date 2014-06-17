@@ -1,7 +1,8 @@
-Version 0.46.0 (in progress)
+Version 0.46.0 (17 June 2014)
 
   * addition of chroot support for package and file management
   * losf add/del node support added for Warewulf
+  * allow recursive callling of losf command within parent 
   * initconfig utility now supports optional directory to use as a template config
   * allow non-interactive option for addalias command
   * inclusion of .spec file to support RPM packaging
