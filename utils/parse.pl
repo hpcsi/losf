@@ -1201,6 +1201,7 @@ BEGIN {
 	    MYERROR("No [Warewulf] section defined - please update config\n");
 	} elsif ( defined ($myval = $local_cfg->val("Warewulf",$host_type)) ) {
 	    DEBUG("   --> Read provisoning chroot image = $myval\n");
+	    $myval = $1 if($myval =~ /(.*)\/$/);
 	    return($myval);
 	} else {
 	    MYERROR("Warewulf chroot directory not defined for node type $host_type - please update config.\n");
