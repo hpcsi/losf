@@ -1206,6 +1206,25 @@ BEGIN {
 	    MYERROR("Warewulf chroot directory not defined for node type $host_type - please update config.\n");
 	}
     }
+
+    sub query_warewulf_node_types {
+	begin_routine();
+
+	if ( $osf_init_local_config == 0 ) {
+	    init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
+	}
+	    
+	my $cluster        = shift;
+	my $host_type      = shift;
+	my $logr           = get_logger();
+	
+	if ( ! $local_cfg->SectionExists("Warewulf") ) {
+	    MYERROR("No [Warewulf] section defined - please update config\n");
+	} else {
+	    my @ww_node_types = $local_cfg->Parameters("Warewulf"); 
+	    return(@ww_node_types);
+	}
+    }
     
 }
 
