@@ -2,7 +2,7 @@ Summary: A Linux operating system framework for managing HPC clusters
 Name: losf
 Version: 0.46.0
 Release: 1
-License: GPLv2
+License: GPL-2
 Group: System Environment/Base
 BuildArch: noarch
 URL: https://github.com/hpcsi/losf 
@@ -10,6 +10,7 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %{!?prefix: %define prefix /opt/losf-%{version}}
+%define installPath %{prefix}/%{name}-%{version}
 
 provides: perl(LosF_node_types)
 provides: perl(LosF_rpm_topdir)
@@ -17,7 +18,11 @@ provides: perl(LosF_rpm_utils)
 provides: perl(LosF_utils)
 provides: perl(LosF_history_utils)
 
+%if 0%{?sles_version} || 0%{?suse_version}
+requires: perl-Config-IniFiles >= 2.43 
+%else
 requires: yum-plugin-downloadonly
+%endif
 
 %define __spec_install_post %{nil}
 %define debug_package %{nil}
@@ -39,28 +44,27 @@ cluster.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p %{buildroot}/%{prefix}
+mkdir -p %{buildroot}/%{installPath}
 mkdir -p %{buildroot}/etc/profile.d
-cp -a * %{buildroot}/%{prefix}
+cp -a * %{buildroot}/%{installPath}
 
 # Remove separate test dir to minimize dependencies
 
-rm -rf %{buildroot}/%{prefix}/test
+rm -rf %{buildroot}/%{installPath}/test
 
 # shell login scripts
 
 %{__cat} << EOF > %{buildroot}/etc/profile.d/losf.sh
-#!/bin/sh
 
 # Setup default path for LosF
 
-LOSF_DIR=%{prefix}
+LOSF_DIR=%{installPath}
 TOP_DIR=\`dirname \${LOSF_DIR}\`
 
 if [ -h \${TOP_DIR}/losf ];then
-   export PATH=\${TOP_DIR}/losf:\${PATH}
+   export PATH=\${TOP_DIR}/losf:\${TOP_DIR}/losf/utils:\${PATH}
 elif [ -d \${LOSF_DIR} ];then
-   export PATH=\${LOSF_DIR}/losf:\${PATH}
+   export PATH=\${LOSF_DIR}/losf:\${LOSF_DIR}/utils:\${PATH}
 fi
 	
 EOF
@@ -68,17 +72,15 @@ EOF
 # shell login scripts
 
 %{__cat} << EOF > %{buildroot}/etc/profile.d/losf.csh
-#!/bin/sh
-
 # Setup default path for LosF
 
-set LOSF_DIR=%{prefix}
+set LOSF_DIR=%{installPath}
 set TOP_DIR=\`dirname \${LOSF_DIR}\`
 
 if ( -l \${TOP_DIR}/losf ) then
-   set path = (\${TOP_DIR}/losf\${PATH} \$path)
+   set path = (\${TOP_DIR}/losf \${TOP_DIR}/losf/utils \$path)
 else if ( -d \${LOSF_DIR} ) then
-   set path = (\${LOSF_DIR}/losf \$path)
+   set path = (\${LOSF_DIR}/losf \${LOSF_DIR}/losf/utils \$path)
 endif
 	
 EOF
@@ -93,7 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 # recent install. Use -c option to clean up previous config_dir file for clean
 # RPM upgrades.
 
-%{prefix}/misc/config_latest_install -c -q
+%{installPath}/misc/config_latest_install -c -q
 
 # Initialize env
 
@@ -109,21 +111,22 @@ export PATH
 # link and config_dir.
 
 if [ "$1" = 0 ];then
-    top_dir=$(dirname %{prefix})
+    top_dir=$(dirname %{installPath})
     if [ -L $top_dir/losf ];then
 	rm $top_dir/losf
     fi
 
-    if [ -s %{prefix}/config/config_dir ];then
-	rm %{prefix}/config/config_dir
+    if [ -s %{installPath}/config/config_dir ];then
+	rm %{installPath}/config/config_dir
     fi
 fi
 
 
 %files
 %defattr(-,root,root,-)
+%dir /opt/fsp
 %{prefix}
-/etc/profile.d/losf.sh
-/etc/profile.d/losf.csh
+%config /etc/profile.d/losf.sh
+%config /etc/profile.d/losf.csh
 
 
