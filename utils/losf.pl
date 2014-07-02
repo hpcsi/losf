@@ -745,6 +745,8 @@ sub update_distro_packages {
 
     # Now check to see if we downloaded anything
 
+    my @newfiles = ();
+
     if($pkg_manager eq "yum") {
 	@newfiles = <$tmpdir/*>;
     } elsif($pkg_manager eq "zypper") {
