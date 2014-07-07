@@ -81,13 +81,13 @@ do
 	    export LOSF_LOG_MODE=ERROR
 	    ;;
 	v)
-	    if [ ! -s $TOP_DIR/utils/VERSION ];then
+	    if [ ! -s $TOP_DIR/VERSION ];then
 		echo " "
 		echo "[ERROR]: Unable to obtain version...please verify local LosF install"
 		echo " "
 		exit 1
 	    else
-		version=`cat $TOP_DIR/utils/VERSION`
+		version=`cat $TOP_DIR/VERSION`
 		echo " "
 		echo "-----------------------"
 		echo "LosF: Version $version"

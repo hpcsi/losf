@@ -1,4 +1,6 @@
-Version 0.47.0 (Work in Progress)
+Version 0.47.1 (07 July 2014)
+
+  * fix for 'update -v' not displaying version info
 
 Version 0.47.0 (07 July 2014)
 
