@@ -75,13 +75,18 @@ losf_get_lock();
 
 # Default logging is set to ERROR
 my $logr = get_logger();
+ 
+# Check for update skip request - can be overridden via presence of LOSF_UPDATE_FORCE env variable
 
-# Check for update skip request
 
 if ( -e "/root/losf-noupdate" ) {
-    chomp(my $host_name=`hostname -s`);
-    ERROR("Skipping update request on $host_name -> remove /root/losf-noupdate to re-enable.\n");
-    exit(0);
+    if ($ENV{'LOSF_UPDATE_FORCE'}  ne "1") {
+	chomp(my $host_name=`hostname -s`);
+	ERROR("Skipping update request on $host_name -> remove /root/losf-noupdate to re-enable.\n");
+	exit(0);
+    } else {
+	INFO("Overriding /root/losf-noupdate request to to disable via \"-f\" force option.\n");
+    }
 }
 
 # Allow for alternate RPM source paths

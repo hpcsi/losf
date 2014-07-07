@@ -67,7 +67,7 @@ EOF
 
 RPM_OVERRIDE=
 
-while getopts "hqvp:" OPTION
+while getopts "hqfvp:" OPTION
 do
     case $OPTION in
 	h)
@@ -79,6 +79,9 @@ do
 	    ;;
 	q)
 	    export LOSF_LOG_MODE=ERROR
+	    ;;
+	f)
+	    export LOSF_UPDATE_FORCE=1
 	    ;;
 	v)
 	    if [ ! -s $TOP_DIR/VERSION ];then

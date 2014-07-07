@@ -1,6 +1,8 @@
 Version 0.47.1 (07 July 2014)
 
   * fix for 'update -v' not displaying version info
+  * addition of a force option (-f) to the update utility allowing updates even 
+    when the /root/losf-noupdate file is present
 
 Version 0.47.0 (07 July 2014)
 
