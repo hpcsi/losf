@@ -1,12 +1,14 @@
-Version 0.47.0 (01 July 2014)
+Version 0.47.0 (07 July 2014)
 
+  * use autoconf for package versioning - note: running 'configure' is not required 
+    for external usage
   * added support for OS package additions under SLES using zypper package management
 
 Version 0.46.0 (17 June 2014)
 
   * addition of chroot support for package and file management
   * losf add/del node support added for Warewulf
-  * allow recursive callling of losf command within parent 
+  * allow recursive calling of losf command within parent 
   * initconfig utility now supports optional directory to use as a template config
   * allow non-interactive option for addalias command
   * inclusion of .spec file to support RPM packaging
