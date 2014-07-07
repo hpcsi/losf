@@ -237,7 +237,7 @@ sub verify_rpms_removed {
 
 	# return array format = (name,version,release,arch)
 
-	my @installed_rpm = is_rpm_installed     ($rpm,$arch);
+	my @installed_rpm = is_rpm_installed($rpm);
 
 	if( @installed_rpm ne 0 ) {
 	    INFO("   --> $installed_rpm[0] is installed....removing\n");
@@ -728,7 +728,7 @@ sub query_all_installed_rpms {
 	    $rpm_chroot = "--root $chroot";
 	}
      }
-     
+
     @rpms_installed = split('_LOSF_DELIM',`rpm -qa $rpm_chroot --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
 
     # we now have all the rpms and their associated version,

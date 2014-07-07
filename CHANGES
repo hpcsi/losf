@@ -1,5 +1,6 @@
 Version 0.47.0 (07 July 2014)
 
+  * bug fix for OS package removal in non-chroot environment
   * use autoconf for package versioning - note: running 'configure' is not required 
     for external usage
   * added support for OS package additions under SLES using zypper package management
