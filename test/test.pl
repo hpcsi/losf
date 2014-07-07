@@ -26,7 +26,7 @@
 
 use strict;
 
-#use Test::More;
+use Test::More;
 use Test::More tests => 21;
 #use Test::Files;
 use File::Basename;
@@ -56,7 +56,7 @@ foreach my $bin (@BINS) {
 #------------------------------------------------------
 
 print "\nInitializing test config ";
-my $tmpdir = File::Temp->newdir(DIR=>my $dir, CLEANUP => 1) || die("Unable to create temporary directory");
+my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
 print "--> tmpdir = $tmpdir\n";
 
 $ENV{'LOSF_CONFIG_DIR'} = "$tmpdir";
@@ -100,4 +100,5 @@ ok($line =~ m/^\[LosF\] RPM topdir:      $tmpdir\/test\/rpms$/,"rpm_topdir -> co
 close(IN);
 
 done_testing();
+
 
