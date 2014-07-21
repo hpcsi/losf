@@ -69,12 +69,16 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 	
-	if ( $osf_sync_const_file == 0 ) {
-	    $osf_sync_const_file = 1;
-	}
-	
+###	if ( $osf_sync_const_file == 0 ) {
+###	    $osf_sync_const_file = 1;
+###	}
+
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
+
+	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
+
+	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
 	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
@@ -93,10 +97,6 @@ BEGIN {
 	foreach(@partial_files) {
 	    $partial_file_hash{$_} = 1;
 	}
-
-	# Sync const files
-
-	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
 	# Support for chroot (e.g. alternate provisioning mechanisms).
 
