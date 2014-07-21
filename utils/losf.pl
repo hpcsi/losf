@@ -39,6 +39,7 @@ use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
 use File::Path;
+use File::Find;
 use Term::ANSIColor;
 use Getopt::Long;
 
