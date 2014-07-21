@@ -1,5 +1,6 @@
 Version 0.48.0 (In Progress)
 
+  * add support for zypper OS patterns with "losf addgroup" under SLES
   * fix for incomplete OS package additions under SLES using zypper package management
   * added perl-Log-Log4perl dependency in RPM .spec file for SLES
   * include optional support to define network gateway for Warewulf installs

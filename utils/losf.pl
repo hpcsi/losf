@@ -39,7 +39,6 @@ use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
 use File::Path;
-use File::Find;
 use Term::ANSIColor;
 use Getopt::Long;
 
@@ -764,22 +763,9 @@ sub update_distro_packages {
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
     my $chroot_option = check_chroot_option($chroot,$pkg_manager);
+    my @newfiles      = download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"upgrade");
 
-    download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"upgrade");
-
-    # Now check to see if we downloaded anything
-
-    my @newfiles = ();
-
-    if($pkg_manager eq "yum") {
-	@newfiles = <$tmpdir/*>;
-    } elsif($pkg_manager eq "zypper") {
-	find ( sub {
-	    return unless -f;        # Must be a file
-	    return unless /\.rpm$/;  # Must end with .rpm suffix
-	    push @newfiles, $File::Find::name;
-	       }, $tmpdir );
-    }
+    # Ask to add new files if we have any
 
     my $extra_deps = @newfiles - 1;
 
@@ -982,22 +968,10 @@ sub add_distro_package {
 
     my $chroot_option = check_chroot_option($chroot,$pkg_manager);
     
-    download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"install");
+    my @newfiles = download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"install");
 
-    # Now check to see if we downloaded anything
+    # Ask to add new files if we have any
 
-    my @newfiles = ();
-
-    if($pkg_manager eq "yum") {
-	@newfiles = <$tmpdir/*>;
-    } elsif($pkg_manager eq "zypper") {
-	find ( sub {
-	    return unless -f;        # Must be a file
-	    return unless /\.rpm$/;  # Must end with .rpm suffix
-	    push @newfiles, $File::Find::name;
-	       }, $tmpdir );
-    }
-	
     my $extra_deps = @newfiles - 1;
 
     if( @newfiles >= 1 ) {
@@ -1158,26 +1132,11 @@ sub add_distro_group {
     INFO("\n** Checking on possible addition of requested distro group: $package\n");
     SYSLOG("losf: Checking on addition of distro group $package");
 
-    # the yum-plugin-downloadonly package is required to support
-    # auto-addition of distro packages...
+    # verify underlying package manager is available for use with auto-addition...
 
-    my $check_pkg = "yum-plugin-downloadonly";
-    my @igot = is_rpm_installed($check_pkg);
+    my $pkg_manager = check_for_package_manager("addgroup");
 
-    if ( @igot  eq 0 ) {
-	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
-    }
-
-    # (1) Check if already installed....yum grouplist doesn't seem to work for this...
-
-#    my @igot = is_rpm_installed($package);
-
-#    if( @igot ne 0 ) {
-#	INFO("   --> package $package is already installed locally\n");
-#	MYERROR("   --> use updatepkg to check for a newer distro version\n");
-#    }
-
-    # (2) Check if it exists in available yum repo...general approach
+    # Check if the group exists in available repo...general approach
     # is to try and download the package and any required dependencies
     # into a temporary directory of our own creation.  Then, if we got
     # a hit, ask the user if they want us to add to LosF, otherwise,
@@ -1186,19 +1145,10 @@ sub add_distro_group {
     my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
-    my $yum_chroot="";
-    if($chroot ne "") {
-	$yum_chroot="--installroot=$chroot";
-    }
+    my $chroot_option = check_chroot_option($chroot,$pkg_manager);
+    my @newfiles      = download_os_group($chroot_option,$pkg_manager,$package,$tmpdir);
 
-    my $cmd="yum -y $yum_chroot -q --downloadonly --downloaddir=$tmpdir groupinstall \"$package\" >& /dev/null";
-    DEBUG("   --> Running yum command \"$cmd\"\n");
-
-   `$cmd`;
-
-    # Now check to see if we downloaded anything
-
-    my @newfiles = <$tmpdir/*>;
+    # Ask to add new files if we have any
 
     my $extra_deps = @newfiles - 1;
 

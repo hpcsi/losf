@@ -28,6 +28,7 @@ use LosF_paths;
 use base 'Exporter';
 use Sys::Syslog;  
 use Fcntl qw(:flock);
+use File::Find;
 
 # Global vars to count any detected changes
 
@@ -428,7 +429,10 @@ sub check_distro() {
     }
 }
 
-# check_for_package_manager() - verifies underlying package manager is available
+# --------------------------------------------------------------------
+# check_for_package_manager() - verifies underlying package manager is
+# available
+# --------------------------------------------------------------------
 
 sub check_for_package_manager {
 
@@ -450,7 +454,10 @@ sub check_for_package_manager {
     return($pkg_manager);
 }
 
-# check_chroot_option() - returns package manager chroot option if chroot is enabled
+# ----------------------------------------------------------------
+# check_chroot_option() - returns package manager chroot option if
+# chroot is enabled
+# ----------------------------------------------------------------
 
 sub check_chroot_option {
 
@@ -470,8 +477,10 @@ sub check_chroot_option {
     }
 }
 
+# ----------------------------------------------------------------
 # download_os_package() - downloads OS package (and dependencies)
 # using underlying package manager.
+# ----------------------------------------------------------------
 
 sub download_os_package {
 
@@ -496,10 +505,75 @@ sub download_os_package {
 	$cmd="zypper -n $chroot_option --pkg-cache-dir $tmpdir $mode --download-only $package_name";
 	DEBUG("   --> Running zypper command \"$cmd\"\n");
     } else {
-	MYERROR("Unknown package manage at __LINE__r\n");
+	MYERROR("Unknown package manager at __LINE__r\n");
     }
 
    `$cmd`;
+
+    # Check to see if we downloaded anything
+
+    my @rpms_downloaded = ();
+
+    if($pkg_manager eq "yum") {
+	@rpms_downloaded = <$tmpdir/*>;
+    } elsif($pkg_manager eq "zypper") {
+	find ( sub {
+	    return unless -f;        # Must be a file
+	    return unless /\.rpm$/;  # Must end with .rpm suffix
+	    push @rpms_downloaded, $File::Find::name;
+	       }, $tmpdir );
+    } else {
+	MYERROR("Unknown package manager at __LINE__r\n");
+    }
+
+    return(@rpms_downloaded);
+}
+
+# -------------------------------------------------------------
+# download_os_group() - downloads OS group (and dependencies)
+# using underlying package manager.
+# -------------------------------------------------------------
+
+sub download_os_group {
+
+    my $chroot_option = shift;
+    my $pkg_manager   = shift;
+    my $group_name    = shift;
+    my $tmpdir        = shift;
+
+    my $cmd="";
+
+    if($pkg_manager eq "yum") {
+	$cmd="yum -y $chroot_option -q --downloadonly --downloaddir=$tmpdir groupinstall $group_name >& /dev/null";
+	DEBUG("   --> Running yum command \"$cmd\"\n");
+    }
+    elsif($pkg_manager eq "zypper") {
+	$cmd="zypper -n $chroot_option --pkg-cache-dir $tmpdir install --download-only -t pattern $group_name";
+	print "$cmd\n";
+	DEBUG("   --> Running zypper command \"$cmd\"\n");
+    } else {
+	MYERROR("Unknown package manager at __LINE__r\n");
+    }
+
+   `$cmd`;
+
+    # Check to see if we downloaded anything
+
+    my @rpms_downloaded = ();
+
+    if($pkg_manager eq "yum") {
+	@rpms_downloaded = <$tmpdir/*>;
+    } elsif($pkg_manager eq "zypper") {
+	find ( sub {
+	    return unless -f;        # Must be a file
+	    return unless /\.rpm$/;  # Must end with .rpm suffix
+	    push @rpms_downloaded, $File::Find::name;
+	       }, $tmpdir );
+    } else {
+	MYERROR("Unknown package manager at __LINE__r\n");
+    }
+
+    return(@rpms_downloaded);
 }
 
 1;
