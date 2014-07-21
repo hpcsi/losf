@@ -710,6 +710,21 @@ sub update_distro_packages {
     begin_routine();
     my $package = shift;
 
+    # [Optional] support for chroot environment
+
+    my $override_type="";
+    my $chroot="";
+
+    if (@_ >= 1) {
+	$override_type = shift;
+	$chroot        = shift;
+	$node_type     = $override_type; # override based on "--type=<node> option"
+	
+	if ( ! -d $chroot) {
+	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+	}
+    }
+
     INFO("\n** Requesting update for local OS pacakge: $package\n");
     SYSLOG("Requesting update for local OS pacakge: $package");
 
@@ -717,32 +732,31 @@ sub update_distro_packages {
 	$package = "";
     }
 
-    # the yum-plugin-downloadonly package is required to support
-    # auto-addition of distro packages...
+    # verify underlying package manager is available for use with auto-addition...
 
-    my $check_pkg = "yum-plugin-downloadonly";
-    my @igot = is_rpm_installed($check_pkg);
+    my $pkg_manager = check_for_package_manager("updatepkg");
 
-    if ( @igot  eq 0 ) {
-	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
-    }
-
-    my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
+    my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
-    my $cmd="yum -y -q --downloadonly --downloaddir=$tmpdir --skip-broken update $package >& /dev/null";
-    DEBUG("   --> Running yum command \"$cmd\"\n");
+    my $chroot_option = check_chroot_option($chroot,$pkg_manager);
 
-   `$cmd`;
+    download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"upgrade");
 
     # Now check to see if we downloaded anything
 
-    my @newfiles = <$tmpdir/*>;
+    my @newfiles = ();
+
+    if($pkg_manager eq "yum") {
+	@newfiles = <$tmpdir/*>;
+    } elsif($pkg_manager eq "zypper") {
+	@newfiles = <$tmpdir/*/*/*/*.rpm>;
+    }
 
     my $extra_deps = @newfiles - 1;
 
     if ( @newfiles == 0) {
-	INFO("   --> no new os packages found...exiting\n");
+	INFO("   --> No new os packages found...exiting\n");
 	return;
     }
 
@@ -805,12 +819,10 @@ sub update_distro_packages {
 
 	my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
 
-###	push(@os_pkgs_new,$rpm_package);
 	push(@os_pkgs_new,"$config_string");
 
 	foreach $rpm (@os_rpms) {
 	    my @rpm_array  = split(/\s+/,$rpm);
-###	    if ($rpm =~ /^$rpm_name-(\S+).($rpm_arch)$/ ) {
 	    if ($rpm_array[0] eq $rpm_name && "arch=$rpm_arch" eq $rpm_array[3]) {
 		INFO("       --> Configuring update for $rpm_package (previously $rpm)\n");
 		$is_upgrade   = 1;
@@ -900,6 +912,8 @@ sub add_distro_package {
     begin_routine();
     my $package = shift;
 
+    # [Optional] support for chroot environment
+
     my $override_type="";
     my $chroot="";
 
@@ -916,15 +930,9 @@ sub add_distro_package {
     INFO("\n** Checking on possible addition of requested distro package: $package\n");
     SYSLOG("Checking on addition of distro package $package");
 
-    # the yum-plugin-downloadonly package is required to support
-    # auto-addition of distro packages...
+    # verify underlying package manager is available for use with auto-addition...
 
-    my $check_pkg = "yum-plugin-downloadonly";
-    my @igot = is_rpm_installed($check_pkg);
-
-    if ( @igot  eq 0 ) {
-	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf addpkg\" functionality");
-    }
+    my $pkg_manager = check_for_package_manager("addpkg");
 
     # (1) Check if already installed....
 
@@ -935,29 +943,29 @@ sub add_distro_package {
 	MYERROR("   --> use updatepkg to check for a newer distro version\n");
     }
 
-    # (2) Check if it exists in available yum repo...general approach
+    # (2) Check if it exists in available repo...general approach
     # is to try and download the package and any required dependencies
     # into a temporary directory of our own creation.  Then, if we got
     # a hit, ask the user if they want us to add to LosF, otherwise,
     # we punt.
 
-    my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
+    my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+
+    my $chroot_option = check_chroot_option($chroot,$pkg_manager);
     
-    my $yum_chroot="";
-    if($chroot ne "") {
-	$yum_chroot="--installroot=$chroot";
-    }
-
-    my $cmd="yum -y $yum_chroot -q --downloadonly --downloaddir=$tmpdir install $package >& /dev/null";
-    DEBUG("   --> Running yum command \"$cmd\"\n");
-
-   `$cmd`;
+    download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"install");
 
     # Now check to see if we downloaded anything
 
-    my @newfiles = <$tmpdir/*>;
+    my @newfiles = ();
 
+    if($pkg_manager eq "yum") {
+	@newfiles = <$tmpdir/*>;
+    } elsif($pkg_manager eq "zypper") {
+	@newfiles = <$tmpdir/*/*/*/*.rpm>;
+    }
+	
     my $extra_deps = @newfiles - 1;
 
     if( @newfiles >= 1 ) {
@@ -1024,7 +1032,7 @@ sub add_distro_package {
 	    foreach $rpm (@os_rpms) {
 
 		if ( "$rpm" eq "$config_string" ) {
-		    INFO("       --> $rpm_name already configured - ignoring addition request\n");
+		    INFO("       --> $rpm_name already configured - ignoring duplicate addition request\n");
 		    $is_configured = 1;
 		    last;
 		}
@@ -1143,7 +1151,7 @@ sub add_distro_group {
     # a hit, ask the user if they want us to add to LosF, otherwise,
     # we punt.
 
-    my $tmpdir = File::Temp->newdir(DIR=>$dir, CLEANUP => 1) || MYERROR("Unable to create temporary directory");
+    my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
     INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
 
     my $yum_chroot="";
@@ -1842,6 +1850,12 @@ if($losf_provisioner eq "Warewulf") {
     } elsif ( $node_type ne "master" ) {
 	MYERROR("Please specify desired node type with \"--type\" for Warewulf RPM package management\n");
     }
+} elsif($local_node_type ne "") {
+    ERROR("\n");
+    MYERROR_NE("The --type option can only be used with chroot based provisioning (e.g. Warewulf).");
+    MYERROR_NE("Please update the [Provisioning] section for your cluster configuration accordingly if you want");
+    MYERROR_NE("to use chroot based images.\n");
+    exit(1);
 }
 
 my $output_mode = "";
@@ -1887,7 +1901,13 @@ switch ($command) {
 	    add_distro_group($argument)
 	}
     };
-    case "updatepkg"      { update_distro_packages($argument) };
+    case "updatepkg"      { 
+	if($local_node_type) {
+	    update_distro_packages($argument,$local_node_type,$chroot);
+	} else {
+	    update_distro_packages($argument);
+	}
+    };
     case "updatepkgs"     { update_distro_packages("ALL")     };
     case "config-upgrade" { 
 	update_os_config();

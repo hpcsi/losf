@@ -1,1 +1,6 @@
 *~
+configure
+config.status
+config.log
+autom4te.cache
+

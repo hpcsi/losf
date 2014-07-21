@@ -67,7 +67,7 @@ EOF
 
 RPM_OVERRIDE=
 
-while getopts "hqvp:" OPTION
+while getopts "hqfvp:" OPTION
 do
     case $OPTION in
 	h)
@@ -80,14 +80,17 @@ do
 	q)
 	    export LOSF_LOG_MODE=ERROR
 	    ;;
+	f)
+	    export LOSF_UPDATE_FORCE=1
+	    ;;
 	v)
-	    if [ ! -s $TOP_DIR/utils/VERSION ];then
+	    if [ ! -s $TOP_DIR/VERSION ];then
 		echo " "
 		echo "[ERROR]: Unable to obtain version...please verify local LosF install"
 		echo " "
 		exit 1
 	    else
-		version=`cat $TOP_DIR/utils/VERSION`
+		version=`cat $TOP_DIR/VERSION`
 		echo " "
 		echo "-----------------------"
 		echo "LosF: Version $version"

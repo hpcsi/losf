@@ -216,6 +216,12 @@ sub MYERROR {
     exit(1);
 }
 
+sub MYERROR_NE {
+    foreach (@_) {
+	ERROR("[ERROR]: $_\n");
+    }
+}
+
 sub SYSLOG {
     openlog(losf,'',LOG_LOCAL0);
     syslog(LOG_INFO,$_[0]);
@@ -398,6 +404,102 @@ sub losf_release_lock() {
     }
 
     close($LOSF_FH_lock);
+}
+
+# check_distro() - map Linux release to underlying package manager
+
+sub check_distro() {
+    my $release_dir       = "/etc";
+    my %supported_distros = (
+	'SuSE-release'   => 'zypper',
+	'centos-release' => 'yum',
+	'fedora-release' => 'yum',
+	'redhat-release' => 'yum',
+	);
+
+    foreach (keys %supported_distros) {
+	if ( -e "$release_dir/$_" ) {
+	    return($supported_distros{$_});
+	}
+    }
+
+    if($found > 1) {
+	MYERROR("Unable to determine unique Linux distro at __LINE__");
+    }
+}
+
+# check_for_package_manager() - verifies underlying package manager is available
+
+sub check_for_package_manager {
+
+    my $pkg_manager = check_distro();
+    my $check_pkg   = $pkg_manager;
+    my $losf_option = shift;
+
+    INFO("   --> Underlying package manager = $pkg_manager\n");
+
+    if($pkg_manager eq "yum") {
+	$check_pkg = "yum-plugin-downloadonly";
+    }
+
+    my @igot = is_rpm_installed($check_pkg);
+
+    if ( @igot  eq 0 ) {
+	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf $losf_option\" functionality");
+    }
+    return($pkg_manager);
+}
+
+# check_chroot_option() - returns package manager chroot option if chroot is enabled
+
+sub check_chroot_option {
+
+    my $chroot      = shift;
+    my $pkg_manager = shift;
+
+    if($chroot eq "") { 
+	return($chroot); 
+    } else {
+	if($pkg_manager eq "yum") {
+	    return("--installroot=$chroot");
+	} elsif($pkg_manager eq "zypper") {
+	    return("--root=$chroot");
+	} else {
+	    MYERROR("Unknown package manage at __LINE__r\n");
+	}	
+    }
+}
+
+# download_os_package() - downloads OS package (and dependencies)
+# using underlying package manager.
+
+sub download_os_package {
+
+    my $chroot_option = shift;
+    my $pkg_manager   = shift;
+    my $package_name  = shift;
+    my $tmpdir        = shift;
+    my $mode          = shift;
+
+    my $cmd="";
+
+    if($pkg_manager eq "yum") {
+	$cmd="yum -y $chroot_option -q --downloadonly --downloaddir=$tmpdir $mode $package_name >& /dev/null";
+	DEBUG("   --> Running yum command \"$cmd\"\n");
+    }
+    elsif($pkg_manager eq "zypper") {
+
+	if($mode eq "upgrade") {
+	    $mode = "update";
+	}
+
+	$cmd="zypper -n $chroot_option --pkg-cache-dir $tmpdir $mode --download-only $package_name";
+	DEBUG("   --> Running zypper command \"$cmd\"\n");
+    } else {
+	MYERROR("Unknown package manage at __LINE__r\n");
+    }
+
+   `$cmd`;
 }
 
 1;
