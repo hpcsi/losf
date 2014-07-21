@@ -6,12 +6,12 @@ if [ ! $IPMI_PASSWORD ]; then
     read -p "Password: " passw; echo
     stty echo
     echo
-    /usr/bin/ipmitool -I lan -H $1 -U root -P $passw sensor
+    /usr/bin/ipmitool -I lanplus -H $1 -U root -P $passw sensor
     echo
 fi
 
 if [ $IPMI_PASSWORD ]; then
-    /usr/bin/ipmitool -E -I lan -H $1 -U root sensor
+    /usr/bin/ipmitool -E -I lanplus -H $1 -U root sensor
 fi
 
 exit 0

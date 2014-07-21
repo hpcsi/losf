@@ -7,12 +7,12 @@ if [ ! $IPMI_PASSWORD ]; then
     stty echo
     echo
 
-    /usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis power off
+    /usr/bin/ipmitool -I lanplus -H $1 -U root -P $passw chassis power off
     echo
 fi
 
 if [ $IPMI_PASSWORD ]; then
-    /usr/bin/ipmitool -E -I lan -H $1 -U root chassis power off
+    /usr/bin/ipmitool -E -I lanplus -H $1 -U root chassis power off
 fi
 
 exit 0

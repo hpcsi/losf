@@ -6,7 +6,7 @@ if [ ! $IPMI_PASSWORD ]; then
     stty echo
     echo
 
-    /usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis power soft
+    /usr/bin/ipmitool -I lanplus -H $1 -U root -P $passw chassis power soft
     echo
 fi
 
@@ -19,7 +19,7 @@ if [ $IPMI_PASSWORD ]; then
     for host in `seq 1 $NUM_HOSTS`; do
 	myhost=$1 
 	printf "$myhost: "
-	/usr/bin/ipmitool -E -I lan -H $myhost -U root chassis power soft
+	/usr/bin/ipmitool -E -I lanplus -H $myhost -U root chassis power soft
 	shift
     done
 fi

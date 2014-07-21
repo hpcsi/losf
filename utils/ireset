@@ -11,7 +11,7 @@ if [ $# -lt 1 ];then
 fi
 
 #echo
-#echo "cmd: ipmitool -I lan -H $1 -U root chassis power reset"
+#echo "cmd: ipmitool -I lanplus -H $1 -U root chassis power reset"
 #echo
 
 if [ ! $IPMI_PASSWORD ]; then
@@ -25,9 +25,9 @@ fi
 while (( "$#" )) ; do 
 
     if [ $IPMI_PASSWORD ]; then
-	/usr/bin/ipmitool -E -I lan -H $1 -U root chassis power reset
+	/usr/bin/ipmitool -E -I lanplus -H $1 -U root chassis power reset
     else
-	/usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis power reset
+	/usr/bin/ipmitool -I lanplus -H $1 -U root -P $passw chassis power reset
     fi
 
     shift
