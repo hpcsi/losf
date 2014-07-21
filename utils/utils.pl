@@ -549,7 +549,6 @@ sub download_os_group {
     }
     elsif($pkg_manager eq "zypper") {
 	$cmd="zypper -n $chroot_option --pkg-cache-dir $tmpdir install --download-only -t pattern $group_name";
-	print "$cmd\n";
 	DEBUG("   --> Running zypper command \"$cmd\"\n");
     } else {
 	MYERROR("Unknown package manager at __LINE__r\n");
