@@ -1,7 +1,8 @@
 Version 0.48.0 (In Progress)
 
-  * Include optional support to define network gateway for Warewulf installs
-  * Updated ipmi convenience utils (ion,ioff, etc) to use lanplus interface
+  * added perl-Log-Log4perl dependency in RPM .spec file for SLES
+  * include optional support to define network gateway for Warewulf installs
+  * updated ipmi convenience utils (ion,ioff, etc) to use lanplus interface
 
 Version 0.47.2 (15 July 2014)
 
