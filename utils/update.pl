@@ -57,6 +57,16 @@ sub display_changes {
 
     my $num_changed = shift;
     my $num_tracked = shift;
+    my $width       = shift;
+
+    my $cnt    = 0;
+    my $string = sprintf("%i",$num_changed);
+    $cnt      += length($string);
+    $string    = sprintf("%i",$num_tracked);
+    $cnt      += length($string);
+
+    my $spaces = $width - $cnt;
+    print " " x $spaces;
 
     if ( $num_changed > 0) {
 	print color 'red';
@@ -174,13 +184,13 @@ foreach our $node_type (@update_types) {
     print ": ";
     
     print "[RPMs: OS ";
-    display_changes($losf_os_packages_updated,$losf_os_packages_total);         print "  Custom ";
-    display_changes($losf_custom_packages_updated,$losf_custom_packages_total); print "] ";
+    display_changes($losf_os_packages_updated,$losf_os_packages_total,6);         print "  Custom ";
+    display_changes($losf_custom_packages_updated,$losf_custom_packages_total,6); print "] ";
     
-    print "[Files: ";    display_changes($losf_const_updated,$losf_const_total);             print "] ";
-    print "[Links: ";    display_changes($losf_softlinks_updated,$losf_softlinks_total);     print "] ";
-    print "[Services: "; display_changes($losf_services_updated,$losf_services_total);       print "] ";
-    print "[Perms: ";    display_changes($losf_permissions_updated,$losf_permissions_total); print "] ";
+    print "[Files: ";    display_changes($losf_const_updated,$losf_const_total,5);             print "] ";
+    print "[Links: ";    display_changes($losf_softlinks_updated,$losf_softlinks_total,4);     print "] ";
+    print "[Services: "; display_changes($losf_services_updated,$losf_services_total,4);       print "] ";
+    print "[Perms: ";    display_changes($losf_permissions_updated,$losf_permissions_total,4); print "] ";
     
     print "-> $node_type";
     print "\n";
