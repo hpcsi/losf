@@ -329,7 +329,7 @@ sub add_node  {
 	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$uname";
 	print "cmd = $cmd\n";
 
-	my $returnCode = system($cmd);
+	$returnCode = system($cmd);
 	
 	if($returnCode != 0) {
 	    print "\n$cmd\n\n";	
