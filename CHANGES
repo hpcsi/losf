@@ -1,3 +1,7 @@
+Version 0.48.0 (In Progress)
+
+  * Updated ipmi convenience utils (ion,ioff, etc) to use lanplus interface
+
 Version 0.47.2 (15 July 2014)
 
   * fix for 'sync_config_files' throwing error when no file argument is given
