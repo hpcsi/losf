@@ -111,8 +111,9 @@ if (@ARGV >= 1) {
 
 my @update_types=($node_type);
 
-if ($losf_provisioner eq "Warewulf") {
-    push(@update_types,"compute");
+if ($losf_provisioner eq "Warewulf" && $node_type eq "master" ) {
+    my @ww_node_types = query_warewulf_node_types($node_cluster,$node_type);
+    push(@update_types,@ww_node_types);
 }
 
 foreach our $node_type (@update_types) {

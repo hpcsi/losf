@@ -98,9 +98,18 @@ BEGIN {
 
 	INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
-		sync_const_file("$_",$node_cluster,$node_type);
+		sync_const_file($chroot . $_,$node_cluster,$node_type);
 	    }
 	}
 
@@ -109,7 +118,7 @@ BEGIN {
 	INFO("** Syncing partial file contents ($node_cluster:$node_type)\n");
 	
 	foreach(@partial_files) {
-	    sync_partial_file("$_");
+	    sync_partial_file($chroot . $_);
 	}
 
 	# Now, verify non-existence of certain files
@@ -122,15 +131,16 @@ BEGIN {
 	    $losf_const_total++;
 
 	    my $basename = basename("$_");
+	    my $file_test = $chroot . $_;
 
-	    if ( -e "$_") {
+	    if ( -e $file_test ) {
 		$losf_const_updated++;
 		print_error_in_red("UPDATING");
 		ERROR(": [$basename] File present: deleting\n");
-		unlink("$_") || MYERROR("Unable to remove file: $_");
+		unlink($file_test) || MYERROR("Unable to remove file: $_");
 	    } else {
 		print_info_in_green("OK");
-		INFO(": $_ not present\n");
+		INFO(": $chroot$_ not present\n");
 	    }
 	}
 	    
@@ -155,11 +165,20 @@ BEGIN {
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
 	my %sync_files = query_cluster_config_softlink_sync_files($node_cluster,$node_type);
 
 	while ( my ($key,$value) = each(%sync_files) ) {
-	    TRACE("   --> $key => $value\n");
-	    sync_soft_link_file($key,$value);
+	    TRACE("   --> $chroot$key => $chroot$value\n");
+	    sync_soft_link_file($chroot.$key,$chroot.$value);
 	}
 
 	# Global soft link settings; any node-specific settings
@@ -168,9 +187,9 @@ BEGIN {
 	my %sync_files_global = query_cluster_config_softlink_sync_files($node_cluster,"LosF-GLOBAL-NODE-TYPE");
 
 	while ( my ($key,$value) = each(%sync_files_global) ) {
-	    TRACE("   --> $key => $value\n");
+	    TRACE("   --> $chroot$key => $chroot$value\n");
 	    if ( ! exists $sync_files{$key} ) {
-		sync_soft_link_file($key,$value);
+		sync_soft_link_file($chroot.$key,$chroot.$value);
 	    }
 	}
 
@@ -236,8 +255,7 @@ BEGIN {
 
 	chomp($host_name=`hostname -s`);
 
-#	(my $cluster, my $type) = determine_node_membership();
-	my %perm_files          = query_cluster_config_sync_permissions($cluster,$type);
+	my %perm_files  = query_cluster_config_sync_permissions($cluster,$type);
 	
 	if ( ! -s "$file" && ! -l "$file" ) {
 	    DEBUG("   --> Warning: production file $file not found - adding new sync file\n");
@@ -599,14 +617,25 @@ BEGIN {
 
 	$losf_permissions_total = scalar keys %perm_files;
 
-	while ( my ($key,$value) = each(%perm_files) ) {
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
+	while ( my ($key_path ,$value) = each(%perm_files) ) {
+
+	    my $key = $chroot . $key_path;
 
 	    DEBUG("   --> $key => $value\n");
 
 	    my $parent_dir = dirname($key);
 
 	    # Check on existence of user-desired directory.
-	    # Directoreis are designated via the presence of a
+	    # Directories are designated via the presence of a
 	    # trailing /
 
 	    if( $key =~ /(.*)\/$/) {
@@ -732,7 +761,9 @@ BEGIN {
 
 	my $enable_service = 0;
 
-	(my $cluster, my $type) = determine_node_membership();
+	my $cluster    = $main::node_cluster;
+	my $type       = $main::node_type;
+	my $chrootFlag = 0;
 
 	DEBUG("   --> Syncing run-level services for: $service\n");
 
@@ -742,34 +773,38 @@ BEGIN {
 	    $enable_service = 0;
 	}
 
-	# NOOP if init.d script is not present
+	# Support for chroot (e.g. alternate provisioning mechanisms).
 
-	if ( ! -s "/etc/init.d/$service" ) {
+	my $chroot = "/";
+
+	if ($LosF_provision::losf_provisioner eq "Warewulf" && $type ne "master" ) {
+	    $chroot     = query_warewulf_chroot($cluster,$type);
+	    $chrootFlag = 1;
+	    DEBUG("   --> using alternate chroot for type = $type, chroot = $chroot\n");
+	}
+	    
+	# NOOP if init.d script is not present
+	
+	if ( ! -s "$chroot/etc/init.d/$service" ) {
 	    TRACE("   --> NOOP: $service not installed, ignoring sync request\n");
 	    return;
 	}
-
+	
 	$losf_services_total++;
-
+	
 	DEBUG("   --> Desired setting = $enable_service\n");
-
-	# make sure chkconfig is setup - have to read stderr for this one....
-
- 	use IPC::Open3;
- 	use File::Spec;
- 	use Symbol qw(gensym);
- 	open(NULL, ">", File::Spec->devnull);
- 	my $pid = open3(gensym, ">&NULL", \*PH, "/sbin/chkconfig --list $service");
- 	while( <PH> ) {
-	    if ( $_ =~ m/service $service supports chkconfig, but is not referenced/ ) {
-		chomp(my $setting=`chkconfig --add $service`);
-	    }
+	
+	my $setting = `chroot $chroot /sbin/chkconfig --list $service 2>&1`;
+	
+	# make sure chkconfig is setup - have to check stderr for this one....
+	
+	if ( $setting =~ m/service $service supports chkconfig, but is not referenced/ ) {
+	    `chroot $chroot /sbin/chkconfig --add $service`;
+	    $setting = `chroot $chroot /sbin/chkconfig --list $service 2>&1`;
 	}
-
- 	waitpid($pid, 0);
-
-	chomp(my $setting=`/sbin/chkconfig --list $service`);
-
+	
+	chomp($setting);
+	
 	if ( $setting =~ m/3:on/ ) {
 	    DEBUG("   --> $service is ON\n");
 	    if($enable_service) {
@@ -779,11 +814,13 @@ BEGIN {
 		$losf_services_updated++;
 		print_error_in_red("UPDATING");
 		ERROR( ": disabling $service\n");
-		`/sbin/chkconfig $service off`;
-		`/etc/init.d/$service stop`;
-		chomp(my $setting=`/sbin/chkconfig --list $service`);
-		if ( $setting =~ m/3:on/ ) {
-		    MYERROR("Unable to chkconfig $service off");
+		`chroot $chroot /sbin/chkconfig $service off`;
+		if($chrootFlag == 0) {
+		    `chroot $chroot /etc/init.d/$service stop`;
+		    chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
+		    if ( $setting =~ m/3:on/ ) {
+			MYERROR("Unable to chkconfig $service off");
+		    }
 		}
 	    }
 	} elsif ( $setting =~ m/3:off/ ) {
@@ -792,18 +829,20 @@ BEGIN {
 		$losf_services_updated++;
 		print_error_in_red("UPDATING");
 		ERROR(": enabling $service\n");
-		`/sbin/chkconfig $service on`;
-		`/etc/init.d/$service start`;
-		chomp(my $setting=`/sbin/chkconfig --list $service`);
-		if ( $setting =~ m/3:off/ ) {
-		    MYERROR("Unable to chkconfig $service on");
+		`chroot $chroot /sbin/chkconfig $service on`;
+		if($chrootFlag == 0) {
+		    `chroot $chroot /etc/init.d/$service start`;
+		    chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
+		    if ( $setting =~ m/3:off/ ) {
+			MYERROR("Unable to chkconfig $service on");
+		    }
 		}
 	    } else {
 		print_info_in_green("OK");
 		INFO (": $service is OFF\n");
 	    }
 	}
-
+	
     }
 
     sub parse_and_uninstall_os_packages {

@@ -58,6 +58,7 @@ BEGIN {
 
 	DEBUG("   --> Looking for DNS domainname match...($domain)\n");
 
+
 	foreach(@Clusters) {
 
 	    my $loc_cluster = $_;
@@ -86,7 +87,11 @@ BEGIN {
 
 			    # Look for a matching hostname (exact match first)
 
-			    my $loc_name = $global_cfg->val($loc_cluster,$_);
+			    my @loc_name = $global_cfg->val($loc_cluster,$_);
+			    my $num_found = @loc_name;
+			    if($num_found > 1 ) {
+				MYERROR("Duplicate node type definition detected for $_");
+			    }
 			    DEBUG("      --> Read $_ = $loc_name\n");
 			    if("$host" eq "$loc_name") {
 				DEBUG("      --> Found exact match\n");
@@ -614,6 +619,7 @@ BEGIN {
 		          
 	my $logr          = get_logger();
 	my @sync_partials = ();
+	my @sync_deletes  = ();
 
 	DEBUG("   --> Looking for defined files to remove...($cluster->$host)\n");
 
@@ -1196,9 +1202,29 @@ BEGIN {
 	    MYERROR("No [Warewulf] section defined - please update config\n");
 	} elsif ( defined ($myval = $local_cfg->val("Warewulf",$host_type)) ) {
 	    DEBUG("   --> Read provisoning chroot image = $myval\n");
+	    $myval = $1 if($myval =~ /(.*)\/$/);
 	    return($myval);
 	} else {
 	    MYERROR("Warewulf chroot directory not defined for node type $host_type - please update config.\n");
+	}
+    }
+
+    sub query_warewulf_node_types {
+	begin_routine();
+
+	if ( $osf_init_local_config == 0 ) {
+	    init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
+	}
+	    
+	my $cluster        = shift;
+	my $host_type      = shift;
+	my $logr           = get_logger();
+	
+	if ( ! $local_cfg->SectionExists("Warewulf") ) {
+	    MYERROR("No [Warewulf] section defined - please update config\n");
+	} else {
+	    my @ww_node_types = $local_cfg->Parameters("Warewulf"); 
+	    return(@ww_node_types);
 	}
     }
     
