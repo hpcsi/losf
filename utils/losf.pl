@@ -773,7 +773,11 @@ sub update_distro_packages {
     if($pkg_manager eq "yum") {
 	@newfiles = <$tmpdir/*>;
     } elsif($pkg_manager eq "zypper") {
-	@newfiles = <$tmpdir/*/*/*/*.rpm>;
+	find ( sub {
+	    return unless -f;        # Must be a file
+	    return unless /\.rpm$/;  # Must end with .rpm suffix
+	    push @newfiles, $File::Find::name;
+	       }, $tmpdir );
     }
 
     my $extra_deps = @newfiles - 1;
@@ -986,7 +990,11 @@ sub add_distro_package {
     if($pkg_manager eq "yum") {
 	@newfiles = <$tmpdir/*>;
     } elsif($pkg_manager eq "zypper") {
-	@newfiles = <$tmpdir/*/*/*/*.rpm>;
+	find ( sub {
+	    return unless -f;        # Must be a file
+	    return unless /\.rpm$/;  # Must end with .rpm suffix
+	    push @newfiles, $File::Find::name;
+	       }, $tmpdir );
     }
 	
     my $extra_deps = @newfiles - 1;
