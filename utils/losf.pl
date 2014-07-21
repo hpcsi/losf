@@ -304,7 +304,18 @@ sub add_node  {
 	    }
 	}
     } elsif ($losf_provisioner eq "Warewulf") {
-	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0]";
+
+	$gateway = query_cluster_config_network_gateway ($node_cluster,$node_type);
+	$chroot  = query_warewulf_chroot                ($node_cluster,$node_type);
+
+	my $vnfs = basename($chroot);
+	my $gw_option = "";
+
+	if( $gateway ne "") {
+	    $gw_option = "-G $gateway"
+	}
+
+	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0] $gw_option";
 	print "cmd = $cmd\n";
 
 	my $returnCode = system($cmd);
@@ -313,6 +324,18 @@ sub add_node  {
 	    print "\n$cmd\n\n";	
 	    MYERROR("Warewulf insertion failed ($returnCode)\n");
 	}
+	
+	my $uname = `uname -r`;
+	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$uname";
+	print "cmd = $cmd\n";
+
+	my $returnCode = system($cmd);
+	
+	if($returnCode != 0) {
+	    print "\n$cmd\n\n";	
+	    MYERROR("Warewulf insertion failed ($returnCode)\n");
+	}
+
     }	else {
 	MYERROR("Unknown provisioning system");
     }
