@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #echo
-#echo "cmd: ipmitool -I lan -H $1 -U root chassis bootdev pxe"
+#echo "cmd: ipmitool -I lanplus -H $1 -U root chassis bootdev pxe"
 #echo
 
 if [ ! $IPMI_PASSWORD ]
@@ -10,13 +10,13 @@ stty -echo
 read -p "Password: " passw; echo
 stty echo
 echo
-/usr/bin/ipmitool -I lan -H $1 -U root -P $passw chassis bootdev disk
+/usr/bin/ipmitool -I lanplus -H $1 -U root -P $passw chassis bootdev disk
 echo
 fi
 
 if [ $IPMI_PASSWORD ]
 then
-  /usr/bin/ipmitool -E -I lan -H $1 -U root chassis bootdev disk
+  /usr/bin/ipmitool -E -I lanplus -H $1 -U root chassis bootdev disk
 fi
 
 exit 0
