@@ -1002,6 +1002,33 @@ BEGIN {
 	return($value);
     }
 
+    sub query_warewulf_bootstrap {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+	my $section   = "Warewulf/bootstraps";
+
+	DEBUG("   --> Looking for defined network gateway...($cluster->$host_type)\n");
+	    
+	if ( ! $local_cfg->SectionExists("$section") ) {
+	    MYERROR("No Input section found for cluster $cluster [$section]\n");
+	} 
+	
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read bootstrap = $myval\n");
+	    $value = $myval;
+	}
+	
+	end_routine();
+	return($value);
+    }
+
     sub query_cluster_config_name_servers_search {
 
 	begin_routine();

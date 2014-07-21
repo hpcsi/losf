@@ -137,7 +137,7 @@ sub usage {
 sub add_node  {
     my $host = shift;
     
-    print "\n** Adding new node $host\n";
+    INFO("\n** Adding new node $host for $losf_provisioner provisioning...\n");
 
     chomp($domain_name=`dnsdomainname`);
     ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
@@ -295,7 +295,6 @@ sub add_node  {
 	    $cmd="cobbler system edit --name=$host --interface=$interface[$count] --static=true "
 		."--mac=$mac[$count] --subnet=$netmask[$count] --ip-addres=$ip[$count] ";
 	    
-	    #print "\n$cmd\n\n";
 	    my $returnCode = system($cmd);
 	    
 	    if($returnCode != 0) {
@@ -305,18 +304,19 @@ sub add_node  {
 	}
     } elsif ($losf_provisioner eq "Warewulf") {
 
-	$gateway = query_cluster_config_network_gateway ($node_cluster,$node_type);
-	$chroot  = query_warewulf_chroot                ($node_cluster,$node_type);
+	$gateway   = query_cluster_config_network_gateway ($node_cluster,$node_type);
+	$chroot    = query_warewulf_chroot                ($node_cluster,$node_type);
+	$bootstrap = query_warewulf_bootstrap             ($node_cluster,$node_type);
 
 	my $vnfs = basename($chroot);
 	my $gw_option = "";
 
 	if( $gateway ne "") {
-	    $gw_option = "-G $gateway"
+	    $gw_option = "-G $gateway";
+	    INFO("   --> Gateway             = $gateway\n");
 	}
 
 	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0] $gw_option";
-	print "cmd = $cmd\n";
 
 	my $returnCode = system($cmd);
 	
@@ -324,10 +324,16 @@ sub add_node  {
 	    print "\n$cmd\n\n";	
 	    MYERROR("Warewulf insertion failed ($returnCode)\n");
 	}
-	
-	my $uname = `uname -r`;
-	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$uname";
-	print "cmd = $cmd\n";
+
+	# convention is to honor requested bootstrap if given; otherwise, we use `uname -r`
+
+	if( $bootstrap eq "") {
+	    $bootstrap = `uname -r`;
+	}
+
+	INFO("   --> vNFS image          = $vnfs\n");
+	INFO("   --> Bootstrap           = $bootstrap\n");
+	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$bootstrap";
 
 	$returnCode = system($cmd);
 	
