@@ -1,6 +1,6 @@
 Summary: A Linux operating system framework for managing HPC clusters
 Name: losf
-Version: 0.47.2
+Version: 0.47.3
 Release: 1
 License: GPL-2
 Group: System Environment/Base

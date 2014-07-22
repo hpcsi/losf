@@ -1,3 +1,7 @@
+Version 0.47.3 (22 July 2014)
+
+  * fix for user-supplied update.<cluster> file not being executed during udpate
+
 Version 0.47.2 (15 July 2014)
 
   * fix for 'sync_config_files' throwing error when no file argument is given

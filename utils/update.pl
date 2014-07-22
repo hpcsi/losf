@@ -189,7 +189,7 @@ foreach our $node_type (@update_types) {
 
 # (Optionally) run custom site-specific utility for the cluster
 
-my $custom_file = "$losf_top_dir/update.$node_cluster";
+my $custom_file = "$losf_config_dir/update.$node_cluster";
 
 if ( -x $custom_file ) {
     INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
