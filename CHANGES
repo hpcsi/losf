@@ -1,6 +1,7 @@
 Version 0.47.3 (22 July 2014)
 
   * fix for user-supplied update.<cluster> file not being executed during udpate
+  * updated ipmi convenience utils (ion,ioff, etc) to use lanplus interface
 
 Version 0.47.2 (15 July 2014)
 
