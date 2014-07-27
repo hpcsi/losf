@@ -472,7 +472,7 @@ sub check_chroot_option {
 	} elsif($pkg_manager eq "zypper") {
 	    return("--root=$chroot");
 	} else {
-	    MYERROR("Unknown package manage at __LINE__r\n");
+	    MYERROR("Unknown package manager at ".__FILE__ . __LINE__ ."\n");
 	}	
     }
 }
@@ -505,7 +505,7 @@ sub download_os_package {
 	$cmd="zypper -n $chroot_option --pkg-cache-dir $tmpdir $mode --download-only $package_name";
 	DEBUG("   --> Running zypper command \"$cmd\"\n");
     } else {
-	MYERROR("Unknown package manager at __LINE__r\n");
+	MYERROR("Unknown package manager at ".__FILE__ . __LINE__ ."\n");
     }
 
    `$cmd`;
@@ -523,7 +523,7 @@ sub download_os_package {
 	    push @rpms_downloaded, $File::Find::name;
 	       }, $tmpdir );
     } else {
-	MYERROR("Unknown package manager at __LINE__r\n");
+	MYERROR("Unknown package manager at ".__FILE__ . __LINE__ ."\n");
     }
 
     return(@rpms_downloaded);
@@ -551,7 +551,7 @@ sub download_os_group {
 	$cmd="zypper -n $chroot_option --pkg-cache-dir $tmpdir install --download-only -t pattern $group_name";
 	DEBUG("   --> Running zypper command \"$cmd\"\n");
     } else {
-	MYERROR("Unknown package manager at __LINE__r\n");
+	MYERROR("Unknown package manager at ".__FILE__ . __LINE__ ."\n");
     }
 
    `$cmd`;
@@ -569,7 +569,7 @@ sub download_os_group {
 	    push @rpms_downloaded, $File::Find::name;
 	       }, $tmpdir );
     } else {
-	MYERROR("Unknown package manager at __LINE__r\n");
+	MYERROR("Unknown package manager at ".__FILE__ . __LINE__ ."\n");
     }
 
     return(@rpms_downloaded);
