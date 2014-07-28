@@ -766,7 +766,7 @@ sub update_distro_packages {
     my $pkg_manager = check_for_package_manager("updatepkg");
 
     my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
-    INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+    INFO("   --> Temporary directory for downloads = $tmpdir\n");
 
     my $chroot_option = check_chroot_option($chroot,$pkg_manager);
     my @newfiles      = download_os_package($chroot_option,$pkg_manager,$package,$tmpdir,"upgrade");
@@ -970,7 +970,7 @@ sub add_distro_package {
     # we punt.
 
     my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
-    INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+    INFO("   --> Temporary directory for downloads = $tmpdir\n");
 
     my $chroot_option = check_chroot_option($chroot,$pkg_manager);
     
@@ -1149,7 +1149,7 @@ sub add_distro_group {
     # we punt.
 
     my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || MYERROR("Unable to create temporary directory");
-    INFO("   --> Temporary directory for yum downloads = $tmpdir\n");
+    INFO("   --> Temporary directory for downloads = $tmpdir\n");
 
     my $chroot_option = check_chroot_option($chroot,$pkg_manager);
     my @newfiles      = download_os_group($chroot_option,$pkg_manager,$package,$tmpdir);
