@@ -1108,8 +1108,8 @@ sub add_distro_package {
 	}
 
     } else {
-	INFO("   --> The package \"$package\" is not available locally via yum.\n\n");
-	INFO("   --> Please verify that yum is pointed to a valid repository (or mirror)\n");
+	INFO("   --> The package \"$package\" is not available locally via $pkg_manager.\n\n");
+	INFO("   --> Please verify that your package manager is pointed to a valid repository (or mirror)\n");
 	INFO("   --> and that the package name you provided is a legitimate distro package.\n");
 	MYERROR(" Unable to add $package to local LosF configuration\n");
     }
@@ -1284,8 +1284,8 @@ sub add_distro_group {
 #	my @os_rpms = query_cluster_config_os_packages($node_cluster,$host_name,$node_type);
 
     } else {
-	INFO("   --> The package \"$package\" is not available locally via yum.\n\n");
-	INFO("   --> Please verify that yum is pointed to a valid repository (or mirror)\n");
+	INFO("   --> The package \"$package\" is not available locally via $pkg_manager.\n\n");
+	INFO("   --> Please verify that your package manager is pointed to a valid repository (or mirror)\n");
 	INFO("   --> and that the package name you provided is a legitimate distro package.\n");
 	MYERROR(" Unable to add $package to local LosF configuration\n");
     }
