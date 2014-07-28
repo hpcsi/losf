@@ -392,10 +392,6 @@ BEGIN {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
 	}
 
-#	my @defined_files = $local_cfg->Parameters("OS Packages");
-#	my $num_files = @defined_files;
-#	INFO("   --> \# of files defined = $num_files\n");
-
 	if($local_os_cfg->exists("OS Packages",$node_type)) {
 	    DEBUG("   --> OS packages defined for node type = $node_type\n");
 	    @rpms_defined = $local_os_cfg->val("OS Packages",$node_type);
