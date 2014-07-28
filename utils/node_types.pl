@@ -45,8 +45,6 @@ BEGIN {
 
     sub determine_node_membership {
 
-
-
 	# Global Variables
 
 	my @clusters;			# cluster names/definitions
