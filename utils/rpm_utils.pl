@@ -104,7 +104,6 @@ sub verify_rpms {
 	# Installing from path provided by user on command-line?
 
 	my $filename = "";
-###	my $arch     = rpm_arch_from_filename($rpm);
 
 	if ( "$MODE" eq "PXE" ) {
 	    $filename = "$SRC_DIR/$desired_arch/$full_rpm_name.rpm";
@@ -194,16 +193,16 @@ sub verify_rpms {
 
     # Add support for chroot install 
 
-    if($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+    if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
 	my $chroot = query_warewulf_chroot($node_cluster,$node_type);
 	if ( ! -d $chroot) {
-	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+	    MYERROR("Specified chroot directory is not available ($chroot) at __LINE__\n");
 	} else {
 	    INFO(" --> Using Warewulf chroot dir = $chroot\n");
 	    $rpm_chroot = "--root $chroot";
 	}
     }
-
+    
     my $cmd = "rpm -Uvh $rpm_chroot "."@rpms_to_install";
     
     system($cmd);
@@ -714,21 +713,21 @@ sub query_all_installed_rpms {
 
     my @rpms_installed          = ();
     %losf_global_rpms_installed = ();
-
+    
     DEBUG("   --> Caching all currently installed RPMs...\n");
-
-     my $rpm_root = "";
-
+    
+    my $rpm_root = "";
+    
     # Add support for chroot query
-     if($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+    if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
  	my $chroot = query_warewulf_chroot($node_cluster,$node_type);
  	if ( ! -d $chroot) {
- 	    MYERROR("Specified chroot directory is not available ($chroot)\n");
+ 	    MYERROR("Specified chroot directory is not available ($chroot) - query_all_installed_rpms()\n");
  	} else {
 	    $rpm_chroot = "--root $chroot";
 	}
-     }
-
+    }
+    
     @rpms_installed = split('_LOSF_DELIM',`rpm -qa $rpm_chroot --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}_LOSF_DELIM'`);
 
     # we now have all the rpms and their associated version,

@@ -124,7 +124,8 @@ if (@ARGV >= 1) {
 # using Warewulf. In that case, each node type is checked if a chroot
 # environment is available.
 
-my @update_types=($node_type);
+my  @update_types   =($node_type);
+our $exec_node_type = $node_type;
 
 if ($losf_provisioner eq "Warewulf" && $node_type eq "master" ) {
     my @ww_node_types = query_warewulf_node_types($node_cluster,$node_type);

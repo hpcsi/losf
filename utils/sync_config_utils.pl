@@ -69,10 +69,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 	
-###	if ( $osf_sync_const_file == 0 ) {
-###	    $osf_sync_const_file = 1;
-###	}
-
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 
@@ -102,7 +98,7 @@ BEGIN {
 
 	my $chroot = "";
 
-	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
 	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
 	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
 	}
@@ -152,12 +148,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 	
-###	if ( $osf_sync_soft_links == 0 ) {
-###	    $osf_sync_soft_links = 1;
-###	} else {
-###	    return;
-###	}
-###
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 
@@ -169,7 +159,7 @@ BEGIN {
 
 	my $chroot = "";
 
-	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
 	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
 	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
 	}
@@ -601,12 +591,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-###	if ( $osf_sync_permissions == 0 ) {
-###	    $osf_sync_permissions = 1;
-###	} else {
-###	    return;
-###	}
-###
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 
@@ -621,7 +605,7 @@ BEGIN {
 
 	my $chroot = "";
 
-	if ($LosF_provision::losf_provisioner eq "Warewulf" && $node_type ne "master" ) {
+	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
 	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
 	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
 	}
@@ -777,7 +761,7 @@ BEGIN {
 
 	my $chroot = "/";
 
-	if ($LosF_provision::losf_provisioner eq "Warewulf" && $type ne "master" ) {
+	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
 	    $chroot     = query_warewulf_chroot($cluster,$type);
 	    $chrootFlag = 1;
 	    DEBUG("   --> using alternate chroot for type = $type, chroot = $chroot\n");
@@ -850,12 +834,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-###	if ( $osf_sync_os_packages_delete == 0 ) {
-###	    $osf_sync_os_packages_delete = 1;
-###	} else {
-###	    return;
-###	}
-###
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 
@@ -877,12 +855,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 	
-#	if ( $osf_sync_os_packages == 0 ) {
-#	    $osf_sync_os_packages = 1;
-#	} else {
-#	    return;
-#	}
-#
 	INFO("** Syncing OS packages ($main::node_cluster:$main::node_type)\n");
 
 	init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$main::node_cluster/packages.config");

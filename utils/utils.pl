@@ -575,5 +575,26 @@ sub download_os_group {
     return(@rpms_downloaded);
 }
 
+# -------------------------------------------------------------
+# requires_chroot_environment() - tests if the running host and
+# and $node_type requires running in an chroot environment
+# -------------------------------------------------------------
+
+sub requires_chroot_environment {
+
+    if($LosF_provision::losf_provisioner eq "Warewulf") {
+	if($node_type eq "master") {
+	    return 0;		# no chroot for master host
+	} elsif($exec_node_type eq "master") {
+	    return 1;		# chroot if execution host is master
+	} else {
+	    return 0;		# no chroot needed if not executing on master host
+	}
+    } else {
+	return 0;
+    }
+
+}
+
 1;
 
