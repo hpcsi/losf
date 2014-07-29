@@ -63,7 +63,7 @@ sub usage {
     print "     sync                                 Sync host provisioning config with Cobbler\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --noprovision                     External host not for provisioning\n";
+    print "        --noprovision                     External host, not intended for provisioning\n";
     print "\n";
 
     print color 'bold blue';
