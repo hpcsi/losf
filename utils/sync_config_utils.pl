@@ -872,12 +872,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-###	if ( $osf_sync_custom_packages_delete == 0 ) {
-###	    $osf_sync_custom_packages_delete = 1;
-###	} else {
-###	    return;
-###	}
-
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 
@@ -911,7 +905,7 @@ BEGIN {
 	    DEBUG("   --> Custom rpm removal requested for node:$node_type = $rpm\n");
 	}
 
-	verify_custom_rpms_removed(\$ALL_type,\@custom_rpms_remove,\%custom_aliases);
+	verify_custom_rpms_removed(\$node_type,\@custom_rpms_remove,\%custom_aliases);
 
 	end_routine();
     }
