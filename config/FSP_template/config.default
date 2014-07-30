@@ -50,14 +50,18 @@
 #---------------------------------------------------------------------
 
 [Services]
+iptables = off
+munge    = on
+ntp      = on
+slurm    = on
+openibd  = on
 
 [Services/master]
 
-iptables = off
-nfs      = on
-munge    = on
-slurm    = on
-rdma     = on
+dhcpd   = on
+xinetd  = on
+mysql   = on
+apache2 = on
 
 #---------------------------------------------------------------------
 # Directory/File Permissions
