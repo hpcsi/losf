@@ -79,6 +79,12 @@ assign_ips_from_file = yes
 # Provisioning Settings 
 #-------------------------------------------
 
+[Provisioning]
+mode=Warewulf
+
+[Warewulf]
+compute = /opt/fsp/admin/images/sles11sp3
+
 [Kickstarts]
 
 [Profiles]
