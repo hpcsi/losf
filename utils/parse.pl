@@ -985,10 +985,6 @@ BEGIN {
 
 	DEBUG("   --> Looking for defined network gateway...($cluster->$host_type)\n");
 	    
-	if ( ! $local_cfg->SectionExists("$section") ) {
-	    MYERROR("No Input section found for cluster $cluster [$section]\n");
-	} 
-	
 	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
 	    DEBUG("   --> Read gateway   = $myval\n");
 	    $value = $myval;
