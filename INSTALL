@@ -303,7 +303,7 @@ should work with CentOS distributions is outlined in the following sections.
        example registering a locally built RPM for the MVAPICH2 open-source project and
        installing it locally via update.
 
-       $ <losf-install>/losf addrpm ./mvapich2-2.0-1.x86_64
+       $ <losf-install>/losf addrpm ./mvapich2-2.0-1.x86_64.rpm
        $ <losf-install>/update -q
 
        More sophisticated options for managing multi-version RPMs, relocatable RPMs, and
