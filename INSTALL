@@ -96,7 +96,7 @@ should work with CentOS distributions is outlined in the following sections.
        $ export DISTRO=CentOS6.5   
        $ mkdir /mnt/centOS6.5-dvd1
        $ mount -o loop CentOS-6.5-x86_64-bin-DVD1.iso /mnt/centOS6.5-dvd1
-       $ cobbler import --path=/mnt/dvd1 --name=${DISTRO} --arch=x86_64
+       $ cobbler import --path=/mnt/centOS6.5-dvd1 --name=${DISTRO} --arch=x86_64
 
        Tip: in order to support the possible provisioning of all available CentOS
        packages, consider importing the 2nd DVD ISO image as well. This requires adding
