@@ -85,8 +85,8 @@ sub print_initconfig_suggestion {
 # Check for privileged credentials
 
 if ($> > 0) {
-    print "[ERROR]: LosF requires elevated credentials for execution.\n";
-    exit 1;
+    print "[WARN]: LosF requires elevated credentials for configuration of runtime services.\n";
+###    exit 1;
 }
 
 # Allow for potential separation of LosF install path and LosF
