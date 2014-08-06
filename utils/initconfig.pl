@@ -136,11 +136,11 @@ if($hostname eq "" ) {
 
 if($domain_name eq "" ) {
     print "\n";
-    print "ERROR: Unable to determine DNS domain name.\n\n";
+    print "Warning: Unable to determine DNS domain name.\n\n";
     print "LosF uses the DNS domain name to differentiate between clusters.\n";
-    print "Please update you local network configuration so that the \n";
+    print "If you want to use a single LosF config to manage multiple clusters,\n";
+    print "please update you local network configuration so that the \n";
     print "\"dnsdomainname\" command returns a non-empty string.\n\n";
-    exit 1;
 }
 
 # Do the deed for non-existent config files
