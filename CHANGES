@@ -1,6 +1,7 @@
 Version 0.48.0 (In Progress)
 
-  * add configure option to allow specification of desired Warewulf bootstrap
+  * added input option to allow specification of desired Warewulf bootstrap
+  * addition of chroot support for "losf updatepkgs" option
   * add support for zypper OS patterns with "losf addgroup" under SLES
   * fix for incomplete OS package additions under SLES using zypper package management
   * added perl-Log-Log4perl dependency in RPM .spec file for SLES

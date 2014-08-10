@@ -1896,7 +1896,13 @@ switch ($command) {
 	    update_distro_packages($argument);
 	}
     };
-    case "updatepkgs"     { update_distro_packages("ALL")     };
+    case "updatepkgs"     { 
+	if($local_node_type) {
+	    update_distro_packages("ALL",$local_node_type,$chroot);
+	} else {
+	    update_distro_packages("ALL");
+	}
+    };
     case "config-upgrade" { 
 	update_os_config();
 	update_custom_config();
