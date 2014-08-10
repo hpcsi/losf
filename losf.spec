@@ -10,8 +10,7 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if 0%{?FSP_BUILD}
-%define FSP_HOME /opt/fsp
-%{!?prefix: %define prefix %{FSP_HOME}/local}
+%{!?prefix: %define prefix %{FSP_LOCAL}}
 %else
 %{!?prefix: %define prefix /opt}
 %endif
