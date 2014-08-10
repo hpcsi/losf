@@ -3,10 +3,10 @@ Version 0.48.0 (10 August 2014)
   * extend update for chroot environments to allow for native execution on a non-master type host
   * added input option to allow specification of desired Warewulf bootstrap
   * addition of chroot support for "losf updatepkgs" option
-  * add support for zypper OS patterns with "losf addgroup" under SLES
+  * added support for zypper OS patterns with "losf addgroup" under SLES
   * fix for incomplete OS package additions under SLES using zypper package management
   * added perl-Log-Log4perl dependency in RPM .spec file for SLES
-  * include optional support to define network gateway for Warewulf installs
+  * inclusion of optional support to define network gateway for Warewulf installs
 
 Version 0.47.3 (22 July 2014)
 
