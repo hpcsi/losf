@@ -98,10 +98,10 @@ should work with CentOS distributions is outlined in the following sections.
        $ mount -o loop CentOS-6.5-x86_64-bin-DVD1.iso /mnt/centOS6.5-dvd1
        $ cobbler import --path=/mnt/centOS6.5-dvd1 --name=${DISTRO} --arch=x86_64
 
-       Tip: in order to support the possible provisioning of all available CentOS
-       packages, consider importing the 2nd DVD ISO image as well. This requires adding
-       packages to the distro profile created from the DVD1 import and updating the
-       repository metadata. An example of this process is below: 
+       Import the 2nd DVD ISO image as well, assuming you intend to install LosF from kickstart
+       because there are some required dependencies of LosF that are only included on the 2nd DVD.
+       This requires adding packages to the distro profile created from the DVD1 import and updating
+       the repository metadata. An example of this process is below: 
 
        $ mkdir /mnt/centOS6.5-dvd2
        $ mount -o loop CentOS-6.5-x86_64-bin-DVD2.iso /mnt/centOS6.5-dvd2
