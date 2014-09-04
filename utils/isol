@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+   echo "Usage: isol HOST" >&2
+   exit 1
+fi
+
+host=$1
+if ! [[ $host =~ ^m ]]; then
+    host=m$host
+fi
+
+ipmitool -I lanplus -U root -P ${IPMI_PASSWORD:-root} -H $host sol activate
