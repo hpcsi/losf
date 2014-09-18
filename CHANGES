@@ -1,6 +1,7 @@
 Version 0.49.0 (In Progress)
 
   * update CLI wrappers to account for execution via soft link
+  * improve command-line parsing within losf utility to warn against unsupported options
 
 Version 0.48.0 (10 August 2014)
 

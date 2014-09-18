@@ -134,6 +134,13 @@ sub usage {
     exit(1);
 }
 
+sub invalid_argument {
+    my $subcommand = shift;
+    my $option     = shift;
+    print "\n[ERROR]: Unsupported option provided to subcommand -> $subcommand ($option)\n";
+    usage();
+}
+
 sub add_node  {
     my $host = shift;
     
@@ -1834,6 +1841,9 @@ init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$
 
 if($losf_provisioner eq "Warewulf") {
     if($local_node_type ne "" ) {
+	if ($command !~ /addpkg|addgroup|updatepkg|updatepkgs/ ) {
+	    invalid_argument($command,"--type"); 
+	}
 	$chroot = query_warewulf_chroot($node_cluster,$local_node_type);
     } elsif ( $node_type ne "master" ) {
 	MYERROR("Please specify desired node type with \"--type\" for Warewulf RPM package management\n");
@@ -1863,6 +1873,19 @@ if ( "$output_mode" eq "INFO"  ||
 if($assume_yes) {
     $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
 }
+
+# Verify that unsupported options are not provided to subcommands
+
+# -- add suboptions
+if ($noprovision      && ($command ne "add")) {invalid_argument($command,"--noprovision"); }
+
+# -- addrpm suboptions
+if ($alias_option     && ($command ne "addrpm")) {invalid_argument($command,"--alias"); }
+if ($all              && ($command ne "addrpm")) {invalid_argument($command,"--all"); }
+if ($upgrade          && ($command ne "addrpm")) {invalid_argument($command,"--upgrade"); }
+if ($install          && ($command ne "addrpm")) {invalid_argument($command,"--install"); }
+if ($assume_yes       && ($command ne "addrpm")) {invalid_argument($command,"--yes"); }
+if (@relocate_options && ($command ne "addrpm")) {invalid_argument($command,"--relocate"); }
 
 switch ($command) {
 
