@@ -24,7 +24,12 @@
 # Shell wrapper for querying local node type -> echo's config to stdout
 #--------------------------------------------------------------------------
 
-export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+binary=$0
+if [ -L $0 ];then
+    binary=`readlink -f $0`
+fi
+
+export TOP_DIR=`echo $( (cd -P $(dirname $binary) && pwd) )`
 
 if [  -z $PERL5LIB ];then
     export PERL5LIB=$TOP_DIR/utils

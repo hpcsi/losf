@@ -24,11 +24,12 @@
 # Shell wrapper for updating local host file 
 #--------------------------------------------------------------------------
 
-if [ -h $0 ];then
-    export TOP_DIR=`dirname $(readlink -f ${0})`
-else
-    export TOP_DIR=`echo $( (cd -P $(dirname $0) && pwd) )`
+binary=$0
+if [ -L $0 ];then
+    binary=`readlink -f $0`
 fi
+
+export TOP_DIR=`echo $( (cd -P $(dirname $binary) && pwd) )`
 
 if [  -z $PERL5LIB ];then
     export PERL5LIB=$TOP_DIR/utils
