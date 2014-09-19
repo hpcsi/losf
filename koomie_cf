@@ -30,8 +30,6 @@
 # disable colors for non-interactive shell
 [[ ! -t 1 ]] && export ANSI_COLORS_DISABLED=1
 
-echo "disabled = $ANSI_COLORS_DISABLED"
-
 export TOP_DIR=`echo $( (cd -P $(dirname $binary) && pwd) )`
 
 $TOP_DIR/utils/koomie_cf.pl "$@"
