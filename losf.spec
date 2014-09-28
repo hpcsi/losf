@@ -15,7 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 %{!?prefix: %define prefix /opt}
 %endif
 
-%define installPath %{prefix}/%{name}-%{version}
+%define installPath %{prefix}/%{name}
 
 provides: perl(LosF_node_types)
 provides: perl(LosF_rpm_topdir)
@@ -58,77 +58,32 @@ cp -a * %{buildroot}/%{installPath}
 
 rm -rf %{buildroot}/%{installPath}/test
 
-# shell login scripts
+# Add soft links to CLI binaries in default path
 
-%{__cat} << EOF > %{buildroot}/etc/profile.d/losf.sh
+mkdir -p ${RPM_BUILD_ROOT}/%{_bindir}
 
-# Setup default path for LosF
+for i in losf update initconfig koomie_cf sync_config_files node_types rpm_topdir ; do
+    ln -sf %{installPath}/$i ${RPM_BUILD_ROOT}/%{_bindir}
+done
 
-LOSF_DIR=%{installPath}
-TOP_DIR=\`dirname \${LOSF_DIR}\`
-
-if [ -h \${TOP_DIR}/losf ];then
-   export PATH=\${TOP_DIR}/losf:\${TOP_DIR}/losf/utils:\${PATH}
-elif [ -d \${LOSF_DIR} ];then
-   export PATH=\${LOSF_DIR}/losf:\${LOSF_DIR}/utils:\${PATH}
-fi
-	
-EOF
-
-# shell login scripts
-
-%{__cat} << EOF > %{buildroot}/etc/profile.d/losf.csh
-# Setup default path for LosF
-
-set LOSF_DIR=%{installPath}
-set TOP_DIR=\`dirname \${LOSF_DIR}\`
-
-if ( -l \${TOP_DIR}/losf ) then
-   set path = (\${TOP_DIR}/losf \${TOP_DIR}/losf/utils \$path)
-else if ( -d \${LOSF_DIR} ) then
-   set path = (\${LOSF_DIR}/losf \${LOSF_DIR}/losf/utils \$path)
-endif
-	
-EOF
+for i in idisk ilog ioff ion ipxe ireboot ireset isensor isoft istat ; do 
+    ln -sf %{installPath}/utils/$i ${RPM_BUILD_ROOT}/%{_bindir}
+done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-
 %post
-
-# Update losf soft link to latest version and inherit config_dir from most
-# recent install. Use -c option to clean up previous config_dir file for clean
-# RPM upgrades.
-
-%{installPath}/misc/config_latest_install -c -q
-
-# Initialize env
-
-if [ -s /etc/profile.d/losf.sh ];then
-   . /etc/profile.d/losf.sh
-fi	
-export PATH
-
 
 %postun
 
-# Following occurs when removing last version of the package. Clean up soft
-# link and config_dir.
+# Following occurs when removing last version of the package. Remove config_dir.
 
 if [ "$1" = 0 ];then
-    top_dir=$(dirname %{installPath})
-    if [ -L $top_dir/losf ];then
-	rm $top_dir/losf
-    fi
-
     if [ -s %{installPath}/config/config_dir ];then
 	rm %{installPath}/config/config_dir
     fi
 fi
-
-
-
 
 %files
 %defattr(-,root,root,-)
@@ -138,7 +93,7 @@ fi
 %endif
 
 %{installPath}
-%config /etc/profile.d/losf.sh
-%config /etc/profile.d/losf.csh
+%{_bindir}/*
+
 
 
