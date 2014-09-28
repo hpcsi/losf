@@ -1,5 +1,9 @@
-Version 0.49.0 (In Progress)
+Version 0.49.0 (28 September 2014)
 
+  * update to RPM .spec file template - removes shell startup scripts
+    in favor of links to binaries
+  * new option added to koomie_cf: use -q to launch underlying ssh commands
+    with quiet option -primarily useful to silence .ssh key warnings
   * disable output coloring if no tty is connected
   * update CLI wrappers to account for execution via soft link
   * improve command-line parsing within losf utility to warn against unsupported options
