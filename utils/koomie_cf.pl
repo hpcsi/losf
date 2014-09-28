@@ -28,7 +28,7 @@
 use POSIX;
 require "getopts.pl";
 
-Getopts("r:i:m:n:t:h:w:c:x:f:v");
+Getopts("r:i:m:n:t:h:w:c:x:f:vq");
 
 $timeout = 5*60;
 $n = @ARGV;
@@ -56,6 +56,7 @@ OPTIONS:
   -t <timeout>            timeout period for command completion in seconds (default = 5 minutes)
   -x <regex>              operate on hosts which match supplied regex pattern
   -w <wait>               wait interval (in seconds) between subsequent command spawns (default = 0)
+  -q                      use quiet option for underlying ssh commands
   -v                      run LosF in verbose mode 
 
 EOF
@@ -198,21 +199,7 @@ if ( $opt_f ne "" ) {
 		
 	    }
 	}
-# depreciating -r login and -r oss in favor of -n login and -n oss
-# 
-###	elsif ( /\boss(\d+?)\b/ && $opt_r eq "oss" ) {
-###	    $rank   = $1;
-###	    $myhost = "oss$rank";
-###	    
-####	print "Checking on oss host $myhost\n";
-###	    $hosts{$myhost} = $rank;
-###	    
-###	} elsif ( /\blogin(\d+?)\b/ && $opt_r eq "login" ) {
-###	    $rank   = $1;
-###	    $myhost = "login$rank";
-###	    $hosts{$myhost} = $rank;
-###	} 
-###	
+
     }
 }
 
@@ -232,7 +219,11 @@ foreach $host (@hosts) {
         open(STDOUT, ">$output");
 	close(STDERR);
         open(STDERR, ">$error");
-	exec  "ssh","-n",$host,$environment,@ARGV;
+	if($opt_q) {
+            exec  "ssh","-n","-q",$host,$environment,@ARGV;
+	} else {
+	    exec  "ssh","-n",$host,$environment,@ARGV;
+	}
 	exit(0);
     }
     if ($opt_w) {  sleep($opt_w);}
