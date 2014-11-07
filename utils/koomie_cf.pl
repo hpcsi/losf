@@ -26,15 +26,10 @@
 # --------------------------------------------------------------------------
 
 use POSIX;
-require "getopts.pl";
+use Getopt::Long;
 
-Getopts("r:i:m:n:t:h:w:c:x:f:vq");
-
-$timeout = 5*60;
-$n = @ARGV;
-
-if ($n == 0) {
-    print <<EOF
+sub usage {
+    print << "EOT";
 
 Usage: koomie_cf [OPTIONS] command
 
@@ -46,7 +41,7 @@ execute the command before the timeout window completes, the requested
 command will be terminated.
 
 OPTIONS:
-  --help                  generate help message and exit
+  -h --help               generate help message and exit
   -r <1,2,..n>|<2-5>      operate on a subset list of racks (e.g. -r 101-105); this option
                           can also accept a special rack types (e.g. -r login)
   -c <rack>-<chassis>     operate on a specific rack/chassis combination (.e.g. -c 101-1)
@@ -59,10 +54,27 @@ OPTIONS:
   -q                      use quiet option for underlying ssh commands
   -v                      run LosF in verbose mode 
 
-EOF
-;
-    exit(0);
-}
+EOT
+
+exit(1);
+} # end usage()				
+
+GetOptions("h"    => \$help,
+	   "help" => \$help,
+	   "r=i"  => \$opt_r,
+	   "m=i"  => \$opt_m,
+	   "n=s"  => \$opt_n,
+	   "t=i"  => \$opt_t,
+	   "x=s"  => \$opt_x,
+	   "f=s"  => \$opt_f,
+	   "w=i"  => \$opt_w,
+	   "q"    => \$opt_q,
+	   "v"    => \$opt_v) || usage();
+
+$timeout = 5*60;
+$n = @ARGV;
+
+if ($n == 0 || $help ) { usage(); }
 
 if ($opt_t) {
      $timeout = $opt_t;
@@ -206,6 +218,9 @@ if ( $opt_f ne "" ) {
 @hosts = sort {$hosts{$a} <=> $hosts{$b}} keys%hosts;
 
 $n = 0;
+my $host_count=1;
+my $numHosts = @hosts;
+
 foreach $host (@hosts) {
     $error = "/tmp/zz" . $$ . $host . "_e";
     $output = "/tmp/zz" . $$ . $host . "_o";
@@ -226,17 +241,25 @@ foreach $host (@hosts) {
 	}
 	exit(0);
     }
-    if ($opt_w) {  sleep($opt_w);}
+
     $n++;
     $pid{$pid} = time;
     $pidh{$pid} = $host;
     $pido{$pid} = $output;
     $pide{$pid} = $error;
     wait_for_it(0);
+
+    # allow for sleep between each round of ssh launches
+
+    if ($opt_w && ($host_count % $max_ssh == 0) && ($host_count < $numHosts) ) {  
+	print "issuing sleep\n";
+	sleep($opt_w);
+    }
+
+    $host_count++;
 }
 
 wait_for_it(1);
-
 
 sub wait_for_it {
     local($flag) = @_[0];
