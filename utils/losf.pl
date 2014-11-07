@@ -25,7 +25,6 @@
 # utility.  Presently intended for use with cobbler.
 #--------------------------------------------------------------------------
 use warnings;
-use Switch;
 use LosF_paths;
 
 use lib "$losf_utils_dir";
@@ -1887,186 +1886,175 @@ if ($install          && ($command ne "addrpm")) {invalid_argument($command,"--i
 if ($assume_yes       && ($command ne "addrpm")) {invalid_argument($command,"--yes"); }
 if (@relocate_options && ($command ne "addrpm")) {invalid_argument($command,"--relocate"); }
 
-switch ($command) {
+# Do the deed
 
-    # Do the deed
-
-    case "add"            { add_node     ($argument) };
-    case "addalias"       { add_alias    ($argument) };
-    case "del"            { del_node     ($argument) };
-    case "delete"         { del_node     ($argument) };
-    case "reinsert"       { reinsert_node($argument) };
-    case "sync"           { sync         ()          };
-    case "version"        { print_header ()          };
-    case "addpkg"         { 
-	if($local_node_type) {
-	    add_distro_package($argument,$local_node_type,$chroot)
-	} else {
-	    add_distro_package($argument);
-        }
+   if ($command eq "add")            { add_node     ($argument) }
+elsif ($command eq "addalias")       { add_alias    ($argument) }
+elsif ($command eq "del")            { del_node     ($argument) } 
+elsif ($command eq "delete")         { del_node     ($argument) } 
+elsif ($command eq "reinsert")       { reinsert_node($argument) }
+elsif ($command eq "sync")           { sync         ()          }
+elsif ($command eq "version")        { print_header ()          }
+elsif ($command eq "addpkg") {
+    if($local_node_type) {
+	add_distro_package($argument,$local_node_type,$chroot);
+    } else {
+	add_distro_package($argument);
     }
-    case "addgroup"       { 
-	if($local_node_type) {
-	    add_distro_group($argument,$local_node_type,$chroot);
-	} else {
-	    add_distro_group($argument)
-	}
-    };
-    case "updatepkg"      { 
-	if($local_node_type) {
-	    update_distro_packages($argument,$local_node_type,$chroot);
-	} else {
-	    update_distro_packages($argument);
-	}
-    };
-    case "updatepkgs"     { 
-	if($local_node_type) {
-	    update_distro_packages("ALL",$local_node_type,$chroot);
-	} else {
-	    update_distro_packages("ALL");
-	}
-    };
-    case "config-upgrade" { 
-	update_os_config();
-	update_custom_config();
-    };
-
-    case "showalias"{ 
-	if( $argument ne '') {
-	    show_defined_alias_members($argument);
-	} else {
-	    show_defined_aliases();
-	}
-    };
-
-    case "addrpm"   { 
-
-	# parse any additional options used with addrpm
-
-	my $options  = "";
-	my $nodetype = "local";
-	my $alias    = "";
-
-	if(@relocate_options) {
-	    $options = "RELOCATE:$relocate_options[0]:$relocate_options[1]";
-	}
-
-	if($alias_option) {
-	    $alias = $alias_option;
-	}
-
-	if($all) {
-	    $nodetype = "ALL";
-	}
-
-	if($upgrade) {
-	    $ENV{'LOSF_REGISTER_UPGRADE'} = '1';
-	}
-
-	if($install) {
-	    if($upgrade) {
-		MYERROR("losf: The --upgrade and --install options are mutually exclusive. Please choose only one.");
-	    }
-	    $ENV{'LOSF_REGISTER_MULTI'} = '1';
-	    $options = $options . "INSTALL MULTI";
-	}
-
-	add_custom_rpm  ($argument,$nodetype,$options,$alias);
+} 
+elsif ($command eq "addgroup") { 
+    if($local_node_type) {
+	add_distro_group($argument,$local_node_type,$chroot);
+    } else {
+	add_distro_group($argument)
     }
-
-    case "hlog" {
-
-	logger_get_lock();
-	log_read_state_1_0();
-	logger_release_lock();
-
-	if( $argument ne '') {
-	    log_dump_state_1_0($argument);
-	} else {
-	    log_dump_state_1_0();
-	}
+} 
+elsif($command eq "updatepkg") { 
+    if($local_node_type) {
+	update_distro_packages($argument,$local_node_type,$chroot);
+    } else {
+	update_distro_packages($argument);
     }
-
-    case "hverify" {
-	if( $argument ne '') {
-	    sanitize_entries_1_0($argument);
-	} else {
-	    sanitize_entries_1_0();
-	}
+} 
+elsif ($command eq "updatepkgs") { 
+    if($local_node_type) {
+	update_distro_packages("ALL",$local_node_type,$chroot);
+    } else {
+	update_distro_packages("ALL");
     }
-
-    case "hingest" {
-	log_ingest_raw_data()
+} 
+elsif($command eq "config-upgrade") { 
+    update_os_config();
+    update_custom_config();
+} 
+elsif($command eq "showalias") { 
+    if( $argument ne '') {
+	show_defined_alias_members($argument);
+    } else {
+	show_defined_aliases();
     }
+} 
+elsif ($command eq "addrpm" )  { 
 
-    case "hcheck" {
-	log_check_for_closed_hosts();
-    }
+    # parse any additional options used with addrpm
 
-    case "hclose"   { 
-	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hclose command");}
-
-	my $state=1;
-	if($noerror == 1) { $state=2};
-
-	if($comment eq '') {
-	    ERROR("TODO: add request for required comment here\n");
-	    exit 1;
-	}
-
-	# TODO: abstract for alternative resource managers
-
-	if(! $logonly ) {
-	    my $rc = system("/usr/bin/scontrol update nodename=$argument state=DRAIN reason=\"$comment\"");
-	    if( $rc != 0) {
-		MYERROR("Unable to close host $argument in SLURM....exiting\n");
-	    }
-	}
-
-	if($datestring ne '') {
-	    log_add_node_event($argument,"close","$comment",$state,$datestring);
-	} else {
-	    log_add_node_event($argument,"close","$comment",$state);
-	}
-
-    }				# end hclose
-
-    case "hopen" {
-	if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hopen command");}
-
-	if($nocertify) {print "TODO: automate recertification here...\n";}
-
-	if($comment eq '') {
-	    ERROR("TODO: add request for required comment here\n");
-	    exit 1;
-	}
-
-	# TODO: abstract for alternative resource managers
-
-	my $rc = system("/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"");
-	    
-	if( $rc != 0) {
-	    MYERROR("Unable to open host $argument in SLURM....exiting\n");
-	}
-
-	my @hosts=`scontrol show hostname $argument`;
-	chomp(@hosts);
-
-	foreach my $myhost (@hosts) {
-	    if($datestring ne '') {
-		log_add_node_event($myhost,"open",$comment,0,$datestring);
-	    } else {
-		log_add_node_event($myhost,"open",$comment,0);
-	    }
-	}
-
-	# notify batch system
-	
-	if($logonly) {exit 0;}
+    my $options  = "";
+    my $nodetype = "local";
+    my $alias    = "";
+    
+    if(@relocate_options) {
+	$options = "RELOCATE:$relocate_options[0]:$relocate_options[1]";
     }
     
-    print "\n[Error]: Unknown command received-> $command\n";
+    if($alias_option) {
+	$alias = $alias_option;
+    }
+    
+    if($all) {
+	$nodetype = "ALL";
+    }
+    
+    if($upgrade) {
+	$ENV{'LOSF_REGISTER_UPGRADE'} = '1';
+    }
+    
+    if($install) {
+	if($upgrade) {
+	    MYERROR("losf: The --upgrade and --install options are mutually exclusive. Please choose only one.");
+	}
+	$ENV{'LOSF_REGISTER_MULTI'} = '1';
+	$options = $options . "INSTALL MULTI";
+    }
+    
+    add_custom_rpm  ($argument,$nodetype,$options,$alias);
 
+}  # end addrpm 
+elsif ($command eq "hlog") {
+    
+    logger_get_lock();
+    log_read_state_1_0();
+    logger_release_lock();
+    
+    if( $argument ne '') {
+	log_dump_state_1_0($argument);
+    } else {
+	log_dump_state_1_0();
+    }
+} # end hlog
+elsif ($command eq "hverify") {
+    if( $argument ne '') {
+	sanitize_entries_1_0($argument);
+    } else {
+	sanitize_entries_1_0();
+    }
+} # end hverify
+elsif ($command eq "hingest") { log_ingest_raw_data() }
+elsif ($command eq "hcheck" )  { log_check_for_closed_hosts() }
+elsif ($command eq "hclose" ) 
+{ 
+    if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hclose command");}
+    
+    my $state=1;
+    if($noerror == 1) { $state=2};
+    
+    if($comment eq '') {
+	ERROR("TODO: add request for required comment here\n");
+	exit 1;
+    }
+    
+    # TODO: abstract for alternative resource managers
+    
+    if(! $logonly ) {
+	my $rc = system("/usr/bin/scontrol update nodename=$argument state=DRAIN reason=\"$comment\"");
+	if( $rc != 0) {
+	    MYERROR("Unable to close host $argument in SLURM....exiting\n");
+	}
+    }
+    
+    if($datestring ne '') {
+	log_add_node_event($argument,"close","$comment",$state,$datestring);
+    } else {
+	log_add_node_event($argument,"close","$comment",$state);
+    }
+    
+} # end hclose
+
+elsif ($command eq "hopen") {
+    if ( $argument eq '') {MYERROR("losf: A hostname must be provided with the the hopen command");}
+    
+    if($nocertify) {print "TODO: automate recertification here...\n";}
+    
+    if($comment eq '') {
+	ERROR("TODO: add request for required comment here\n");
+	exit 1;
+    }
+    
+    # TODO: abstract for alternative resource managers
+    
+    my $rc = system("/usr/bin/scontrol update nodename=$argument state=resume reason=\"$comment\"");
+    
+    if( $rc != 0) {
+	MYERROR("Unable to open host $argument in SLURM....exiting\n");
+    }
+    
+    my @hosts=`scontrol show hostname $argument`;
+    chomp(@hosts);
+
+    foreach my $myhost (@hosts) {
+	if($datestring ne '') {
+	    log_add_node_event($myhost,"open",$comment,0,$datestring);
+	} else {
+	    log_add_node_event($myhost,"open",$comment,0);
+	}
+    }
+    
+    # notify batch system
+    
+    if($logonly) {exit 0;}
+} # end hopen
+
+else {
+    print "\n[Error]: Unknown command received-> $command\n";
     usage();
     exit(1);
 }
