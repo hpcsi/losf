@@ -27,6 +27,7 @@
 
 use POSIX;
 use Getopt::Long;
+Getopt::Long::Configure("pass_through");
 
 sub usage {
     print << "EOT";
@@ -69,7 +70,7 @@ GetOptions("h"    => \$help,
 	   "f=s"  => \$opt_f,
 	   "w=i"  => \$opt_w,
 	   "q"    => \$opt_q,
-	   "v"    => \$opt_v) || usage();
+	   "v"    => \$opt_v);
 
 $timeout = 5*60;
 $n = @ARGV;
