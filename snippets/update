@@ -1,3 +1,5 @@
+LOSF_INSTALL_DIR="/admin"
+
 # Initial s/w update, mount fs and run as usual...
 
 /bin/hostname -f          >> /root/losf.log 2>&1
@@ -11,8 +13,8 @@
 
 # Mount LosF config dir from cobbler master
 
-/bin/mkdir -p /home >> /root/losf.log 2>&1
-/bin/mount -o nfsvers=3,nolock $server:/home /home  >> /root/losf.log 2>&1
+/bin/mkdir -p $LOSF_INSTALL_DIR >> /root/losf.log 2>&1
+/bin/mount -o nfsvers=3,nolock $server:$LOSF_INSTALL_DIR $LOSF_INSTALL_DIR  >> /root/losf.log 2>&1
 
 # Get updated user list prior to performing install
 
@@ -29,7 +31,6 @@
 
 # Update the node with all configured OS packages and local RPMs
 
-/home/admin/losf/update >> /root/losf.log 2>&1
+$LOSF_INSTALL_DIR/losf/update >> /root/losf.log 2>&1
 
 /usr/bin/logger -p local0.notice losf: losf update finished during PXE install
-
