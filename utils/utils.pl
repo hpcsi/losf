@@ -442,15 +442,29 @@ sub check_for_package_manager {
 
     INFO("   --> Underlying package manager = $pkg_manager\n");
 
-    if($pkg_manager eq "yum") {
-	$check_pkg = "yum-plugin-downloadonly";
-    }
-
     my @igot = is_rpm_installed($check_pkg);
 
     if ( @igot  eq 0 ) {
 	MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf $losf_option\" functionality");
     }
+
+    # Check for old/new versions of yum (newer versions have downloadonly built in - older versions require a plugin)
+    if($pkg_manager eq "yum") {
+	my @version = split('\.',$igot[1]);
+	if($version[0] >= 3 && $version[1] >= 4) {
+	    DEBUG("   --> yum version is >= 3.4\n");
+	    $pkg_manager = "yum";
+	} else {
+	    DEBUG("   --> yum version is < 3.4\n");
+	    $check_pkg = "yum-plugin-downloadonly";
+	    my @igot = is_rpm_installed($check_pkg);
+
+	    if ( @igot  eq 0 ) {
+		MYERROR("The $check_pkg rpm must be installed locally in order to use \"losf $losf_option\" functionality");
+	    }
+	}
+    }
+
     return($pkg_manager);
 }
 
