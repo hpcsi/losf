@@ -21,6 +21,7 @@ provides: perl(LosF_node_types)
 provides: perl(LosF_rpm_topdir)
 provides: perl(LosF_rpm_utils)
 provides: perl(LosF_utils)
+provides: perl(LosF_config)
 provides: perl(LosF_history_utils)
 
 %if 0%{?sles_version} || 0%{?suse_version}
