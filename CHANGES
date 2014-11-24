@@ -1,5 +1,6 @@
 Version 0.50.0 (06 November 2014)
-
+  
+  * remove use of Switch.pm from losf util to support newer perl versions
   * update parallel ssh tool (koomie_cf) to support SLES12
 
 Version 0.49.0 (28 September 2014)
