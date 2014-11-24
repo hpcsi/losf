@@ -24,8 +24,10 @@
 # Package management, logging, and node provisioning registration
 # utility.  Presently intended for use with cobbler.
 #--------------------------------------------------------------------------
+
 use warnings;
 use LosF_paths;
+use LosF_config;
 
 use lib "$losf_utils_dir";
 
@@ -50,19 +52,20 @@ sub usage {
     print color 'reset';
     print "  where available COMMANDs are as follows:\n\n";
 
-    print "     version, --version                   Print version number and exit\n\n";
+    print "     -h --help                            generate help message and exit\n";
+    print "     -v, --version                        print version number and exit\n\n";
 
     print color 'bold blue';
     print "  Host Registration:\n";
     print color 'reset';
 
-    print "     add <OPTIONS> [host]                 Register a new host for provisioning\n";
-    print "     del           [host]                 Delete an existing host\n";
-    print "     reinsert      [host]                 Reinsert an existing host\n";
-    print "     sync                                 Sync host provisioning config with Cobbler\n";
+    print "     add <OPTIONS> [host]                 register a new host for provisioning\n";
+    print "     del           [host]                 delete an existing host\n";
+    print "     reinsert      [host]                 reinsert an existing host\n";
+    print "     sync                                 sync host provisioning config with Cobbler\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --noprovision                     External host, not intended for provisioning\n";
+    print "        --noprovision                     flag as external host, not intended for provisioning\n";
     print "\n";
 
     print color 'bold blue';
@@ -73,15 +76,15 @@ sub usage {
     print "     for the local node type on which the command is executed:\n";
     print "\n";
 
-    print "     addpkg     [package]                 Add new OS package (and dependencies)\n";
+    print "     addpkg     [package]                 add new OS package (and dependencies)\n";
 ###    print "     delpkg     [package]                 Remove previously added OS package\n";
-    print "     addgroup   [ group ]                 Add new OS group (and dependencies)\n";
-    print "     updatepkg  [package]                 Update specific OS packages (and dependencies)\n";
-    print "     updatepkgs                           Update all local OS packages (and dependencies)\n";
-    print "     config-upgrade                       Upgrade existing packages.config to latest syntax format\n";
+    print "     addgroup   [ group ]                 add new OS group (and dependencies)\n";
+    print "     updatepkg  [package]                 update specific OS packages (and dependencies)\n";
+    print "     updatepkgs                           update all local OS packages (and dependencies)\n";
+    print "     config-upgrade                       upgrade existing packages.config to latest syntax format\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --type [name]                     Add package to specific node type (for use with chroot provisioning)\n";
+    print "        --type [name]                     add package to specific node type (for use with chroot provisioning)\n";
 
     print "\n";
 
@@ -92,18 +95,18 @@ sub usage {
     print "     These commands update the non-distro (custom) RPM configuration\n";
     print "     for the local node type on which the command is executed:\n";
     print "\n";
-    print "     addrpm <OPTIONS> [rpm]               Add a new custom RPM for current node type\n";
-    print "     addalias  [name]                     Add defined alias to custom RPM list for current node type\n";
-    print "     showalias                            Show all currently defined aliases\n";
-    print "     showalias [name]                     Show all rpms associated with a particular alias name\n";
+    print "     addrpm <OPTIONS> [rpm]               add a new custom RPM for current node type\n";
+    print "     addalias  [name]                     add defined alias to custom RPM list for current node type\n";
+    print "     showalias                            show all currently defined aliases\n";
+    print "     showalias [name]                     show all rpms associated with a particular alias name\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --all                             Add rpm for all node types\n";
-    print "        --upgrade                         Upgrade previous rpm to new version provided\n";
-    print "        --yes                             Assume \"yes\" for interactive additions\n";
-    print "        --alias    [name]                 Add rpm to alias with given name\n";
-    print "        --relocate [oldpath] [newpath]    Change install path for relocatable rpm\n";
-    print "        --install                         Configure to use install mode as opposed to the default\n";
+    print "        --all                             add rpm for all node types\n";
+    print "        --upgrade                         upgrade previous rpm to new version provided\n";
+    print "        --yes                             assume \"yes\" for interactive additions\n";
+    print "        --alias    [name]                 add rpm to alias with given name\n";
+    print "        --relocate [oldpath] [newpath]    change install path for relocatable rpm\n";
+    print "        --install                         configure to use install mode as opposed to the default\n";
     print "                                          upgrade mode for RPM installations. Allows multiple\n";
     print "                                          RPMs of the same name to be installed.\n";
 
@@ -114,20 +117,20 @@ sub usage {
     print "     These commands provide administrative interaction with the\n";
     print "     locally defined batch system:\n";
     print "\n";
-    print "     qclose   [name|all]                  Close specified queue (or all queues)\n";
-    print "     qopen    [name|all]                  Open  specified queue (or all queues)\n";
+    print "     qclose   [name|all]                  close specified queue (or all queues)\n";
+    print "     qopen    [name|all]                  open  specified queue (or all queues)\n";
     print "\n";
-    print "     hlog   <host>                        Display open/close log history\n";
-    print "     hclose <OPTIONS> [host]              Close specified host from scheduling\n";
-    print "     hopen  <OPTIONS> [host]              Open specified host from scheduling\n";
-    print "     hcheck                               Check for newly closed hosts in batch system\n";
+    print "     hlog   <host>                        display open/close log history\n";
+    print "     hclose <OPTIONS> [host]              close specified host from scheduling\n";
+    print "     hopen  <OPTIONS> [host]              open specified host from scheduling\n";
+    print "     hcheck                               check for newly closed hosts in batch system\n";
     print "\n";
     print "     OPTIONS:\n";
-    print "        --comment [comment]               Comment string associated with open/closure\n";
-    print "        --date    [YYYY-MM-DD HH:MM]      Override current default timestamp\n";
-    print "        --nocertify                       Skip host certification when opening\n";
-    print "        --noerror                         Do not flag host as errored when closing\n";
-    print "        --logonly                         Log entry only - does not make batch system changes\n";
+    print "        --comment [comment]               comment string associated with open/closure\n";
+    print "        --date    [YYYY-MM-DD HH:MM]      override current default timestamp\n";
+    print "        --nocertify                       skip host certification when opening\n";
+    print "        --noerror                         do not flag host as errored when closing\n";
+    print "        --logonly                         log entry only - does not make batch system changes\n";
 
     print "\n";
     exit(1);
@@ -1808,10 +1811,10 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 	   "noerror"       => \$noerror) || usage();
 
 
-# Command-line parsing
+# Allow --version and --help to run irrespective of having a valid config available
 
 if ($version) {
-    print_header();
+    print_version();
     exit(0);
 }
 
@@ -1829,6 +1832,10 @@ if (@ARGV >= 1) {
 } else {
     usage();
 }
+
+# Verify we have a valid local config before going further
+
+#LosF_config::validate_config_path();
 
 my $logr = get_logger(); $logr->level($ERROR); 
 verify_sw_dependencies(); 
