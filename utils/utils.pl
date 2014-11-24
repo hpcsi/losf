@@ -596,5 +596,31 @@ sub requires_chroot_environment {
 
 }
 
+# -------------------------------------------------------------
+# print_version() - echo versioning info to stdout
+# -------------------------------------------------------------
+
+sub print_version {
+
+    my $width = 24;
+    my $ver   = "";
+
+    if ( ! -e "$losf_top_dir/VERSION" ) {
+	die("Unable to obtain version...please verify local LosF install");
+    } else {
+	open ($IN,"<$losf_top_dir/VERSION") || die("Unable to open VERSION file");
+	$ver = <$IN>;
+	chomp($ver);
+	close($IN);
+    }
+
+    print "\n";
+    print "-"x $width . "\n";
+    print "LosF: Version $ver\n";
+    print "-"x $width . "\n";
+    print "\n";
+
+}
+
 1;
 
