@@ -1,4 +1,4 @@
-Version 0.50.0 ( November 2014)
+Version 0.50.0 ( 24 November 2014)
 
   * include support for RHEL7 without need for additional yum downloadonly plugin
   * remove use of Switch.pm from losf util to support newer perl versions
