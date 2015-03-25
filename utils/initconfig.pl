@@ -29,25 +29,34 @@ use strict;
 use File::Basename;
 use File::Path;
 use File::Copy;
+use Getopt::Long;
+use Sys::Hostname;
 
 my $newCluster   = "";
 my $losf_top_dir = "";
 my $changedFlag  = 0;
 my $template_dir = "";
+my $help         = 0;
 
-$newCluster = shift || '';
-
-if( $newCluster eq '') {
+sub usage {
     print "\ninitconfig: convenience utility used to create a basic starting\n";
     print "configuration template for a new LosF cluster designation.\n";
     print "\n";
-    print "usage: initconfig <cluster-name> [template-dir]\n";
+    print "usage: initconfig [OPTIONS] <cluster-name> [template-dir]\n";
     print "\n";
-
-    exit 1;
+    print "    -h          Show help message.\n";
+    print "    -v          Print version number and exit.\n";
+    exit(1);
 }
 
+GetOptions("h"       => \$help) || usage();
 
+usage() if ($help);
+
+$newCluster = shift || '';
+
+if( $newCluster eq '') { 
+    usage(); }
 
 my ($filename,$basename) = fileparse($0);
 
@@ -116,31 +125,22 @@ if ( $config_dir_specified == 0) {
     exit 1;
 }
 
-# Verify some basic networking requirements for hostname and dnsdomainname.
+# Establish hostname/domainname
     
 print "\n";
 print "Initializing basic configuration skeleton for new cluster -> $newCluster\n";
 print "Using LosF config dir -> $config_dir\n";
 
-my $hostname    = `hostname -s`; chomp($hostname);
-my $domain_name = `dnsdomainname 2> /dev/null`; chomp($domain_name);
+my @hostTmp     = split(/\./,hostname);
+my $hostname    = shift(@hostTmp);
+my $domain_name = join("\.", @hostTmp);
 
-if($hostname eq "" ) {
+if($hostname eq "" || $domain_name eq "" ) {
     print "\n";
     print "ERROR: Unable to determine local host name.\n\n";
-    print "LosF uses the host name to differentiate between node types.\n";
-    print "Please update you local network configuration so that the \n";
-    print "\"hostname\" command returns a non-empty string.\n\n";
+    print "LosF uses a hostname and fully qualified domainname (FQDN) differentiate \n";
+    print "between node types. Please update you local network configuration to provide a FQDN.\n\n";
     exit 1;
-}
-
-if($domain_name eq "" ) {
-    print "\n";
-    print "Warning: Unable to determine DNS domain name.\n\n";
-    print "LosF uses the DNS domain name to differentiate between clusters.\n";
-    print "If you want to use a single LosF config to manage multiple clusters,\n";
-    print "please update you local network configuration so that the \n";
-    print "\"dnsdomainname\" command returns a non-empty string.\n\n";
 }
 
 # Do the deed for non-existent config files
