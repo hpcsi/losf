@@ -71,6 +71,12 @@ assign_ips_from_file = yes
 # Provisioning Settings 
 #-------------------------------------------
 
+[Provisioning]
+
+[Warewulf]
+
+[Warewulf/bootstraps]
+
 [Kickstarts]
 
 [Profiles]
