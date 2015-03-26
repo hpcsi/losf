@@ -240,10 +240,9 @@ BEGIN {
 
 	my $logr       = get_logger();
 	my $found      = 0;
-	my $host_name;                       
 	my $customized = 0;
 
-	chomp($host_name=`hostname -s`);
+        my ($host_name,$doman_name) = query_local_network_name();
 
 	my %perm_files  = query_cluster_config_sync_permissions($cluster,$type);
 	
