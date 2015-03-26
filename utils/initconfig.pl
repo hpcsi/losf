@@ -30,7 +30,7 @@ use File::Basename;
 use File::Path;
 use File::Copy;
 use Getopt::Long;
-use Sys::Hostname;
+use LosF_utils;
 
 my $newCluster   = "";
 my $losf_top_dir = "";
@@ -48,6 +48,16 @@ sub usage {
     print "    -v          Print version number and exit.\n";
     exit(1);
 }
+
+#-------------------------------------------------
+# Main front-end for initconfig command-line tool
+#-------------------------------------------------
+
+verify_sw_dependencies();
+my $logr = get_logger(); $logr->level($INFO);
+
+# Only one LosF instance at a time
+losf_get_lock();
 
 GetOptions("h"       => \$help) || usage();
 
@@ -118,47 +128,36 @@ if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
 }
 
 if ( $config_dir_specified == 0) {
-    print "\nError: An LosF config directory was not provided. You must provide a desired config\n";
-    print "path for your local cluster. This can be accomplished via one of two methods:\n\n";
-    print "  (1) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n";
-    print "  (2) Set the LOSF_CONFIG_DIR environment variable\n\n";
+    ERROR("\nError: An LosF config directory was not provided. You must provide a desired config\n");
+    ERROR("path for your local cluster. This can be accomplished via one of two methods:\n\n");
+    ERROR("  (1) Add your desired config path to the file -> $losf_top_dir/config/config_dir\n");
+    ERROR("  (2) Set the LOSF_CONFIG_DIR environment variable\n\n");
     exit 1;
 }
 
 # Establish hostname/domainname
     
-print "\n";
-print "Initializing basic configuration skeleton for new cluster -> $newCluster\n";
-print "Using LosF config dir -> $config_dir\n";
+INFO("\n");
+INFO("Initializing basic configuration skeleton for new cluster -> $newCluster\n");
+INFO("Using LosF config dir -> $config_dir\n");
 
-my @hostTmp     = split(/\./,hostname);
-my $hostname    = shift(@hostTmp);
-my $domain_name = join("\.", @hostTmp);
-
-if($hostname eq "" || $domain_name eq "" ) {
-    print "\n";
-    print "ERROR: Unable to determine local host name.\n\n";
-    print "LosF uses a hostname and fully qualified domainname (FQDN) differentiate \n";
-    print "between node types. Please update you local network configuration to provide a FQDN.\n\n";
-    exit 1;
-}
+my ($hostname,$domain_name) = query_local_network_name();
 
 # Do the deed for non-existent config files
 
 if ( ! -d $config_dir ) {
-    print "--> creating path for $config_dir\n";
-    mkpath("$config_dir") || die("[ERROR]: Unable to create path $config_dir");
+    INFO("--> creating path for $config_dir\n");
+    mkpath("$config_dir") || MYERROR("Unable to create path $config_dir");
     $changedFlag = 1;
 }
 
 if ( ! -s "$config_dir/config.machines" ) {
-    print "--> creating $config_dir/config.machines file\n";
+    INFO("--> creating $config_dir/config.machines file\n");
 
     my $template = "$template_dir/config.machines";
 
     if ( ! -s $template ) {
-	print "ERROR: Missing template file -> $template\n";
-	exit 1;
+	MYERROR("ERROR: Missing template file -> $template");
     }
 
     open(IN, "<$template")                    || die "Cannot open $template\n";
@@ -177,8 +176,8 @@ if ( ! -s "$config_dir/config.machines" ) {
 	    # create a default rpm_dir
 	    my $rpm_dir = "$config_dir/$newCluster/rpms";
 	    if ( ! -d $rpm_dir) {
-		print "--> creating path for default rpm_dir -> $rpm_dir\n";
-		mkpath("$rpm_dir") || die("[ERROR]: Unable to create path $rpm_dir");
+		INFO("--> creating path for default rpm_dir -> $rpm_dir\n");
+		mkpath("$rpm_dir") || MYERROR("Unable to create path $rpm_dir");
 	    }
 	    print OUT "rpm_dir = $rpm_dir\n";
 	} else {
@@ -194,13 +193,12 @@ if ( ! -s "$config_dir/config.machines" ) {
 # Cluster-specific config file
 
 if ( ! -e "$config_dir/config.$newCluster" ) {
-    print "--> creating $config_dir/config.$newCluster file\n";
+    INFO("--> creating $config_dir/config.$newCluster file\n");
 
     my $template = "$template_dir/config.default";
 
     if ( ! -s $template ) {
-	print "ERROR: Missing template file -> $template\n";
-	exit 1;
+	MYERROR("Missing template file -> $template");
     }
     
     copy("$template","$config_dir/config.$newCluster") || print "ERROR: Unable to update config.$newCluster\n";
@@ -210,12 +208,11 @@ if ( ! -e "$config_dir/config.$newCluster" ) {
 # Cluster-specific IPs file
 
 if ( ! -e "$config_dir/ips.$newCluster" ) {
-    print "--> creating $config_dir/ips.$newCluster file\n";
+    INFO("--> creating $config_dir/ips.$newCluster file\n");
     
     my $template = "$losf_top_dir/config/skeleton_template/ips.default";
     if ( ! -s $template ) {
-	print "ERROR: Missing template file -> $template\n";
-	exit 1;
+	MYERROR("Missing template file -> $template");
     }
     
     copy("$template","$config_dir/ips.$newCluster") || print "ERROR: Unable to update ips.$newCluster\n";
@@ -233,32 +230,28 @@ if ( ! -e "$config_dir/os-packages/$newCluster/packages.config" ) {
 
     my $template = "$template_dir/os-packages/packages.config";
     if ( ! -s $template ) {
-	print "ERROR: Missing template file -> $template\n";
-	exit 1;
+	MYERROR("Missing template file -> $template\n");
     }
 
-    copy("$template","$config_dir/os-packages/$newCluster/packages.config") || 
-	print "ERROR: Unable to update packages.config\n";
+    copy("$template","$config_dir/os-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config\n");
     $changedFlag = 1;
 }
 
 # Custom Packages config file
 
 if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
-    print "--> creating $config_dir/custom-packages/$newCluster/packages.config file\n";
+    INFO("--> creating $config_dir/custom-packages/$newCluster/packages.config file\n");
 
     if ( ! -d "$config_dir/custom-packages/$newCluster" ) {
-	mkpath("$config_dir/custom-packages/$newCluster") || die("[ERROR]: Unable to create path for custom-packages");
+	mkpath("$config_dir/custom-packages/$newCluster") || MYERROR("Unable to create path for custom-packages");
     }
 
     my $template = "$template_dir/custom-packages/packages.config";
     if ( ! -s $template ) {
-	print "ERROR: Missing template file -> $template\n";
-	exit 1;
+	MYERROR("Missing template file -> $template");
     }
 
-    copy("$template","$config_dir/custom-packages/$newCluster/packages.config") || 
-	print "ERROR: Unable to update packages.config\n";
+    copy("$template","$config_dir/custom-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config");
     $changedFlag = 1;
 }
 
@@ -266,22 +259,26 @@ if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
 
 if ( ! -d "$config_dir/const_files/$newCluster" ) {
     mkpath("$config_dir/const_files/$newCluster") || 
-	die("[ERROR]: Unable to create path for const_files/$newCluster");
-    print "--> creating $config_dir/const_files/$newCluster directory\n";
+	MYERROR("Unable to create path for const_files/$newCluster");
+    INFO("--> creating $config_dir/const_files/$newCluster directory\n");
 
     if ( ! -d "$config_dir/const_files/$newCluster/master" ) {
 	mkpath("$config_dir/const_files/$newCluster/master") || 
-	    die("[ERROR]: Unable to create path for const_files/$newCluster/master");
-	print "--> creating $config_dir/const_files/$newCluster/master directory\n";
+	    MYERROR("Unable to create path for const_files/$newCluster/master");
+	INFO("--> creating $config_dir/const_files/$newCluster/master directory\n");
     }
     $changedFlag = 1;
 }
 
 if ( $changedFlag == 0) {
-    print "--> Basic config files for cluster \"$newCluster\" already present\n";
-    print "\nNo additional initialization required.\n";
+    INFO("--> Basic config files for cluster \"$newCluster\" already present\n");
+    INFO("\nNo additional initialization required.\n");
 } else {
-    print "\nBasic initialization complete.\n";
+    INFO("\nBasic initialization complete.\n");
 }
+
+# Done with lock
+
+losf_get_lock();
 
 1;
