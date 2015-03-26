@@ -32,15 +32,6 @@
 
 export TOP_DIR=`echo $( (cd -P $(dirname $binary) && pwd) )`
 
-# check if version requested
-for i in "$@"; do
-    case $i in -v|--version)
-    $TOP_DIR/update -v
-    exit 0
-    ;;
-    esac
-done
-
 if [  -z $PERL5LIB ];then
     export PERL5LIB=$TOP_DIR/utils
 else
