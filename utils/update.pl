@@ -91,8 +91,8 @@ my $logr = get_logger();
 
 if ( -e "/root/losf-noupdate" ) {
     if ($ENV{'LOSF_UPDATE_FORCE'}  ne "1") {
-	chomp(my $host_name=`hostname -s`);
-	ERROR("Skipping update request on $host_name -> remove /root/losf-noupdate to re-enable.\n");
+        my ($hostname,$domain_name) = query_local_network_name();
+	ERROR("Skipping update request on $hostname -> remove /root/losf-noupdate to re-enable.\n");
 	exit(0);
     } else {
 	INFO("Overriding /root/losf-noupdate request to to disable via \"-f\" force option.\n");
@@ -155,8 +155,16 @@ foreach our $node_type (@update_types) {
 
     our $losf_permissions_updated     = 0;
     our $losf_permissions_total       = 0;
+
+    # Include delimiter if more than 1 node type to update
+
+    if(@update_types > 1) {
+        INFO("-------------------------------------------------------------------------\n");
+        INFO("[Applying update for node type=$node_type]\n");
+        INFO("-------------------------------------------------------------------------\n");
+    }
     
-# Check for any necessary updates
+   # Check for any necessary updates
     
     INFO("** Config dir -> $losf_config_dir\n");
     
@@ -195,6 +203,11 @@ foreach our $node_type (@update_types) {
     
     print "-> $node_type";
     print "\n";
+
+    if($node_type ne $update_types[$#update_types]) {
+        INFO("\n");
+    }
+
 }
 
 
