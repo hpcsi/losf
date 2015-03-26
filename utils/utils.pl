@@ -29,6 +29,7 @@ use base 'Exporter';
 use Sys::Syslog;  
 use Fcntl qw(:flock);
 use File::Find;
+use Sys::Hostname;
 
 # Global vars to count any detected changes
 
@@ -634,7 +635,28 @@ sub print_version {
     print "-"x $width . "\n";
     print "\n";
 
-}
+} # end sub print_version()
+
+# -------------------------------------------------------------
+# query local hostname/domainname
+# -------------------------------------------------------------
+
+sub query_local_network_name {
+    my @hostTmp     = split(/\./,hostname);
+    my $hostname    = shift(@hostTmp);
+    my $domain_name = join("\.", @hostTmp);
+
+    if($hostname eq "" || $domain_name eq "" ) {
+        ERROR("\n");
+        ERROR("ERROR: Unable to determine local host name.\n\n");
+        ERROR("LosF uses a hostname and fully qualified domainname (FQDN) to differentiate \n");
+        ERROR("between node types. Please update you local network configuration to provide a FQDN.\n\n");
+        exit 1;
+    }
+
+    return($hostname,$domain_name);
+
+} # end sub query_local_network_name()
 
 1;
 
