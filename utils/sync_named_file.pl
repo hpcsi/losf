@@ -36,6 +36,7 @@ use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
+use LosF_provision;
 
 require "$losf_utils_dir/utils.pl";
 require "$losf_utils_dir/parse.pl";
@@ -51,52 +52,77 @@ if ($#ARGV != 0) {
 # Only one LosF instance at a time
 losf_get_lock();
 
-sync_single_file($ARGV[0]);
+# Local node membership
+(my $node_cluster, my $node_type) = determine_node_membership();
+
+# Check if we need to update multiple node types (chroot environment)
+
+my  @update_types   = ($node_type);
+our $exec_node_type = $node_type;
+
+if ($losf_provisioner eq "Warewulf" && $node_type eq "master" ) {
+    my @ww_node_types = query_warewulf_node_types($node_cluster,$node_type);
+    push(@update_types,@ww_node_types);
+}
+
+foreach our $node_type (@update_types) {
+    if(@update_types > 1) {
+        INFO("-------------------------------------------------------------------------\n");
+        INFO("[Applying sync_config_file for node type=$node_type]\n");
+        INFO("-------------------------------------------------------------------------\n");
+    }
+
+    sync_single_file($ARGV[0],$node_cluster,$node_type);
+
+    if($node_type ne $update_types[$#update_types]) {
+        INFO("\n");
+    }
+}
 
 BEGIN {
 
-    my $osf_sync_const_file  = 0;
-    my $osf_sync_services    = 0;
-    my $osf_sync_permissions = 0;
-
     sub sync_single_file {
 
-	verify_sw_dependencies();
 	begin_routine();
 
-        my $file = shift;
+        my $file          = shift;
+        my $node_cluster  = shift;
+        my $node_type     = shift;
 	
-	if ( $osf_sync_const_file == 0 ) {
-	    INFO("** Syncing configuration files (const)\n\n");
-	    $osf_sync_const_file = 1;
-	}
+        INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
 	# Make sure the requested file has valid config...
 
-	$osf_sync_const_file = 1;
-
-	(my $node_cluster, my $node_type) = determine_node_membership();
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 	my @sync_files         = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my @sync_files_partial = query_cluster_config_partial_sync_files($node_cluster,$node_type);
 
 	my $found=0;
 
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "";
+
+	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
+	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+	}
+
 	# partially synced file? we do this first as a partial sync
 	# request trumps a normal sync request.
 
 	if (grep {$_ eq $file } @sync_files_partial ) {
 	    $found=1;
-	    sync_partial_file($file);
-	    exit(0);  
+	    sync_partial_file(chroot . $file);
+	    return;  
 	}
 
 	# normal const file?
 
 	if (grep {$_ eq $file } @sync_files ) {
 	    $found=1;
-	    sync_const_file($file,$node_cluster,$node_type);
-	    exit(0);  
+	    sync_const_file($chroot . $file,$node_cluster,$node_type);
+	    return;  
 	}
 
 	if (! $found) { 
