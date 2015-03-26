@@ -50,8 +50,6 @@ else
     export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
 fi
 
-export MYHOST=`hostname -s`
-
 usage()
 {
   cat <<EOF
