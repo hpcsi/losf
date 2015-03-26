@@ -27,10 +27,11 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 27;
+use Test::More tests => 28;
 #use Test::Files;
 use File::Basename;
 use File::Temp qw(tempfile);
+use File::Compare;
 use Cwd 'abs_path';
 use LosF_test_utils;
 
@@ -96,10 +97,25 @@ ok(-s "$tmpdir/os-packages/test/packages.config","os-packages/test/packages.conf
 ok(-s "$tmpdir/custom-packages/test/packages.config","custom-packages/test/packages.config exists");
 #};
 
-ok(system("$losf_dir/node_types $redirect") == 0,"node_types runs");
-ok(system("$losf_dir/update -q 1> $tmpdir/.result" ) == 0,"update runs");
+#ok(system("$losf_dir/node_types $redirect") == 0,"node_types runs");
+
+# node_type tests
+ok(system("$losf_dir/node_types 1> $tmpdir/.result" ) == 0,"node_types runs");
 
 my $igot=(`cat $tmpdir/.result`); 
+
+my $ref_output = <<"END_OUTPUT";
+[LosF] Node type:       test -> master
+[LosF] Config dir:      $tmpdir
+END_OUTPUT
+
+ok("$igot" eq "$ref_output","node_type output ok");
+
+# update tests
+
+ok(system("$losf_dir/update -q  1> $tmpdir/.result" ) == 0,"update runs");
+
+$igot=(`cat $tmpdir/.result`); 
 chomp($igot);			# remove newline
 $igot =~ s/\e\[\d+m//g;		# remove any colors
 
