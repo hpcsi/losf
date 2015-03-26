@@ -27,13 +27,13 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 28;
-#use Test::Files;
+use Test::More tests => 30;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
 use Cwd 'abs_path';
 use LosF_test_utils;
+use Sys::Hostname;
 
 print "---------------------\n";
 print "LosF Regression Tests\n";
@@ -42,6 +42,11 @@ print "---------------------\n";
 my $losf_dir=dirname(dirname(abs_path($0)));
 my $redirect = "1> /dev/null";
 #my $redirect="";
+
+# local hostname
+
+my @hostTmp     = split(/\./,hostname);
+my $hostname    = shift(@hostTmp);
 
 #------------------------------------------------------
 
@@ -97,7 +102,6 @@ ok(-s "$tmpdir/os-packages/test/packages.config","os-packages/test/packages.conf
 ok(-s "$tmpdir/custom-packages/test/packages.config","custom-packages/test/packages.config exists");
 #};
 
-#ok(system("$losf_dir/node_types $redirect") == 0,"node_types runs");
 
 # node_type tests
 ok(system("$losf_dir/node_types 1> $tmpdir/.result" ) == 0,"node_types runs");
@@ -110,6 +114,14 @@ my $ref_output = <<"END_OUTPUT";
 END_OUTPUT
 
 ok("$igot" eq "$ref_output","node_type output ok");
+
+# node_type with argument tests
+ok(system("$losf_dir/node_types master 1> $tmpdir/.result" ) == 0,"node_types (w/ argument) runs");
+
+$igot=(`cat $tmpdir/.result`); 
+chomp($igot); 
+
+ok("$igot" eq $hostname,"node_type (w/ argument) output ok");
 
 # update tests
 
