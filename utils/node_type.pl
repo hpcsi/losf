@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env perl
 #-----------------------------------------------------------------------bl-
 #--------------------------------------------------------------------------
 # 
@@ -21,31 +21,19 @@
 # Boston, MA  02110-1301  USA
 #
 #-----------------------------------------------------------------------el-
-# Shell wrapper for querying local node type -> echo's config to stdout
+# Determine cluster/node membership based on LosF runtime config
 #--------------------------------------------------------------------------
 
-# determine path to binary
-[[ -L $0 ]] && binary=`readlink -f $0` || binary=$0
+use strict;
+use warnings;
+use LosF_paths;
+use LosF_utils;
 
-# disable colors for non-interactive shell
-[[ ! -t 1 ]] && export ANSI_COLORS_DISABLED=1
+use lib "$losf_utils_dir/";
+use LosF_node_types;
 
-export TOP_DIR=`echo $( (cd -P $(dirname $binary) && pwd) )`
+determine_node_membership();
 
-if [  -z $PERL5LIB ];then
-    export PERL5LIB=$TOP_DIR/utils
-else
-    export PERL5LIB=$TOP_DIR/utils:$PERL5LIB
-fi
-
-export LOSF_LOG_MODE="INFO"
-export LOSF_STANDALONE_UTIL=1
-
-if [ $# -ge 1 ];then
-    export LOSF_NODE_TYPE_REGEX_QUERY=1
-else
-    unset LOSF_NODE_TYPE_REGEX_QUERY
-fi
+1;
 
 
-$TOP_DIR/utils/node_type.pl "$@"
