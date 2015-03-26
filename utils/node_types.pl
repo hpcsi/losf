@@ -75,13 +75,13 @@ BEGIN {
 
 	DEBUG("** LosF Node Type Determination:\n");
 
-	chomp($host_name=`hostname -s`);
-	chomp($domain_name=`dnsdomainname 2> /dev/null`);
+        ($host_name,$domain_name) = query_local_network_name();
 
         #---------------
         # Global Parsing
         #---------------
-	
+
+        LosF_paths::query_config_dir();
 	init_config_file_parsing("$losf_config_dir/config.machines");
 	($node_cluster, $node_type) = query_global_config_host($host_name,$domain_name);
 
