@@ -36,6 +36,7 @@ use lib "$losf_utils_dir";
 
 use LosF_node_types;
 use LosF_utils;
+use LosF_provision;
 
 require "$losf_utils_dir/utils.pl";
 require "$losf_utils_dir/parse.pl";
@@ -45,11 +46,52 @@ require "$losf_utils_dir/sync_config_utils.pl";
 # Only one LosF instance at a time
 losf_get_lock();
 
-parse_and_sync_const_files();
-parse_and_sync_softlinks();
-parse_and_sync_services();
-parse_and_sync_permissions();
+# Local node membership
+(my $node_cluster, my $node_type) = determine_node_membership();
 
+# Check if we need to update multiple node types (chroot environment)
+
+my  @update_types   = ($node_type);
+our $exec_node_type = $node_type;
+
+if ($losf_provisioner eq "Warewulf" && $node_type eq "master" ) {
+    my @ww_node_types = query_warewulf_node_types($node_cluster,$node_type);
+    push(@update_types,@ww_node_types);
+}
+
+foreach our $node_type (@update_types) {
+
+    our $losf_const_updated           = 0;
+    our $losf_const_total             = 0;
+    
+    our $losf_softlinks_updated       = 0;
+    our $losf_softlinks_total         = 0;
+    
+    our $losf_services_updated        = 0;
+    our $losf_services_total          = 0;
+
+    our $losf_permissions_updated     = 0;
+    our $losf_permissions_total       = 0;
+
+    # Include delimiter if more than 1 node type to update
+
+    if(@update_types > 1) {
+        INFO("-------------------------------------------------------------------------\n");
+        INFO("[Applying sync_config_files for node type=$node_type]\n");
+        INFO("-------------------------------------------------------------------------\n");
+    }
+
+    parse_and_sync_const_files();
+    parse_and_sync_softlinks();
+    parse_and_sync_services();
+    parse_and_sync_permissions();
+
+    if($node_type ne $update_types[$#update_types]) {
+        INFO("\n");
+    }
+
+}
+    
 # Done with lock
 
 our $LOSF_FH_lock; close($LOSF_FH_lock);
