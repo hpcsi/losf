@@ -148,7 +148,8 @@ sub add_node  {
     
     INFO("\n** Adding new node $host for $losf_provisioner provisioning...\n");
 
-    chomp($domain_name=`dnsdomainname`);
+    my ($tmp,$domain_name) = query_local_network_name();
+
     ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
 
     # 
@@ -811,9 +812,6 @@ sub update_distro_packages {
 
     # Now, read current configfile for OS packages
 
-    my $host_name;
-    chomp($host_name=`hostname -s`);
-
     INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
     my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
@@ -1016,9 +1014,6 @@ sub add_distro_package {
 
 	# (3) Read relevant configfile for OS packages
 
-	my $host_name;
-	chomp($host_name=`hostname -s`);
-
 	INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
 
@@ -1193,9 +1188,6 @@ sub add_distro_group {
 	print "\n";
 
 	# (3) Read relevant configfile for OS packages
-
-	my $host_name;
-	chomp($host_name=`hostname -s`);
 
 	INFO("   Reading OS package config file -> $losf_custom_config_dir/os-packages/"."$node_cluster/packages.config\n");
 	my @os_rpms = query_cluster_config_os_packages($node_cluster,$node_type);
@@ -1834,8 +1826,6 @@ if (@ARGV >= 1) {
 }
 
 # Verify we have a valid local config before going further
-
-#LosF_config::validate_config_path();
 
 my $logr = get_logger(); $logr->level($ERROR); 
 verify_sw_dependencies(); 
