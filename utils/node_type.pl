@@ -32,7 +32,7 @@ use LosF_utils;
 use lib "$losf_utils_dir/";
 use LosF_node_types;
 
-determine_node_membership();
+determine_node_membership(@ARGV);
 
 1;
 
