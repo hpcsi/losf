@@ -642,9 +642,19 @@ sub print_version {
 # -------------------------------------------------------------
 
 sub query_local_network_name {
+
+    my $name = hostname;
+
     my @hostTmp     = split(/\./,hostname);
     my $hostname    = shift(@hostTmp);
     my $domain_name = join("\.", @hostTmp);
+
+    # revert to backup approach using dnsdomainname if domain_name
+    # fails to resolve from above
+
+    if($domain_name eq "") {
+        chomp($domain_name=`dnsdomainname 2> /dev/null`);
+    }
 
     if($hostname eq "" || $domain_name eq "" ) {
         ERROR("\n");
