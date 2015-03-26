@@ -643,8 +643,6 @@ sub print_version {
 
 sub query_local_network_name {
 
-    my $name = hostname;
-
     my @hostTmp     = split(/\./,hostname);
     my $hostname    = shift(@hostTmp);
     my $domain_name = join("\.", @hostTmp);
