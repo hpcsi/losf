@@ -37,6 +37,7 @@ my $losf_top_dir = "";
 my $changedFlag  = 0;
 my $template_dir = "";
 my $help         = 0;
+my $version      = "";
 
 sub usage {
     print "\ninitconfig: convenience utility used to create a basic starting\n";
@@ -53,15 +54,21 @@ sub usage {
 # Main front-end for initconfig command-line tool
 #-------------------------------------------------
 
+GetOptions("h"       => \$help,
+     "version"       => \$version) || usage();
+
+usage() if ($help);
+
+if ($version) {
+    print_version();
+    exit(0);
+}
+
 verify_sw_dependencies();
 my $logr = get_logger(); $logr->level($INFO);
 
 # Only one LosF instance at a time
 losf_get_lock();
-
-GetOptions("h"       => \$help) || usage();
-
-usage() if ($help);
 
 $newCluster = shift || '';
 

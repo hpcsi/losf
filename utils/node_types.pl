@@ -36,8 +36,6 @@ require "$losf_utils_dir/parse.pl";
 my $output_mode = $ENV{'LOSF_LOG_MODE'};
 my $standalone  = $ENV{'LOSF_STANDALONE_UTIL'};
 
-determine_node_membership(@ARGV);
-
 BEGIN {
     my $osf_membership_init = 0;        # initialization flag 
     my $node_cluster;		        # cluster ownership for local host

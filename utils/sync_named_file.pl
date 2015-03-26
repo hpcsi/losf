@@ -57,6 +57,8 @@ losf_get_lock();
 
 # Check if we need to update multiple node types (chroot environment)
 
+LosF_provision::init_provisioning_system();
+
 my  @update_types   = ($node_type);
 our $exec_node_type = $node_type;
 

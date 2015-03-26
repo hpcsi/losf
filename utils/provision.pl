@@ -34,7 +34,11 @@ use lib "$losf_utils_dir";
 require "$losf_utils_dir/parse.pl";
 use Exporter qw(import);
 
-our $losf_provisioner = main::query_provisioning_system();
-our @EXPORT           = qw($losf_provisioner);
+our $losf_provisioner; # = main::query_provisioning_system();
+our @EXPORT = qw($losf_provisioner);
+
+sub init_provisioning_system {
+    $losf_provisioner = main::query_provisioning_system();
+}
 
 1;

@@ -99,6 +99,9 @@ if ( -e "/root/losf-noupdate" ) {
     }
 }
 
+# Check for provisioning system
+LosF_provision::init_provisioning_system();
+
 # Allow for alternate RPM source paths
 
 my $alt_rpm;

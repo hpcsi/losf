@@ -36,6 +36,7 @@ use LosF_utils;
 use LosF_rpm_utils;
 use LosF_history_utils;
 use LosF_provision;
+
 use File::Temp qw(tempfile);
 use File::Compare;
 use File::Copy;
@@ -1829,7 +1830,10 @@ if (@ARGV >= 1) {
 
 my $logr = get_logger(); $logr->level($ERROR); 
 verify_sw_dependencies(); 
+
 (my $node_cluster, my $node_type) = determine_node_membership();
+
+LosF_provision::init_provisioning_system();
 
 init_local_config_file_parsing       ("$losf_custom_config_dir/config."."$node_cluster");
 init_local_os_config_file_parsing    ("$losf_custom_config_dir/os-packages/$node_cluster/packages.config");
