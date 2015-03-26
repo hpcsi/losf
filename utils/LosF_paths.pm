@@ -66,19 +66,65 @@ sub print_initconfig_suggestion {
     print "a starting LosF configuration template.\n\n";
 }
 
-# ----------------------------------------------------------------------
-# v0.43.0 Change:
-#
-# require user to provide us with a config path (we no longer assume
-# it is local to LosF install since users will likely want to use
-# their own SCM for config files). Config path can be specified in one
-# of two ways:
+#-----------------------------------------------------------------------
+#  Query top-level LosF configuration directory. We allow for
+#  potential separation of LosF install path and LosF configuration
+#  path. By default, we assume a config/ dir local to the LosF install
+#  but this can be overridden by an environment variable.  Config path
+#  can be specified in one of two ways:
 # 
 # 1. LOSF_CONFIG_DIR environment variable
 # 2. config/config_dir file in locally running LosF path
 #
 # The environment variable takes precedence over config_dir setting
-# ----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+
+sub query_config_dir {
+
+    my $config_dir = $ENV{'LOSF_CONFIG_DIR'};
+
+    if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
+        if ( -d $config_dir ) {
+            # remove trailing slash if present
+
+            if($config_dir =~ /(.*)\/$/) {
+                chop($config_dir);
+            }
+            our $losf_config_dir        = $config_dir;
+            our $losf_custom_config_dir = $config_dir;
+        } else {
+            print "\n";
+            print "[ERROR]: LOSF_CONFIG_DIR provided path does not exist or is not a directory.\n\n";
+            print "Using LosF config dir -> $config_dir\n";
+            print_initconfig_suggestion();
+            exit 1;
+        }
+    } else {
+        my $local_config_file="$losf_top_dir/config/config_dir";
+        if ( -s $local_config_file ) {
+            open (my $IN,"<$local_config_file") || MYERROR("Unable to open  file ($local_config_file)");
+            my $local_config_dir = <$IN>;
+            chomp($local_config_dir);
+            close($IN);
+
+            if ( -d $local_config_dir ) {
+
+                # remove trailing slash if present
+                if($local_config_dir =~ /(.*)\/$/) {
+                    chop($local_config_dir);
+                }
+
+                our $losf_config_dir        = "$local_config_dir";
+                our $losf_custom_config_dir = "$local_config_dir";
+            } else {
+                print_no_defined_config_path_message();
+            } 
+        } else {
+            print_no_defined_config_path_message();
+        }
+    }
+
+} # end sub query_losf_config_dir()
 
 # Check for privileged credentials
 
@@ -87,53 +133,7 @@ if ($> > 0) {
 ###    exit 1;
 }
 
-# Allow for potential separation of LosF install path and LosF
-# configuration path. By default, we assume a config/ dir local to the
-# LosF install but this can be overridden by an environment variable.
 
-my $config_dir = $ENV{'LOSF_CONFIG_DIR'};
-
-if ( defined $ENV{'LOSF_CONFIG_DIR'} ) {
-    if ( -d $config_dir ) {
-	# remove trailing slash if present
-
-	if($config_dir =~ /(.*)\/$/) {
-	    chop($config_dir);
-	}
-	our $losf_config_dir        = $config_dir;
-	our $losf_custom_config_dir = $config_dir;
-    } else {
-	print "\n";
-	print "[ERROR]: LOSF_CONFIG_DIR provided path does not exist or is not a directory.\n\n";
-	print "Using LosF config dir -> $config_dir\n";
-	print_initconfig_suggestion();
-	exit 1;
-    }
-} else {
-    my $local_config_file="$losf_top_dir/config/config_dir";
-    if ( -s $local_config_file ) {
-	open (my $IN,"<$local_config_file") || MYERROR("Unable to open  file ($local_config_file)");
-	my $local_config_dir = <$IN>;
-	chomp($local_config_dir);
-	close($IN);
-
-	if ( -d $local_config_dir ) {
-
-	    # remove trailing slash if present
-	    if($local_config_dir =~ /(.*)\/$/) {
-		chop($local_config_dir);
-	    }
-
-	    our $losf_config_dir        = "$local_config_dir";
-	    our $losf_custom_config_dir = "$local_config_dir";
-	} else {
-	    print_no_defined_config_path_message();
-	} 
-    } else {
-	print_no_defined_config_path_message();
-    }
-}
-
-our $losf_utils_dir         = "$losf_top_dir/utils";
+our $losf_utils_dir = "$losf_top_dir/utils";
 
 1;
