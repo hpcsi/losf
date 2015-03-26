@@ -262,7 +262,7 @@ BEGIN {
 	my $sync_file = "$losf_custom_config_dir/const_files/$cluster/$type/$basename.$host_name";
 	DEBUG("   --> Looking for file $sync_file\n");
 
-	if ( ! -s $sync_file ) {
+	if ( ! -e $sync_file ) {
 	    $sync_file = "$losf_custom_config_dir/const_files/$cluster/$type/$basename";
 	    DEBUG("   --> Looking for file $sync_file\n");
 	} else {
@@ -270,7 +270,7 @@ BEGIN {
 	    INFO("  --> Using host specific config file for $host_name\n");
 	}
 	
-	if ( ! -s $sync_file ) {
+	if ( ! -e $sync_file ) {
 	    DEBUG("   --> Warning: config/const_files/$cluster/$type/$basename not " .
 		 "found - not syncing...\n");
 	    end_routine();
