@@ -235,7 +235,7 @@ if ( ! -e "$config_dir/os-packages/$newCluster/packages.config" ) {
 	mkpath("$config_dir/os-packages/$newCluster") || die("[ERROR]: Unable to create path for os-packages");
     }
 
-    my $template = "$template_dir/os-packages/packages.config";
+    my $template = "$template_dir/os-packages/default/packages.config";
     if ( ! -s $template ) {
 	MYERROR("Missing template file -> $template\n");
     }
@@ -253,7 +253,7 @@ if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
 	mkpath("$config_dir/custom-packages/$newCluster") || MYERROR("Unable to create path for custom-packages");
     }
 
-    my $template = "$template_dir/custom-packages/packages.config";
+    my $template = "$template_dir/default/custom-packages/packages.config";
     if ( ! -s $template ) {
 	MYERROR("Missing template file -> $template");
     }
