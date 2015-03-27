@@ -27,13 +27,14 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 30;
+use Test::More tests => 43;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
 use Cwd 'abs_path';
 use LosF_test_utils;
 use Sys::Hostname;
+use Config::IniFiles;
 
 print "---------------------\n";
 print "LosF Regression Tests\n";
@@ -41,12 +42,23 @@ print "---------------------\n";
 
 my $losf_dir=dirname(dirname(abs_path($0)));
 my $redirect = "1> /dev/null";
+my $returnCode;
 #my $redirect="";
 
 # local hostname
 
 my @hostTmp     = split(/\./,hostname);
 my $hostname    = shift(@hostTmp);
+
+sub verify_no_changes_required {
+    system("$losf_dir/update -q $redirect" ); $returnCode = $? >> 8;
+    ok( $returnCode == 0 ,"update correctly detects no changes required");
+}
+
+sub verify_change_required {
+    system("$losf_dir/update -q $redirect" ); $returnCode = $? >> 8;
+    ok( $returnCode == 1 ,"update correctly detected change required");
+}
 
 #------------------------------------------------------
 
@@ -84,7 +96,7 @@ ok ($version_update == "LosF: Version $loc_version","\"losf --version\" matches 
 #------------------------------------------------------
 
 print "\nInitializing test config ";
-my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
+my $tmpdir = File::Temp::tempdir(CLEANUP => 0) || die("Unable to create temporary directory");
 print "--> tmpdir = $tmpdir\n";
 
 $ENV{'LOSF_CONFIG_DIR'} = "$tmpdir";
@@ -113,7 +125,7 @@ my $ref_output = <<"END_OUTPUT";
 [LosF] Config dir:      $tmpdir
 END_OUTPUT
 
-ok("$igot" eq "$ref_output","node_type output ok");
+ok("$igot" eq "$ref_output","node_types output ok");
 
 # node_type with argument tests
 ok(system("$losf_dir/node_types master 1> $tmpdir/.result" ) == 0,"node_types (w/ argument) runs");
@@ -121,7 +133,7 @@ ok(system("$losf_dir/node_types master 1> $tmpdir/.result" ) == 0,"node_types (w
 $igot=(`cat $tmpdir/.result`); 
 chomp($igot); 
 
-ok("$igot" eq $hostname,"node_type (w/ argument) output ok");
+ok("$igot" eq $hostname,"node_types (w/ argument) output ok");
 
 # update tests
 
@@ -146,6 +158,36 @@ ok($line =~ m/^\[LosF\] Config dir:      $tmpdir$/,"rpm_topdir -> correct config
 
 $line = <IN>; chomp($line);
 ok($line =~ m/^\[LosF\] RPM topdir:      $tmpdir\/test\/rpms$/,"rpm_topdir -> correct RPM topdir ");
+
+# -----------------------------------------------------------------------------------------
+
+print "\nChecking permissions update capability using input file $tmpdir/config.test\n";
+
+my $fileMode;
+
+my $local_cfg = new Config::IniFiles( -file => "$tmpdir/config.test",
+				   -allowcontinue => 1,
+				   -nomultiline   => 1);
+
+ok($local_cfg->SectionExists("Permissions"),"[Permissions] section exists");
+
+my $tmpdir2 = File::Temp::tempdir(CLEANUP => 0) || die("Unable to create temporary directory");
+my $testdir = "$tmpdir2/a_test_dir/";
+ok(! -d $testdir,"$testdir does not exist previously");
+ok($local_cfg->newval("Permissions",$testdir,"750"),"Setting dir perms to 750");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+verify_change_required();
+
+ok( -d $testdir,"a_test_dir created");
+$fileMode = sprintf("%o",(stat($testdir))[2] &07777);
+ok($fileMode eq "750","a_test_dir has correct 750 permissions"); verify_no_changes_required();
+
+ok($local_cfg->setval("Permissions",$testdir,"700"),"Setting dir perms to 700");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+verify_change_required();
+
+$fileMode = sprintf("%o",(stat($testdir))[2] &07777);
+ok($fileMode eq "700","a_test_dir has correct 700 permissions"); verify_no_changes_required();
 
 close(IN);
 
