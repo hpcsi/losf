@@ -124,8 +124,10 @@ if (@ARGV >= 1) {
 
 # Perform the updates - normally this is done only on the local
 # host. However, there is an exception for a "master" node type when
-# using Warewulf. In that case, each node type is checked if a chroot
-# environment is available.
+# supporting chroot environments. In that case, each node type is
+# checked if a chroot environment is available.
+
+my $hostChanged = 0;
 
 my  @update_types   =($node_type);
 our $exec_node_type = $node_type;
@@ -187,6 +189,7 @@ foreach our $node_type (@update_types) {
 	notify_local_log();
 	print color 'red';
 	print "UPDATED";
+        $hostChanged=1;
     } else { 
 	print color 'green';
 	print "OK";
@@ -210,6 +213,8 @@ foreach our $node_type (@update_types) {
     if($node_type ne $update_types[$#update_types]) {
         INFO("\n");
     }
+
+    exit($hostChanged);
 
 }
 
