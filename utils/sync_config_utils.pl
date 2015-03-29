@@ -191,12 +191,6 @@ BEGIN {
 	verify_sw_dependencies();
 	begin_routine();
 
-###	if ( $osf_sync_services == 0 ) {
-###	    $osf_sync_services = 1;
-###	} else {
-###	    return;
-###	}
-###
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 
@@ -586,6 +580,55 @@ BEGIN {
 	end_routine();
     }
 
+    sub sync_perm_file {
+	verify_sw_dependencies();
+	begin_routine();
+
+        my $key   = shift;
+        my $value = shift;
+
+        my $parent_dir = dirname($key);
+
+        # Check on existence of user-desired directory.
+        # Directories are designated via the presence of a
+        # trailing /
+        
+        if( $key =~ /(.*)\/$/) {
+            if( -d $key) {
+		    print_info_in_green("OK");
+		    INFO(": $key directory present\n");
+            } else {
+                $losf_permissions_updated++;
+                print_error_in_red("UPDATING");
+                ERROR(": Desired directory $key does not exist...creating\n");
+                mkpath("$key") || MYERROR("Unable to create path $key");
+                my $cmd_string = sprintf("chmod %i %s",$value,$key);
+                system($cmd_string); 
+            }
+        }
+
+        if ( -e $key || -d $key ) {
+		my $info = stat($key);
+		my $current_mode = $info->mode;
+                
+		my $current_mode = sprintf("%4o",$current_mode & 07777);
+                
+		if($current_mode == $value) {
+		    print_info_in_green("OK");
+		    INFO(": $key perms correct ($value)\n");
+		} else {
+		    $losf_permissions_updated++;
+		    print_error_in_red("UPDATING");
+		    ERROR(": $key perms incorrect..setting to $value\n");
+                    
+		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
+		    system($cmd_string); 
+		}
+        }
+
+	end_routine();
+    } # end sub sync_perm_file()
+
     sub parse_and_sync_permissions {
 	verify_sw_dependencies();
 	begin_routine();
@@ -596,9 +639,6 @@ BEGIN {
 	INFO("** Syncing file/directory permissions ($node_cluster:$node_type)\n");
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
-	my %perm_files = query_cluster_config_sync_permissions($node_cluster,$node_type);
-
-	$losf_permissions_total = scalar keys %perm_files;
 
 	# Support for chroot (e.g. alternate provisioning mechanisms).
 
@@ -609,51 +649,33 @@ BEGIN {
 	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
 	}
 
-	while ( my ($key_path ,$value) = each(%perm_files) ) {
+	# Node type-specific settings: these take precedence over global
+	# settings; apply them first
 
+	my %perm_files_custom = query_cluster_config_sync_permissions($node_cluster,$node_type);
+
+
+	$losf_permissions_total = scalar keys %perm_files_custom;
+
+	while ( my ($key_path ,$value) = each(%perm_files_custom) ) {
 	    my $key = $chroot . $key_path;
+	    TRACE("   --> $key => $value\n");
+            sync_perm_file($key,$value);
+        }
 
-	    DEBUG("   --> $key => $value\n");
+        # Global perm settings; any node-type specific settings applied above are skipped
 
-	    my $parent_dir = dirname($key);
+	my %perm_files = query_cluster_config_sync_permissions($node_cluster,"LosF-GLOBAL-NODE-TYPE");
 
-	    # Check on existence of user-desired directory.
-	    # Directories are designated via the presence of a
-	    # trailing /
+	while ( my ($key_path ,$value) = each(%perm_files) ) {
+            my $key = $chroot . $key_path;
+	    TRACE("   --> $key => $value\n");
 
-	    if( $key =~ /(.*)\/$/) {
-		if( -d $key) {
-		    print_info_in_green("OK");
-		    INFO(": $key directory present\n");
-		} else {
-		    $losf_permissions_updated++;
-		    print_error_in_red("UPDATING");
-		    ERROR(": Desired directory $key does not exist...creating\n");
-		    mkpath("$key") || MYERROR("Unable to create path $key");
-		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
-		    system($cmd_string); 
-		}
-	    }
-
-	    if ( -e $key || -d $key ) {
-		my $info = stat($key);
-		my $current_mode = $info->mode;
-
-		my $current_mode = sprintf("%4o",$current_mode & 07777);
-
-		if($current_mode == $value) {
-		    print_info_in_green("OK");
-		    INFO(": $key perms correct ($value)\n");
-		} else {
-		    $losf_permissions_updated++;
-		    print_error_in_red("UPDATING");
-		    ERROR(": $key perms incorrect..setting to $value\n");
-
-		    my $cmd_string = sprintf("chmod %i %s",$value,$key);
-		    system($cmd_string); 
-		}
-	    }
-	}		       
+	    if ( ! exists $perm_files_custom{$key} ) {
+                $losf_permissions_total++;
+                sync_perm_file($key,$value);
+            }
+        }
 
 	end_routine();
 	return;
@@ -917,13 +939,7 @@ BEGIN {
 	my $node_cluster = $main::node_cluster;
 	my $node_type    = $main::node_type;
 	
-###	if ( $osf_sync_custom_packages == 0 ) {
-###	    $osf_sync_custom_packages = 1;
-###	} else {
-###	    return;
-###	}
-
-	    INFO("** Syncing Custom packages ($node_cluster:$node_type)\n");
+        INFO("** Syncing Custom packages ($node_cluster:$node_type)\n");
 
 	init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$node_cluster/packages.config");
 

@@ -1,5 +1,12 @@
 Version 0.51.0 ( In Progress)
 
+  * allow support for node-type specific [Permissions] control
+  * update initconfig utility to allow use of previously existing config dirs for initialization
+  * include chroot syncing capability for standalone "sync_config_files" utility
+  * improve FQDN query for initconfig utility
+  * expand regression test suite
+  * allow losf -v/--version queries when LOSF_CONFIG_DIR is not valid
+
 Version 0.50.0 ( 24 November 2014)
 
   * include support for RHEL7 without need for additional yum downloadonly plugin

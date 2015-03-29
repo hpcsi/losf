@@ -809,7 +809,6 @@ BEGIN {
 
 	    my $cluster = shift;
 	    my $host    = shift;
-	
 	    my $logr    = get_logger();
 	    
 	    %osf_file_perms  = ();
@@ -820,7 +819,21 @@ BEGIN {
 		MYERROR("No Input section found for cluster $cluster [Permissions]\n");
 	    }
 	    
-	    my @perms = $local_cfg->Parameters("Permissions");
+	    my @perms   = ();
+	    my $section = ();
+
+	    if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
+		$section = "Permissions";
+	    } else {
+		$section = "Permissions/$host";
+		if ( ! $local_cfg->SectionExists($section) ) {
+		    return(%perms);
+		}
+	    }
+
+	    @perms = $local_cfg->Parameters($section);
+
+#	    my @perms = $local_cfg->Parameters("Permissions");
 	    
 	    my $num_entries = @perms;
 	    
@@ -828,7 +841,7 @@ BEGIN {
 	    
 	    foreach(@perms) {
 		DEBUG("   --> Read value for $_\n");
-		if (defined ($myval = $local_cfg->val("Permissions",$_)) ) {
+		if (defined ($myval = $local_cfg->val($section,$_)) ) {
 		    DEBUG("   --> Value = $myval\n");
 		    $osf_file_perms{$_} = $myval;
 		} else {
