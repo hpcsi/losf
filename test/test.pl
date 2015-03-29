@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 43;
+use Test::More tests => 53;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -171,7 +171,7 @@ my $local_cfg = new Config::IniFiles( -file => "$tmpdir/config.test",
 
 ok($local_cfg->SectionExists("Permissions"),"[Permissions] section exists");
 
-my $tmpdir2 = File::Temp::tempdir(CLEANUP => 0) || die("Unable to create temporary directory");
+my $tmpdir2 = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
 my $testdir = "$tmpdir2/a_test_dir/";
 ok(! -d $testdir,"$testdir does not exist previously");
 ok($local_cfg->newval("Permissions",$testdir,"750"),"Setting dir perms to 750");
@@ -188,6 +188,23 @@ verify_change_required();
 
 $fileMode = sprintf("%o",(stat($testdir))[2] &07777);
 ok($fileMode eq "700","a_test_dir has correct 700 permissions"); verify_no_changes_required();
+
+print "\nChecking permissions override capability for specific node-type\n";
+ok($local_cfg->newval("Permissions/master",$testdir,"600"),"Setting dir perms to 600");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+verify_change_required();
+$fileMode = sprintf("%o",(stat($testdir))[2] &07777);
+ok($fileMode eq "600","a_test_dir has correct 600 permissions"); verify_no_changes_required();
+
+print "\nChecking removal of global permissions setting\n";
+ok($local_cfg->delval("Permissions",$testdir),"Removing global permissions setting");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+system("chmod 700 $testdir");
+verify_change_required();
+$fileMode = sprintf("%o",(stat($testdir))[2] &07777);
+ok($fileMode eq "600","a_test_dir still has correct 600 permissions"); verify_no_changes_required();
+
+
 
 close(IN);
 
