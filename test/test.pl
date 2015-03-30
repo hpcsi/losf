@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 53;
+use Test::More tests => 65;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -204,6 +204,49 @@ verify_change_required();
 $fileMode = sprintf("%o",(stat($testdir))[2] &07777);
 ok($fileMode eq "600","a_test_dir still has correct 600 permissions"); verify_no_changes_required();
 
+print "\nChecking use of sync_config_files to update permissions with chroot environment\n";
+
+my $global_cfg = new Config::IniFiles( -file => "$tmpdir/config.machines",
+				       -allowcontinue => 1,
+				       -nomultiline   => 1);
+
+
+
+$local_cfg->delval("Permissions/master",$testdir);
+$local_cfg->newval("Permissions/master","$tmpdir2/images/",755);
+$local_cfg->RewriteConfig;
+
+ok($local_cfg->newval("Provisioning","mode","Warewulf"),"enable chroot Warewulf env");
+ok($local_cfg->newval("Warewulf","compute","$tmpdir2/images"),"define chroot dir");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+ok($global_cfg->newval("test","compute","c[1-4]"),"define compute node type regex");
+ok($global_cfg->RewriteConfig,"Rewriting config file");
+
+system("$losf_dir/update -q 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);
+
+$ref_output = << "EOF";
+   --> UPDATING: Desired directory $tmpdir2/images/ does not exist...creating
+UPDATED: [RPMs: OS     0/0  Custom     0/0] [Files:    0/0] [Links:   0/0] [Services:   0/0] [Perms:   1/1] -> master
+OK: [RPMs: OS     0/0  Custom     0/0] [Files:    0/0] [Links:   0/0] [Services:   0/0] [Perms:   0/0] -> compute
+EOF
+ok("$igot" eq "$ref_output","update applied to master node type only");
+ok(-d "$tmpdir2/images","images/ directory created");
+ok(! -e "$tmpdir2/images/$tmpdir2/images","images/ directory not present in compute chroot path");
+
+$local_cfg->newval("Permissions/compute","b_test_dir/","755");
+$local_cfg->RewriteConfig;
+system("$losf_dir/update -q 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);
+$ref_output = << "EOF";
+OK: [RPMs: OS     0/0  Custom     0/0] [Files:    0/0] [Links:   0/0] [Services:   0/0] [Perms:   0/1] -> master
+   --> UPDATING: Desired directory $tmpdir2/images/b_test_dir/ does not exist...creating
+UPDATED: [RPMs: OS     0/0  Custom     0/0] [Files:    0/0] [Links:   0/0] [Services:   0/0] [Perms:   1/1] -> compute
+EOF
+ok("$igot" eq "$ref_output","update applied to compute node type only");
+ok(-d "$tmpdir2/images/b_test_dir","$tmpdir2/images/b_test_dir/ directory created");
+$fileMode = sprintf("%o",(stat("$tmpdir2/images/b_test_dir"))[2] &07777);
+ok($fileMode eq "755","b_test_dir has correct 755 permissions"); verify_no_changes_required();
 
 
 close(IN);
