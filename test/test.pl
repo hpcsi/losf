@@ -103,17 +103,12 @@ $ENV{'LOSF_CONFIG_DIR'} = "$tmpdir";
 
 ok(system("$losf_dir/initconfig test $redirect") == 0,"initconfig runs");
 
-#subtest 'Verify initconfig' => sub {
-#    plan tests => 6;
-
 ok(-s "$tmpdir/config.machines","config.machines exists");
 ok(-s "$tmpdir/config.test","config.test exists");
 ok(-s "$tmpdir/ips.test","ips.test exists");
 ok(-d "$tmpdir/const_files/test/master","const_files/test/master exists");
 ok(-s "$tmpdir/os-packages/test/packages.config","os-packages/test/packages.config exists");
 ok(-s "$tmpdir/custom-packages/test/packages.config","custom-packages/test/packages.config exists");
-#};
-
 
 # node_type tests
 ok(system("$losf_dir/node_types 1> $tmpdir/.result" ) == 0,"node_types runs");
