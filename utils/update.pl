@@ -104,6 +104,8 @@ LosF_provision::init_provisioning_system();
 
 # Allow for alternate RPM source paths
 
+query_cluster_rpm_dir($node_cluster,$node_type);
+
 my $alt_rpm;
 
 if (@ARGV >= 1) {
