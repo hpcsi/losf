@@ -282,7 +282,7 @@ system("rpm -e foo");
 ok($custom_cfg->delval("Custom Packages","master"),"remove previous config for package foo");
 ok($custom_cfg->RewriteConfig,"Rewriting config file");
 verify_no_changes_required();
-system("../losf -y addrpm duplicate_rpm/foo-1.0-1.x86_64.rpm"); $returnCode =$? >> 8;
+system("../losf -y addrpm duplicate_rpm/foo-1.0-1.x86_64.rpm $redirect"); $returnCode =$? >> 8;
 ok($returnCode == 1,"losf addrpm failed when cached rpm already present");
 verify_no_changes_required();
 # make sure the config file was not updated
