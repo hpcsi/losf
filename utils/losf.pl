@@ -1428,8 +1428,7 @@ sub add_custom_rpm {
 		}
 		$is_multi   = 1;
 	    } else {
-		INFO("       --> $rpm_name already configured - ignoring addition request\n");
-		#$is_configured = 1;
+		MYERROR("$rpm_name already configured - ignoring addition request\n");
 		return;
 	    }
 	    if(! $ENV{'LOSF_REGISTER_MULTI'}) {
@@ -1555,6 +1554,18 @@ sub add_custom_rpm {
     if ( ! -e "$rpm_topdir/$rpm_arch/$basename" )  {
 	INFO("   --> Copying package to default RPM config dir: $rpm_topdir/$rpm_arch\n");
 	copy($package,"$rpm_topdir/$rpm_arch") || MYERROR("Unable to copy $basename");
+    } else  {
+        # Adding a  little extra defense to protect users from themselves
+        # (Issue #59). Error if this is a new rpm addition, but an old
+        # copy of the cached rpm exists already.
+
+        ERROR("\n");
+        MYERROR_NE("Cached $rpm_arch exists already in rpm_topdir ($rpm_topdir). Consider increasing the");
+        MYERROR_NE("RPM release number or remove the cached copy if you are confident this RPM has not been");
+        MYERROR_NE("propagated previously.");
+        ERROR("\n");
+        exit(1);
+        
     }
 
     SYSLOG("User requested addition of custom RPM: $basename (type=$appliance)");

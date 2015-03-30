@@ -1,5 +1,6 @@
 Version 0.51.0 ( In Progress)
 
+  * disallow addition of custom rpm if the same version/release was cached previously in rpm_topdir
   * allow support for node-type specific [Permissions] control
   * update initconfig utility to allow use of previously existing config dirs for initialization
   * include chroot syncing capability for standalone "sync_config_files" utility

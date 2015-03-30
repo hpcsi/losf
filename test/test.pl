@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 65;
+use Test::More tests => 88;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -171,7 +171,7 @@ my $local_cfg = new Config::IniFiles( -file => "$tmpdir/config.test",
 
 ok($local_cfg->SectionExists("Permissions"),"[Permissions] section exists");
 
-my $tmpdir2 = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
+my $tmpdir2 = File::Temp::tempdir(CLEANUP => 0) || die("Unable to create temporary directory");
 my $testdir = "$tmpdir2/a_test_dir/";
 ok(! -d $testdir,"$testdir does not exist previously");
 ok($local_cfg->newval("Permissions",$testdir,"750"),"Setting dir perms to 750");
@@ -204,13 +204,9 @@ verify_change_required();
 $fileMode = sprintf("%o",(stat($testdir))[2] &07777);
 ok($fileMode eq "600","a_test_dir still has correct 600 permissions"); verify_no_changes_required();
 
-print "\nChecking use of sync_config_files to update permissions with chroot environment\n";
+print "\nChecking use of sync_config_files to update permissions within chroot environment\n";
 
-my $global_cfg = new Config::IniFiles( -file => "$tmpdir/config.machines",
-				       -allowcontinue => 1,
-				       -nomultiline   => 1);
-
-
+my $global_cfg = new Config::IniFiles( -file => "$tmpdir/config.machines",-allowcontinue => 1,-nomultiline   => 1);
 
 $local_cfg->delval("Permissions/master",$testdir);
 $local_cfg->newval("Permissions/master","$tmpdir2/images/",755);
@@ -248,6 +244,72 @@ ok(-d "$tmpdir2/images/b_test_dir","$tmpdir2/images/b_test_dir/ directory create
 $fileMode = sprintf("%o",(stat("$tmpdir2/images/b_test_dir"))[2] &07777);
 ok($fileMode eq "755","b_test_dir has correct 755 permissions"); verify_no_changes_required();
 
+#----------------------------------------
+print "\nChecking losf addrpm\n";
+#----------------------------------------
+
+system("rpm -q foo $redirect"); $returnCode =$? >> 8;
+ok($returnCode == 1,"custom rpm foo is not installed");
+system("../losf -y addrpm foo-1.0-1.x86_64.rpm $redirect"); $returnCode =$? >> 8;
+ok($returnCode == 0,"losf addrpm foo-1.0-1.x86_64.rpm ran ok");
+ok(-s "$tmpdir/test/rpms/x86_64/foo-1.0-1.x86_64.rpm","rpm file correctly cached in rpm_topdir");
+
+my $custom_cfg = new Config::IniFiles( -file => "$tmpdir/custom-packages/test/packages.config",
+				       -allowcontinue => 1,-nomultiline   => 1);
+ok($custom_cfg->SectionExists("Custom Packages"),"[Custom Packages] section exists");
+my $value = $custom_cfg->val("Custom Packages","master");
+ok($value eq "foo-1.0-1.x86_64 name=foo version=1.0 release=1 arch=x86_64 181fdd67f04def176cf486a156476f25 NODEPS IGNORESIZE",
+    "packages.config file contains correct entry for package foo");
+verify_change_required();
+system("rpm -q foo 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);chomp($igot);
+ok($igot eq "foo-1.0-1.x86_64","foo-1.0-1.x86_64 is installed after update");
+system("rpm -V foo"); $returnCode =$? >> 8;
+ok($returnCode == 0,"foo rpm verifies");
+
+# Verify we can't re-add same rpm with the same name
+system("../losf -y addrpm duplicate/foo-1.0-1.x86_64.rpm $redirect"); $returnCode =$? >> 8;
+ok($returnCode == 1,"repeat try of losf addrpm duplicate/foo-1.0-1.x86_64.rpm failed as expected");
+
+# make sure no change made to foo setting
+$custom_cfg->ReadConfig;
+my $value = $custom_cfg->val("Custom Packages","master");
+ok($value eq "foo-1.0-1.x86_64 name=foo version=1.0 release=1 arch=x86_64 181fdd67f04def176cf486a156476f25 NODEPS IGNORESIZE",
+    "packages.config file contains correct entry for package foo");
+
+# Verify we can't add a previously unregistered rpm when the same filename is present in cache_dir (Issue #59)
+system("rpm -e foo");
+ok($custom_cfg->delval("Custom Packages","master"),"remove previous config for package foo");
+ok($custom_cfg->RewriteConfig,"Rewriting config file");
+verify_no_changes_required();
+system("../losf -y addrpm duplicate_rpm/foo-1.0-1.x86_64.rpm"); $returnCode =$? >> 8;
+ok($returnCode == 1,"losf addrpm failed when cached rpm already present");
+verify_no_changes_required();
+# make sure the config file was not updated
+my $value = $custom_cfg->val("Custom Packages","master");
+ok("$value" eq "","erroneous addrpm request did not update config");
+
+# test upgrade of custom rpm
+
+system("rm $tmpdir/test/rpms/x86_64/*.rpm");
+system("../losf -y addrpm foo-1.0-1.x86_64.rpm $redirect"); $returnCode =$? >> 8;
+system("../update $redirect");
+system("rpm -q foo 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);chomp($igot);
+ok($igot eq "foo-1.0-1.x86_64","reinstall foo-1.0-1.x86_64");
+system("../losf -y addrpm ./foo-1.0-2.x86_64.rpm $redirect"); $returnCode =$? >> 8;
+ok($returnCode == 1,"addrpm correctly fails without upgrade request");
+verify_no_changes_required();
+system("../losf -y addrpm --upgrade foo-1.0-2.x86_64.rpm $redirect"); $returnCode =$? >> 8;
+ok($returnCode == 0,"addrpm --upgrade foo-1.0-2.x86_64.rpm ok");
+verify_change_required;
+system("rpm -q foo 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);chomp($igot);
+ok($igot eq "foo-1.0-2.x86_64","foo-1.0-2.x86_64 is installed after update");
+system("rpm -V foo"); $returnCode =$? >> 8;
+ok($returnCode == 0,"foo-1.0-2.x86_64 rpm verifies");
+
+system("rpm -e foo");
 
 close(IN);
 
