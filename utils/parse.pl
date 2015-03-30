@@ -805,56 +805,52 @@ BEGIN {
 
 	begin_routine();
 
-	if($osf_init_sync_permissions == 0) {
+        my $cluster = shift;
+        my $host    = shift;
+        my $logr    = get_logger();
+        
+        %osf_file_perms  = ();
 
-	    my $cluster = shift;
-	    my $host    = shift;
-	    my $logr    = get_logger();
+        DEBUG("   --> Looking for specific permissions to sync...($cluster->$host)\n");
 	    
-	    %osf_file_perms  = ();
+        if ( ! $local_cfg->SectionExists("Permissions") ) {
+            MYERROR("No Input section found for cluster $cluster [Permissions]\n");
+        }
+        
+        my @perms   = ();
+        my $section = ();
 
-	    DEBUG("   --> Looking for specific permissions to sync...($cluster->$host)\n");
-	    
-	    if ( ! $local_cfg->SectionExists("Permissions") ) {
-		MYERROR("No Input section found for cluster $cluster [Permissions]\n");
-	    }
-	    
-	    my @perms   = ();
-	    my $section = ();
-
-	    if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
-		$section = "Permissions";
-	    } else {
-		$section = "Permissions/$host";
-		if ( ! $local_cfg->SectionExists($section) ) {
-		    return(%perms);
-		}
-	    }
-
-	    @perms = $local_cfg->Parameters($section);
-
-#	    my @perms = $local_cfg->Parameters("Permissions");
-	    
-	    my $num_entries = @perms;
-	    
-	    DEBUG("   --> \# of file permissions to sync = $num_entries\n");
-	    
-	    foreach(@perms) {
-		DEBUG("   --> Read value for $_\n");
-		if (defined ($myval = $local_cfg->val($section,$_)) ) {
-		    DEBUG("   --> Value = $myval\n");
-		    $osf_file_perms{$_} = $myval;
-		} else {
-		    MYERROR("Permissions defined with no value ($_)");
-		}
-	    }
-	    $osf_init_sync_permissions=1;
-	}# end on first entry
+        if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
+            $section = "Permissions";
+        } else {
+            $section = "Permissions/$host";
+            if ( ! $local_cfg->SectionExists($section) ) {
+                DEBUG("   --> \# of file permissions to sync = 0\n");
+                return(%osf_file_perms);
+            }
+        }
+        
+        @perms = $local_cfg->Parameters($section);
+        
+        my $num_entries = @perms;
+        
+        DEBUG("   --> \# of file permissions to sync = $num_entries\n");
+        
+        foreach(@perms) {
+            DEBUG("   --> Read value for $_\n");
+            if (defined ($myval = $local_cfg->val($section,$_)) ) {
+                DEBUG("   --> Value = $myval\n");
+                $osf_file_perms{$_} = $myval;
+            } else {
+                MYERROR("Permissions defined with no value ($_)");
+            }
+        }
 
 	end_routine();
 	return(%osf_file_perms);
-    }
 
+    } # end sub query_cluster_config_sync_permissions()
+    
     sub query_cluster_rpm_dir {
 
 	begin_routine();
@@ -1021,10 +1017,6 @@ BEGIN {
 
 	DEBUG("   --> Looking for defined network gateway...($cluster->$host_type)\n");
 	    
-###	if ( ! $local_cfg->SectionExists("$section") ) {
-###	    MYERROR("No Input section found for cluster $cluster [$section]\n");
-###	} 
-###	
 	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
 	    DEBUG("   --> Read bootstrap = $myval\n");
 	    $value = $myval;
