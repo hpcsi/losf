@@ -85,6 +85,8 @@ if ($basename =~ m/(.*)\/utils\/$/) {
     $losf_top_dir = $basename;
 }
 
+my $nonDefaultTemplate = 0;
+
 if( @ARGV >= 1 ) {
     $template_dir = shift;
     my $resolve_dir = 0;
@@ -99,6 +101,7 @@ if( @ARGV >= 1 ) {
 	print "ERROR: Unable to access requested template directory -> $template_dir\n";
 	exit 1;
     }
+    $nonDefaultTemplate = 1;
 }
 
 # Use default template_dir if none provided 
@@ -173,7 +176,11 @@ if ( ! -s "$config_dir/config.machines" ) {
     while(my $line=<IN>) {
 	if($line =~ /^clusters\s+=\s+FOO/) {
 	    print OUT "clusters = $newCluster\n";
+	} elsif($line =~ /^clusters\s+=\s+default/) {
+	    print OUT "clusters = $newCluster\n";
 	} elsif ($line =~ /^\[FOO\]/) {
+	    print OUT "\[$newCluster\]\n";
+	} elsif ($line =~ /^\[default\]/) {
 	    print OUT "\[$newCluster\]\n";
 	} elsif ($line =~ /^master\s+=\s+default/) {
 	    print OUT "master = $hostname\n";
@@ -282,6 +289,50 @@ if ( $changedFlag == 0) {
     INFO("\nNo additional initialization required.\n");
 } else {
     INFO("\nBasic initialization complete.\n");
+}
+
+# Check for any provided const_files when using non-default template
+
+if($nonDefaultTemplate) {
+
+    INFO("\nChecking for const_files supplied with custom template ($template_dir)\n");
+
+    my $indir = "$template_dir/const_files/default";
+    opendir my $dirHandle, $indir or MYERROR("Unable to access $indir");
+
+    my @dirs = grep {-d "$indir/$_" && ! /^\.{1,2}$/} readdir($dirHandle);
+    
+    foreach my $dir (@dirs) {
+	INFO "--> detected const_files subdirectory for type = $dir\n";
+	
+	find( sub {
+	    return if (-d $_);
+	    
+	    if (-e "$config_dir/const_files/$newCluster/$dir/$_") {
+		INFO("    --> $_ const_file already present...not copying\n");
+		return;
+	    }
+	    
+	    INFO("    --> $_ file detected, copying file to new config\n");
+
+	    if( ! -d "$config_dir/const_files/$newCluster/$dir") {
+		mkpath("$config_dir/const_files/$newCluster/$dir") || 
+		    MYERROR("Unable to create path for const_files/$newCluster/$dir");
+	    }
+
+	    copy("$_","$config_dir/const_files/$newCluster/$dir/") || MYERROR("Unable to copy file $_ ($dir)");
+	    return;
+	      },"$template_dir/const_files/default/$dir");
+    }
+
+#    INFO("\nChecking for missing OS dependencies and caching RPMs locally\n");
+    
+#    my $pkg_manager = check_for_package_manager("updatepkg");
+#    init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$newCluster/packages.config");
+#    my @os_rpms = query_cluster_config_os_packages($newCluster,$main::node_type);
+#    verify_rpms(@os_rpms);
+#    INFO("--> package manger = $pkg_manager\n");
+#    parse_and_sync_os_packages();
 }
 
 # Done with lock
