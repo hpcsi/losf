@@ -645,15 +645,19 @@ BEGIN {
 	my $chroot = "";
 
 	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
-	    $chroot     = query_warewulf_chroot($node_cluster,$node_type);
+	    $chroot = query_warewulf_chroot($node_cluster,$node_type);
 	    DEBUG("   --> using alternate chroot for type = $node_type, chroot = $chroot\n");
+
+            # chroot does not include trailing slash, add it in locally
+            if($chroot ne "") {
+                $chroot = $chroot . "/";
+            }
 	}
 
 	# Node type-specific settings: these take precedence over global
 	# settings; apply them first
 
 	my %perm_files_custom = query_cluster_config_sync_permissions($node_cluster,$node_type);
-
 
 	$losf_permissions_total = scalar keys %perm_files_custom;
 
