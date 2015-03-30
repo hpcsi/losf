@@ -1560,7 +1560,7 @@ sub add_custom_rpm {
         # copy of the cached rpm exists already.
 
         ERROR("\n");
-        MYERROR_NE("Cached $rpm_arch exists already in rpm_topdir ($rpm_topdir). Consider increasing the");
+        MYERROR_NE("Cached $basename exists already in rpm_topdir ($rpm_topdir). Consider increasing the");
         MYERROR_NE("RPM release number or remove the cached copy if you are confident this RPM has not been");
         MYERROR_NE("propagated previously.");
         ERROR("\n");
