@@ -57,6 +57,7 @@ BEGIN {
 	if ( "$output_mode" eq "INFO"  || 
 	     "$output_mode" eq "ERROR" ||
 	     "$output_mode" eq "WARN"  ||
+	     "$output_mode" eq "TRACE"  ||
 	     "$output_mode" eq "DEBUG" ) {
 	    $logr->level($output_mode);
 	} else {
