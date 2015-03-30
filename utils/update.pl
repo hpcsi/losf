@@ -214,8 +214,6 @@ foreach our $node_type (@update_types) {
         INFO("\n");
     }
 
-    exit($hostChanged);
-
 }
 
 
@@ -234,6 +232,8 @@ if ( -x $custom_file ) {
 # Done with lock
 
 our $LOSF_FH_lock; close($LOSF_FH_lock);
+
+exit($hostChanged);
 
 1;
 
