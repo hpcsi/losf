@@ -25,7 +25,7 @@
 #--------------------------------------------------------------------------
 
 use LosF_paths;
-use LosF_rpm_topdir;
+#use LosF_rpm_topdir;
 
 use Sys::Syslog;  
 use Digest::MD5;
