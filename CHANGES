@@ -1,3 +1,5 @@
+Version 0.52.0 (In Progress)
+
 Version 0.51.0 (30 March 2015)
 
   * disallow addition of custom rpm if the same version/release was cached previously in rpm_topdir
