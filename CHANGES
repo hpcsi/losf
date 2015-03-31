@@ -1,4 +1,4 @@
-Version 0.51.0 ( In Progress)
+Version 0.51.0 (30 March 2015)
 
   * disallow addition of custom rpm if the same version/release was cached previously in rpm_topdir
   * allow support for node-type specific [Permissions] control
@@ -8,7 +8,7 @@ Version 0.51.0 ( In Progress)
   * expand regression test suite
   * allow losf -v/--version queries when LOSF_CONFIG_DIR is not valid
 
-Version 0.50.0 ( 24 November 2014)
+Version 0.50.0 (24 November 2014)
 
   * include support for RHEL7 without need for additional yum downloadonly plugin
   * remove use of Switch.pm from losf util to support newer perl versions
