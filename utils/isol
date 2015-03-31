@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ $# -lt 1 ];then
+    echo " "
+    echo "Usage: isol host"
+    echo " "
+    exit 1
+fi
+
+if [ ! $IPMI_PASSWORD ]; then
+    stty -echo
+    read -p "Password: " passw; echo
+    stty echo
+    echo
+    /usr/bin/ipmitool -I lanplus -H $1 -U root -P $passw sol activate
+    echo
+fi
+
+if [ $IPMI_PASSWORD ]; then
+    /usr/bin/ipmitool -E -I lanplus -H $1 -U root sol activate
+fi
+
+exit 0
