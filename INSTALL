@@ -196,7 +196,7 @@ should work with CentOS distributions is outlined in the following sections.
        used as the basis for creating the necessary configuration files for your cluster
        in $config_dir and help to illustrate some of the available options.
        
-       Alternatively, you can use a convenience utility to initialize the cluster with a
+       Alternatively, you can use a convenient utility to initialize the cluster with a
        vanilla configuration as follows:
 
        $ <losf-install>/initconfig <YourClusterName>
@@ -320,7 +320,7 @@ should work with CentOS distributions is outlined in the following sections.
    (d) Sync config files only.
 
        The "update" utility is normally used to verify that all configuration files and
-       OS/Custom packages are in sync. A convenience utility is provided in cases where
+       OS/Custom packages are in sync. A convenient utility is provided in cases where
        you only modified a configuration file or runtime service and want to bring a host
        in sync without checking all RPM packages.  
 
