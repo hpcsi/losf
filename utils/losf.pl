@@ -1844,7 +1844,7 @@ my $logr = get_logger(); $logr->level($ERROR);
 verify_sw_dependencies(); 
 
 (my $node_cluster, my $node_type) = determine_node_membership();
-#my %rpm_topdir                    = query_cluster_rpm_dir($node_cluster,$node_type);
+my %rpm_topdir                    = query_cluster_rpm_dir($node_cluster,$node_type);
 
 LosF_provision::init_provisioning_system();
 
