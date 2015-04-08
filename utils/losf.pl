@@ -85,6 +85,7 @@ sub usage {
     print "     config-upgrade                       upgrade existing packages.config to latest syntax format\n";
     print "\n";
     print "     OPTIONS:\n";
+    print "        --yes                             assume \"yes\" for interactive additions\n";
     print "        --type [name]                     add package to specific node type (for use with chroot provisioning)\n";
 
     print "\n";
@@ -1843,6 +1844,7 @@ my $logr = get_logger(); $logr->level($ERROR);
 verify_sw_dependencies(); 
 
 (my $node_cluster, my $node_type) = determine_node_membership();
+#my %rpm_topdir                    = query_cluster_rpm_dir($node_cluster,$node_type);
 
 LosF_provision::init_provisioning_system();
 
@@ -1890,12 +1892,20 @@ if($assume_yes) {
 # -- add suboptions
 if ($noprovision      && ($command ne "add")) {invalid_argument($command,"--noprovision"); }
 
+# --addpkg/addrpm suboptions
+
+if ($assume_yes){
+    if ($command ne "addrpm" && $command ne "addpkg") {
+	invalid_argument($command,"--yes"); 
+    }
+}
+
 # -- addrpm suboptions
 if ($alias_option     && ($command ne "addrpm")) {invalid_argument($command,"--alias"); }
 if ($all              && ($command ne "addrpm")) {invalid_argument($command,"--all"); }
 if ($upgrade          && ($command ne "addrpm")) {invalid_argument($command,"--upgrade"); }
 if ($install          && ($command ne "addrpm")) {invalid_argument($command,"--install"); }
-if ($assume_yes       && ($command ne "addrpm")) {invalid_argument($command,"--yes"); }
+
 if (@relocate_options && ($command ne "addrpm")) {invalid_argument($command,"--relocate"); }
 
 # Do the deed
