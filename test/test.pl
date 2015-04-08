@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 88;
+use Test::More tests => 94;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -238,6 +238,23 @@ ok("$igot" eq "$ref_output","update applied to compute node type only");
 ok(-d "$tmpdir2/images/b_test_dir","$tmpdir2/images/b_test_dir/ directory created");
 $fileMode = sprintf("%o",(stat("$tmpdir2/images/b_test_dir"))[2] &07777);
 ok($fileMode eq "755","b_test_dir has correct 755 permissions"); verify_no_changes_required();
+
+system("rpm --root=$tmpdir2/images --initdb"); $returnCode = $? >> 8;
+ok( $returnCode == 0,"initialized rpmdb in chroot -> $tmpdir2/images");
+
+system("rpm --root=$tmpdir2/images -i --nodeps --nosignature centos-release-6-6.el6.centos.12.2.x86_64.rpm $redirect"); $returnCode = $? >> 8;
+ok( $returnCode == 0,"installed centos-release in chroot");
+
+system("$losf_dir/losf addpkg --yes --type=compute setup $redirect"); $returnCode = $? >> 8;
+ok( $returnCode == 0,"addpkg command to --type=compute completed ok");
+
+system("ls $tmpdir/test/rpms/noarch/setup*.rpm $redirect"); $returnCode = $? >> 8;
+ok( $returnCode == 0,"setup rpm present in rpm_topdir");
+
+verify_change_required();
+system("rpm --root=$tmpdir2/images -q setup $redirect"); $returnCode = $? >> 8;
+ok( $returnCode == 0,"setup rpm avilable in chroot");
+
 
 #----------------------------------------
 print "\nChecking losf addrpm\n";
