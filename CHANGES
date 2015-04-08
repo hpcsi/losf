@@ -1,4 +1,7 @@
-Version 0.52.0 (In Progress)
+Version 0.51.1 (08 April 2015)
+
+  * fix for use of "losf addpkg" with a chroot environment
+  * added support for "--yes" option to losf addpkg
 
 Version 0.51.0 (30 March 2015)
 
