@@ -1,3 +1,7 @@
+Version 0.51.2 (14 April 2015)
+
+  * fix for koomie_cf options parsing
+
 Version 0.51.1 (08 April 2015)
 
   * fix for use of "losf addpkg" with a chroot environment
