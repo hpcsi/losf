@@ -28,6 +28,7 @@
 use POSIX;
 use Getopt::Long;
 Getopt::Long::Configure("pass_through");
+Getopt::Long::Configure("require_order");
 
 sub usage {
     print << "EOT";
