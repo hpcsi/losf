@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 94;
+use Test::More tests => 97;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -96,7 +96,7 @@ ok ($version_update == "LosF: Version $loc_version","\"losf --version\" matches 
 #------------------------------------------------------
 
 print "\nInitializing test config ";
-my $tmpdir = File::Temp::tempdir(CLEANUP => 0) || die("Unable to create temporary directory");
+my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
 print "--> tmpdir = $tmpdir\n";
 
 $ENV{'LOSF_CONFIG_DIR'} = "$tmpdir";
@@ -166,7 +166,7 @@ my $local_cfg = new Config::IniFiles( -file => "$tmpdir/config.test",
 
 ok($local_cfg->SectionExists("Permissions"),"[Permissions] section exists");
 
-my $tmpdir2 = File::Temp::tempdir(CLEANUP => 0) || die("Unable to create temporary directory");
+my $tmpdir2 = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
 my $testdir = "$tmpdir2/a_test_dir/";
 ok(! -d $testdir,"$testdir does not exist previously");
 ok($local_cfg->newval("Permissions",$testdir,"750"),"Setting dir perms to 750");
@@ -322,6 +322,16 @@ system("rpm -V foo"); $returnCode =$? >> 8;
 ok($returnCode == 0,"foo-1.0-2.x86_64 rpm verifies");
 
 system("rpm -e foo");
+
+#----------------------------------------
+print "\nChecking koomie_cf\n";
+#----------------------------------------
+ok(system("$losf_dir/koomie_cf -x localhost hostname 1> $tmpdir/.result" ) == 0,"koomie_cf -x localhost runs");
+my $igot=(`cat $tmpdir/.result`); chomp($igot);
+$ref_output = "localhost " . `hostname`; chomp($ref_output);
+ok("$igot" eq "$ref_output","koomie_cf hostname output ok");
+system("$losf_dir/koomie_cf -x localhost uptime -h $redirect"); $returnCode =$? >> 8;
+ok($returnCode == 0,"koomie_cf ignoring options given to command arguments");
 
 close(IN);
 
