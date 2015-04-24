@@ -371,6 +371,24 @@ sub add_node  {
 sub del_node {
     my $host = shift;
 
+    # Check if host is defined
+
+
+    print "\n** Checking if node $host is registered with $losf_provisioner\n";
+    if($losf_provisioner eq "Cobbler") {
+	$cmd="cobbler system report --name=$host >& /dev/null";
+    } elsif ($losf_provisioner eq "Warewulf") {
+	$cmd="wwsh node list $host >& /dev/null";
+    } else {
+	MYERROR("Unknown provisioning system");
+    }
+
+    my $returnCode = system($cmd);
+    if($returnCode != 0) {
+        INFO("   --> $host unknown to $losf_provisioner - ignoring delete request\n");
+        return;
+    }
+        
     print "\n** Removing existing node $host\n";
 
     if($losf_provisioner eq "Cobbler") {
@@ -381,7 +399,7 @@ sub del_node {
 	MYERROR("Unknown provisioning system");
     }
 
-    my $returnCode = system($cmd);
+    $returnCode = system($cmd);
     if($returnCode != 0) {
 	print "\n$cmd\n\n";	
 	MYERROR("Host removal failed ($returnCode)\n");
@@ -393,7 +411,13 @@ sub reinsert_node {
     my $host = shift;
 
     del_node($host);
-    add_node($host);
+
+    if (@_ >= 1) {
+        my $local_node_type = shift;
+        add_node($host,$local_node_type);
+    } else {
+        add_node($host);
+    }
 }
 
 sub sync {
@@ -1862,7 +1886,7 @@ init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$
 
 if($losf_provisioner eq "Warewulf") {
     if($local_node_type ne "" ) {
-	if ($command !~ /addpkg|addgroup|updatepkg|updatepkgs|add/ ) {
+	if ($command !~ /addpkg|addgroup|updatepkg|updatepkgs|add|reinsert/ ) {
 	    invalid_argument($command,"--type"); 
 	}
 	$chroot = query_warewulf_chroot($node_cluster,$local_node_type);
@@ -1920,15 +1944,21 @@ if (@relocate_options && ($command ne "addrpm")) {invalid_argument($command,"--r
 
 if ($command eq "add") { 
     if($local_node_type) {
-        add_node ($argument,$local_node_type) 
+        add_node ($argument,$local_node_type);
     } else {
         add_node ($argument);
    }
+} elsif ($command eq "reinsert") {
+    if($local_node_type) {
+        reinsert_node($argument,$local_node_type);
+    } else {
+        reinsert_node($argument) 
+    }
 }
+
 elsif ($command eq "addalias")       { add_alias    ($argument) }
 elsif ($command eq "del")            { del_node     ($argument) } 
 elsif ($command eq "delete")         { del_node     ($argument) } 
-elsif ($command eq "reinsert")       { reinsert_node($argument) }
 elsif ($command eq "sync")           { sync         ()          }
 elsif ($command eq "version")        { print_header ()          }
 elsif ($command eq "addpkg") {

@@ -1,5 +1,6 @@
 Version 0.52.0 (In Progress)
 
+  * allow 'losf reinsert [host]' to proceed when host not registered with provisioner
   * add option to 'losf add [host]' command to allow specification of desired node type
 
 Version 0.51.2 (14 April 2015)
