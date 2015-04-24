@@ -66,6 +66,7 @@ sub usage {
     print "     sync                                 sync host provisioning config with Cobbler\n";
     print "\n";
     print "     OPTIONS:\n";
+    print "        --type [name]                     override node type using provided name\n";
     print "        --noprovision                     flag as external host, not intended for provisioning\n";
     print "\n";
 
@@ -147,12 +148,19 @@ sub invalid_argument {
 
 sub add_node  {
     my $host = shift;
-    
+
     INFO("\n** Adding new node $host for $losf_provisioner provisioning...\n");
 
     my ($tmp,$domain_name) = query_local_network_name();
 
-    ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
+    # [Optional] support for user-provided node type
+
+    if (@_ >= 1) {
+        ($node_cluster, $node_type) = query_global_config_host($tmp,$domain_name);
+        $node_type = shift;
+    } else {
+        ($node_cluster, $node_type) = query_global_config_host($host,$domain_name);
+    }
 
     # 
     # Parse defined Losf network interface settings
@@ -1854,7 +1862,7 @@ init_local_custom_config_file_parsing("$losf_custom_config_dir/custom-packages/$
 
 if($losf_provisioner eq "Warewulf") {
     if($local_node_type ne "" ) {
-	if ($command !~ /addpkg|addgroup|updatepkg|updatepkgs/ ) {
+	if ($command !~ /addpkg|addgroup|updatepkg|updatepkgs|add/ ) {
 	    invalid_argument($command,"--type"); 
 	}
 	$chroot = query_warewulf_chroot($node_cluster,$local_node_type);
@@ -1910,7 +1918,13 @@ if (@relocate_options && ($command ne "addrpm")) {invalid_argument($command,"--r
 
 # Do the deed
 
-   if ($command eq "add")            { add_node     ($argument) }
+if ($command eq "add") { 
+    if($local_node_type) {
+        add_node ($argument,$local_node_type) 
+    } else {
+        add_node ($argument);
+   }
+}
 elsif ($command eq "addalias")       { add_alias    ($argument) }
 elsif ($command eq "del")            { del_node     ($argument) } 
 elsif ($command eq "delete")         { del_node     ($argument) } 
