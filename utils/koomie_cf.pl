@@ -171,8 +171,15 @@ if ( $opt_f ne "" ) {
 
     open(input,$opt_f) || die("Unable to open $opt_f");
     while(<input>) {
-	chomp;
-	$hosts{$_} = $rnk_count;
+        my $name=$_;
+        chomp($name);           # remove newline
+        $name =~ s/\s+$//;      # also remove any inadvertent spaces
+
+        if($name =~ m/^# \S+/) {
+            next;
+        }
+
+	$hosts{$name} = $rnk_count;
 	$rnk_count++;
     }
 
