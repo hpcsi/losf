@@ -175,7 +175,9 @@ if ( $opt_f ne "" ) {
         chomp($name);           # remove newline
         $name =~ s/\s+$//;      # also remove any inadvertent spaces
 
-        if($name =~ m/^# \S+/) {
+        # skip commented-out hosts
+
+        if($name =~ m/^#\S+/) {
             next;
         }
 
