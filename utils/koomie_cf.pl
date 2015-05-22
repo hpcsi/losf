@@ -177,7 +177,7 @@ if ( $opt_f ne "" ) {
 
         # skip commented-out hosts
 
-        if($name =~ m/^#\S+/) {
+        if($name =~ m/^#/) {
             next;
         }
 
