@@ -1,6 +1,7 @@
 Version 0.52.0 (In Progress)
 
-  * all hosts to be skipped via comment character (#) when using koomie_cf -f <hostfile>
+  * propagate [Kernel-Boot-Options-Post] settings in Warewulf provisioning mode
+  * allow hosts to be skipped via comment character (#) when using koomie_cf -f <hostfile>
   * allow 'losf reinsert [host]' to proceed when host not registered with provisioner
   * add option to 'losf add [host]' command to allow specification of desired node type
 

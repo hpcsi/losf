@@ -324,9 +324,10 @@ sub add_node  {
 	}
     } elsif ($losf_provisioner eq "Warewulf") {
 
-	$gateway   = query_cluster_config_network_gateway ($node_cluster,$node_type);
-	$chroot    = query_warewulf_chroot                ($node_cluster,$node_type);
-	$bootstrap = query_warewulf_bootstrap             ($node_cluster,$node_type);
+	$gateway   = query_cluster_config_network_gateway                   ($node_cluster,$node_type);
+	$chroot    = query_warewulf_chroot                                  ($node_cluster,$node_type);
+	$bootstrap = query_warewulf_bootstrap                               ($node_cluster,$node_type);
+        $kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
 
 	my $vnfs = basename($chroot);
 	my $gw_option = "";
@@ -335,6 +336,14 @@ sub add_node  {
 	    $gw_option = "-G $gateway";
 	    INFO("   --> Gateway             = $gateway\n");
 	}
+
+        my $karg_option = "";
+
+        if( $kernel_options_post ne "" ) {
+            $karg_option = "--kargs $kernel_options_post";
+	    INFO("   --> Kernal arg          = $kernel_options_post\n");
+        }
+                
 
 	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0] $gw_option";
 
@@ -353,7 +362,7 @@ sub add_node  {
 
 	INFO("   --> vNFS image          = $vnfs\n");
 	INFO("   --> Bootstrap           = $bootstrap\n");
-	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$bootstrap";
+	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$bootstrap $karg_option";
 
 	$returnCode = system($cmd);
 	
