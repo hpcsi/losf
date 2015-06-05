@@ -1589,7 +1589,7 @@ sub add_custom_rpm {
     (my $rpm_topdir) = query_cluster_rpm_dir($node_cluster,$node_type);
 
     if(! -d "$rpm_topdir/$rpm_arch" ) {
-	INFO("  --> Creating rpm housing directory: $rpm_topdir/$rpm_arch");
+	INFO("   --> Creating rpm housing directory: $rpm_topdir/$rpm_arch\n");
 	mkdir("$rpm_topdir/$rpm_arch",0700) || MYERROR("Unable to create rpm directory: $rpm_topdir/$rpm_arch");
     }
 
