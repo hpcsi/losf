@@ -181,6 +181,14 @@ if ( $opt_f ne "" ) {
             next;
         }
 
+        # skip empty lines
+
+        $name =~ s/^\s+//;
+        $name =~ s/\s+$//;
+
+        next unless length($name);
+        
+
 	$hosts{$name} = $rnk_count;
 	$rnk_count++;
     }
