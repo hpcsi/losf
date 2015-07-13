@@ -324,9 +324,11 @@ sub add_node  {
 	}
     } elsif ($losf_provisioner eq "Warewulf") {
 
-	$gateway   = query_cluster_config_network_gateway                   ($node_cluster,$node_type);
-	$chroot    = query_warewulf_chroot                                  ($node_cluster,$node_type);
-	$bootstrap = query_warewulf_bootstrap                               ($node_cluster,$node_type);
+        my @addFiles = query_warewulf_file_additions                        ($node_cluster,$node_type);
+	$gateway     = query_cluster_config_network_gateway                 ($node_cluster,$node_type);
+	$chroot      = query_warewulf_chroot                                ($node_cluster,$node_type);
+	$bootstrap   = query_warewulf_bootstrap                             ($node_cluster,$node_type);
+
         $kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
 
 	my $vnfs = basename($chroot);
@@ -345,13 +347,28 @@ sub add_node  {
         }
                 
 
-	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0] $gw_option";
+	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0] $gw_option "
+	    ."--netmask=$netmask[0] --fqdn=$host.$domain_name";
 
 	my $returnCode = system($cmd);
 	
 	if($returnCode != 0) {
 	    print "\n$cmd\n\n";	
 	    MYERROR("Warewulf insertion failed ($returnCode)\n");
+	}
+
+	# add any additional interfaces
+
+	for my $count (1 .. ($num_interfaces-1)) {
+	    $cmd="wwsh -y node set $host --netdev=$interface[$count] --ipaddr=$ip[$count] "
+		."--netmask=$netmask[$count] --hwaddr=$mac[$count]";
+
+	    my $returnCode = system($cmd);
+	
+	    if($returnCode != 0) {
+		print "\n$cmd\n\n";	
+		MYERROR("Warewulf insertion for multiple interfaces failed ($returnCode)\n");
+	    }
 	}
 
 	# convention is to honor requested bootstrap if given; otherwise, we use `uname -r`
@@ -362,6 +379,7 @@ sub add_node  {
 
 	INFO("   --> vNFS image          = $vnfs\n");
 	INFO("   --> Bootstrap           = $bootstrap\n");
+
 	$cmd="wwsh -y provision set $host --vnfs=$vnfs --bootstrap=$bootstrap $karg_option";
 
 	$returnCode = system($cmd);
@@ -370,6 +388,19 @@ sub add_node  {
 	    print "\n$cmd\n\n";	
 	    MYERROR("Warewulf insertion failed ($returnCode)\n");
 	}
+
+        # Add any additional bootstrapping files that are defined
+        foreach my $file (@addFiles) {
+            INFO("   --> Additional file     = $file\n");
+            $cmd = "wwsh -y provision set --fileadd=$file $host";
+
+            $returnCode = system($cmd);
+            
+            if($returnCode != 0) {
+                print "\n$cmd\n\n";	
+                MYERROR("Warewulf provisoin set --fileadd=$file failed ($returnCode)\n");
+            }
+        }
 
     }	else {
 	MYERROR("Unknown provisioning system");

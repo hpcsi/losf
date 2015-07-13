@@ -1026,6 +1026,32 @@ BEGIN {
 	return($value);
     }
 
+    sub query_warewulf_file_additions {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+        my @files     = ();
+	my $section   = "Warewulf/files";
+
+	DEBUG("   --> Looking for defined Warewulf files to add...($cluster->$host_type)\n");
+	    
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read files = $myval\n");
+	    $value = $myval;
+	}
+
+        @files = split(',', $value);
+	
+	end_routine();
+	return(@files);
+    }
+
     sub query_cluster_config_name_servers_search {
 
 	begin_routine();

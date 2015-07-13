@@ -1,5 +1,8 @@
 Version 0.52.0 (13 July 2015)
 
+  * added new config option for Warewulf provisioning ([Warewulf/files]). Allows for the 
+    specification of additional files to provision - useful for prescribing multiple network interfaces.
+  * allow multiple interface definition with Warewulf provisioning
   * propagate [Kernel-Boot-Options-Post] settings in Warewulf provisioning mode
   * allow hosts to be skipped via comment character (#) when using koomie_cf -f <hostfile>
   * allow 'losf reinsert [host]' to proceed when host not previously registered with provisioner
