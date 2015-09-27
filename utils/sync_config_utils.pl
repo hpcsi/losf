@@ -76,9 +76,10 @@ BEGIN {
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
-	my @sync_files    = query_cluster_config_const_sync_files($node_cluster,$node_type);
+	my @sync_files    = query_cluster_config_const_sync_files  ($node_cluster,$node_type);
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
-	my %perm_files    = query_cluster_config_sync_permissions($node_cluster,$node_type);
+        my %replace_vars  = query_cluster_config_var_substitution  ($node_cluster,$node_type);
+	my %perm_files    = query_cluster_config_sync_permissions  ($node_cluster,$node_type);
 
 	# note: if the user supplies a partial config request for a
 	# particular appliance, this should override a const file
@@ -105,7 +106,7 @@ BEGIN {
 
 	foreach(@sync_files) {
 	    if( !exists $partial_file_hash{$_} ) {
-		sync_const_file($chroot . $_,$node_cluster,$node_type);
+		sync_const_file($chroot . $_,$node_cluster,$node_type,\%replace_vars);
 	    }
 	}
 
@@ -228,13 +229,16 @@ BEGIN {
 
 	begin_routine();
 
-	my $file       = shift;	# input filename to sync
-	my $cluster    = shift;	# cluster name
-	my $type       = shift;	# node type
+	my $file         = shift;	# input filename to sync
+	my $cluster      = shift;	# cluster name
+	my $type         = shift;	# node type
 
-	my $logr       = get_logger();
-	my $found      = 0;
-	my $customized = 0;
+        my $params       = shift;
+        my %replace_vars = %$params;    # hash of variables to replace
+
+	my $logr         = get_logger();
+	my $found        = 0;
+ 	my $customized   = 0;
 
         my ($host_name,$doman_name) = query_local_network_name();
 
@@ -281,7 +285,7 @@ BEGIN {
 
 	(my $fh_tmp, my $ref_file) = tempfile();
 	    
-	expand_text_macros($sync_file,$ref_file,$cluster);
+	expand_text_macros($sync_file,$ref_file,$cluster,\%replace_vars);
 	    
 	# Deal with non-symbolic link and diff directly.
 

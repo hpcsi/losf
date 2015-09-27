@@ -258,9 +258,12 @@ sub end_routine {
 sub expand_text_macros {
     begin_routine();
 
-    my $file_in  = shift;
-    my $file_out = shift;
-    my $cluster  = shift;
+    my $file_in      = shift;
+    my $file_out     = shift;
+    my $cluster      = shift;
+
+    my $params       = shift;
+    my %replace_vars = %$params;    # hash of variables to replace
 
     # @losf_synced_file_notice@ 
 
@@ -268,48 +271,46 @@ sub expand_text_macros {
 
     if ( -s "$template" ) {
 	DEBUG( "   --> notify_header file available\n");
-	expand_individual_macro($file_in,$file_out,$template,"\@losf_synced_file_notice\@");
-    } else {
-	copy($file_in,$file_out) || die "Copy failed: $!";
+        open($TEMPLATE,"<$template") || die "Cannot open $template\n";
+
+        @expand_text = <$TEMPLATE>;
+
+        # update text with any other supported macro's
+
+        foreach(@expand_text) {
+            s/\@losf_synced_file_location\@/$file_in/
+        }
+        close($TEMPLATE);
     }
 
-
-    end_routine();
-}
-
-sub expand_individual_macro {
-    begin_routine();
-
-    my $file_in  = shift;
-    my $file_out = shift;
-    my $template = shift;
-    my $keyword  = shift;
-
-    open($TEMPLATE,"<$template") || die "Cannot open $template\n";
     open($IN,      "<$file_in")  || die "Cannot open $file_in\n";
-    open($OUT,     ">$file_out") || die "Cannot create $file_out\n";
+    open($OUT,     ">$file_out") || die "Cannot create $file_out\n";    
 
-    @expand_text = <$TEMPLATE>;
-
-    # update text with any other supported macro's
-
-    foreach(@expand_text) {
-	s/\@losf_synced_file_location\@/$file_in/
-    }
+    my $count = keys %replace_vars;
 
     while( $line = <$IN>) {
-	if( $line =~ m/$keyword/ ) {
+
+        # Apply any desired variable substitution
+        
+        while( my($key,$value) = each %replace_vars) {
+            if ($line =~ s/<<<$key>>>/$value/g ) {
+                DEBUG("   --> performed variable substitution for $key ($file_in)\n");
+            }
+        }
+
+        # Apply special @losf_synced_file_notice@
+
+	if( $line =~ m/\@losf_synced_file_notice\@/ ) {
 	    DEBUG(   "--> found a text macro...\n");
 	    print $OUT @expand_text;
-
-	} else {
-	    print $OUT $line;
-	}
+        } else {
+            print $OUT $line;
+        }
     }
 
-    close($TEMPLATE);
     close($IN);
     close($OUT);
+
     end_routine();
 }
 
