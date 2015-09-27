@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 97;
+use Test::More tests => 124;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -154,15 +154,130 @@ ok($line =~ m/^\[LosF\] Config dir:      $tmpdir$/,"rpm_topdir -> correct config
 $line = <IN>; chomp($line);
 ok($line =~ m/^\[LosF\] RPM topdir:      $tmpdir\/test\/rpms$/,"rpm_topdir -> correct RPM topdir ");
 
-# -----------------------------------------------------------------------------------------
 
-print "\nChecking permissions update capability using input file $tmpdir/config.test\n";
 
-my $fileMode;
+# -----------------------------------------------------------------------
+print "\nChecking sync const files with/without variable substitution\n";
+# -----------------------------------------------------------------------
 
 my $local_cfg = new Config::IniFiles( -file => "$tmpdir/config.test",
 				   -allowcontinue => 1,
 				   -nomultiline   => 1);
+
+ok($local_cfg->SectionExists("ConfigFiles"),"[ConfigFiles] section exists");
+
+
+my $const_file="/tmp/.losf_testing_const";
+ok($local_cfg->newval("ConfigFiles",$const_file,"yes"),"Defining sync file");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+verify_no_changes_required();
+
+open(OUT,">$tmpdir/const_files/test/master/.losf_testing_const") || die "Cannot open const file .losf_testing_const\n";
+print OUT "All right, all right, all right\n";
+close(OUT);
+
+unlink($const_file);
+
+system("$losf_dir/update -q 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);
+
+$ref_output = << "EOF";
+   --> UPDATING: [.losf_testing_const] Differences found: requires syncing
+UPDATED: [RPMs: OS     0/0  Custom     0/0] [Files:    1/1] [Links:   0/0] [Services:   0/0] [Perms:   0/0] -> master
+EOF
+
+ok("$igot" eq "$ref_output","const file updated");
+ok( (compare($const_file,"$tmpdir/const_files/test/master/.losf_testing_const") == 0),"const file contents identical");
+
+
+# variable substitution
+
+open(OUT,">$tmpdir/const_files/test/master/.losf_testing_const2") || die "Cannot open const file .losf_testing_const2\n";
+print OUT "This world needs to be <<<avariable>>>\n";
+close(OUT);
+
+ok($local_cfg->newval("ConfigFiles","/tmp/.losf_testing_const2","yes"),"Defining another sync file");
+ok($local_cfg->newval("VarSub","avariable","exterminated. Exterminate!"),"Defining variable substitution");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+
+unlink("/tmp/.losf_testing_const2");
+
+system("$losf_dir/update -q 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);
+
+$ref_output = << "EOF";
+   --> UPDATING: [.losf_testing_const2] Differences found: requires syncing
+UPDATED: [RPMs: OS     0/0  Custom     0/0] [Files:    1/2] [Links:   0/0] [Services:   0/0] [Perms:   0/0] -> master
+EOF
+
+ok("$igot" eq "$ref_output","1/2 const files updated");
+
+$ref_output = << "EOF";
+This world needs to be exterminated. Exterminate!
+EOF
+
+$igot=(`cat /tmp/.losf_testing_const2`);
+ok("$igot" eq "$ref_output","variable substitution for <<<avariable>>> correct");
+
+# verify node-type substitution overrides default value
+
+ok($local_cfg->newval("VarSub/master","avariable","removed for an intergalactic freeway"),"Defining var subs for node type");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+
+verify_change_required();
+
+$ref_output = << "EOF";
+This world needs to be removed for an intergalactic freeway
+EOF
+
+$igot=(`cat /tmp/.losf_testing_const2`);
+ok("$igot" eq "$ref_output","variable substitution override for node type correct");
+
+# verify delimiters can be overridden by user
+
+ok($local_cfg->newval("VarSub/Controls","delimiter_begin","\@"),"Override begin delimiter");
+ok($local_cfg->newval("VarSub/Controls","delimiter_end","\@"),"Override end delimiter");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+verify_change_required();
+
+open(OUT,">$tmpdir/const_files/test/master/.losf_testing_const2") || die "Cannot open const file .losf_testing_const2\n";
+print OUT "This world needs to be \@avariable\@\n";
+close(OUT);
+
+verify_change_required();
+
+$igot=(`cat /tmp/.losf_testing_const2`);
+ok("$igot" eq "$ref_output","variable substitution with non-default delimiters works");
+
+# verify removal works
+
+ok($local_cfg->newval("ConfigFiles","/tmp/.losf_testing_const","delete"),"Update config to remove 1st config file");
+ok($local_cfg->newval("ConfigFiles","/tmp/.losf_testing_const2","delete"),"Update config to remove 2nd config file");
+ok($local_cfg->RewriteConfig,"Rewriting config file");
+
+system("$losf_dir/update -q 1> $tmpdir/.result");
+$igot=(`cat $tmpdir/.result`);
+
+$ref_output = << "EOF";
+   --> UPDATING: [.losf_testing_const] File present: deleting
+   --> UPDATING: [.losf_testing_const2] File present: deleting
+UPDATED: [RPMs: OS     0/0  Custom     0/0] [Files:    2/2] [Links:   0/0] [Services:   0/0] [Perms:   0/0] -> master
+EOF
+
+ok("$igot" eq "$ref_output","update detected two files to remove");
+ok(! -e "/tmp/.losf_testing_const","Confirm 1st config file is removed");
+ok(! -e "/tmp/.losf_testing_const2","Confirm 2nd config file is removed");
+
+$local_cfg->delval("ConfigFiles","/tmp/.losf_testing_const");
+$local_cfg->delval("ConfigFiles","/tmp/.losf_testing_const2");
+
+
+# -----------------------------------------------------------------------------------------
+print "\nChecking permissions update capability using input file $tmpdir/config.test\n";
+# -----------------------------------------------------------------------------------------
+
+my $fileMode;
+
 
 ok($local_cfg->SectionExists("Permissions"),"[Permissions] section exists");
 
