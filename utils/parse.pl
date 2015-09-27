@@ -388,14 +388,14 @@ BEGIN {
 
 	DEBUG("   --> Looking for variable replacement definitions...($cluster->$node_type)\n");
 
-        my $begin_delim = $local_cfg->val("VarSub/Controls","delimiter_begin","<<<") || MYERROR("VarSub: Unable to query delimiter_begin");
-        my $end_delim   = $local_cfg->val("VarSub/Controls","delimiter_end",  ">>>") || MYERROR("VarSub: Unable to query delimiter_end");
+        our $varSub_begin_delim = $local_cfg->val("VarSub/Controls","delimiter_begin","<<<") || MYERROR("VarSub: Unable to query delimiter_begin");
+        our $varSub_end_delim   = $local_cfg->val("VarSub/Controls","delimiter_end",  ">>>") || MYERROR("VarSub: Unable to query delimiter_end");
 
-        $begin_delim =~ s/^"(.*)"$/$1/;
-        $end_delim   =~ s/^"(.*)"$/$1/;
+        $varSub_begin_delim =~ s/^"(.*)"$/$1/;
+        $varSub_end_delim   =~ s/^"(.*)"$/$1/;
 
-        DEBUG("       --> begin delimiter = $begin_delim\n");
-        DEBUG("       --> end   delimiter = $end_delim\n");
+        DEBUG("       --> begin delimiter = $varSub_begin_delim\n");
+        DEBUG("       --> end   delimiter = $varSub_end_delim\n");
         
         my @definedVars = ();
 
@@ -427,7 +427,7 @@ BEGIN {
         if( $count > 0) {
             INFO("   --> Variable substitution enabled for $count vars:\n");
             while( my($key,$value) = each %replace_files) {
-                INFO("       --> $begin_delim$key$end_delim = $value\n");
+                INFO("       --> $varSub_begin_delim" . $key . "$varSub_end_delim = $value\n");
             }
         }
 

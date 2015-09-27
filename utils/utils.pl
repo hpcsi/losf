@@ -286,14 +286,14 @@ sub expand_text_macros {
     open($IN,      "<$file_in")  || die "Cannot open $file_in\n";
     open($OUT,     ">$file_out") || die "Cannot create $file_out\n";    
 
-    my $count = keys %replace_vars;
+    MYERROR("Variable replacement delimiters not defined") if ( $varSub_begin_delim eq "" || $varSub_end_delim eq "");
 
     while( $line = <$IN>) {
 
         # Apply any desired variable substitution
         
         while( my($key,$value) = each %replace_vars) {
-            if ($line =~ s/<<<$key>>>/$value/g ) {
+            if ($line =~ s/$varSub_begin_delim$key$varSub_end_delim/$value/g ) {
                 DEBUG("   --> performed variable substitution for $key ($file_in)\n");
             }
         }
