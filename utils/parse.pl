@@ -389,7 +389,7 @@ BEGIN {
 	DEBUG("   --> Looking for variable replacement definitions...($cluster->$node_type)\n");
 
         my $begin_delim = $local_cfg->val("VarSub/Controls","delimiter_begin","<<<") || MYERROR("VarSub: Unable to query delimiter_begin");
-        my $end_delim   = $local_cfg->val("VarSub/Controls","delimiter_end")         || MYERROR("VarSub: Unable to query delimiter_end");
+        my $end_delim   = $local_cfg->val("VarSub/Controls","delimiter_end",  ">>>") || MYERROR("VarSub: Unable to query delimiter_end");
 
         $begin_delim =~ s/^"(.*)"$/$1/;
         $end_delim   =~ s/^"(.*)"$/$1/;
