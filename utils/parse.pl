@@ -376,6 +376,67 @@ BEGIN {
 	return(@sync_files);
     }
 
+    sub query_cluster_config_var_substitution {
+
+	begin_routine();
+
+	my $cluster       = shift;
+	my $node_type     = shift;
+		          
+	my $logr          = get_logger();
+	my %replace_files = ();
+
+	DEBUG("   --> Looking for variable replacement definitions...($cluster->$node_type)\n");
+
+        my $begin_delim = $local_cfg->val("VarSub/Controls","delimiter_begin","<<<") || MYERROR("VarSub: Unable to query delimiter_begin");
+        my $end_delim   = $local_cfg->val("VarSub/Controls","delimiter_end")         || MYERROR("VarSub: Unable to query delimiter_end");
+
+        $begin_delim =~ s/^"(.*)"$/$1/;
+        $end_delim   =~ s/^"(.*)"$/$1/;
+
+        DEBUG("       --> begin delimiter = $begin_delim\n");
+        DEBUG("       --> end   delimiter = $end_delim\n");
+        
+        my @definedVars = ();
+
+	if ( $local_cfg->SectionExists("VarSub") ) {
+            @definedVars = $local_cfg->Parameters("VarSub");
+            foreach (@definedVars) {
+                my $value = $local_cfg->val("VarSub",$_) || MYERROR("VarSub: Unable to read value for $_");
+                $replace_files{$_} = $value;
+            }
+        }
+
+        # Allow for appliance-specific variable substitution.
+        # Variables that are duplicated for a specific node-type will
+        # take precedenc over the general value.
+
+	if ( $local_cfg->SectionExists("VarSub/$node_type") ) {
+            @definedVars = ();
+            @definedVars = $local_cfg->Parameters("VarSub/$node_type");
+            foreach (@definedVars) {
+                my $value = $local_cfg->val("VarSub/$node_type",$_) || MYERROR("VarSub/$node_type: Unable to read value for $_");
+                if(exists $replace_files{$_}) {
+                    DEBUG("       --> overriding variable substitution for $_ (type=$node_type)\n");
+                }
+                $replace_files{$_} = $value;
+            }
+        }
+
+        my $count = keys %replace_files;
+        if( $count > 0) {
+            INFO("   --> Variable substitution enabled for $count vars:\n");
+            while( my($key,$value) = each %replace_files) {
+                INFO("       --> $begin_delim$key$end_delim = $value\n");
+            }
+        }
+
+	end_routine();
+        
+	return(%replace_files);
+    }
+
+
     sub query_cluster_config_os_packages {
 
 	begin_routine();
