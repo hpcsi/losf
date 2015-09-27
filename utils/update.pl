@@ -171,7 +171,7 @@ foreach our $node_type (@update_types) {
         INFO("-------------------------------------------------------------------------\n");
     }
     
-   # Check for any necessary updates
+    # Check for any necessary updates
     
     INFO("** Config dir -> $losf_config_dir\n");
     
