@@ -1,4 +1,4 @@
-# -*-sh-*-
+# -*-ini-*-
 #---------------------------------------------------------------------
 # Configuration File Syncing
 #
@@ -45,6 +45,30 @@
 [PartialConfigFiles/compute]
 
 /etc/hosts                                                = partial
+
+
+#---------------------------------------------------------------------
+# Variable Substitution
+#
+# Define any desired variables for substitution during the syncing
+# process for configuration files. Delimiters are used to callout
+# desired variables to replace. 
+#
+# variable = desired-value
+# 
+# With default delimiters, any presence of <<<variable>>> inside a 
+# template configuration file will be updated with desired-value.
+#---------------------------------------------------------------------
+
+[VarSub/Controls]
+delimiter_begin = "<<<"
+delimiter_end   = ">>>"
+
+[VarSub]
+
+variable  = 192.168.1.0
+ntp_host  = ntp.local.org
+
 
 #---------------------------------------------------------------------
 # Soft Link creation/maintenance
@@ -157,7 +181,17 @@ assign_ips_from_file = yes
 # Provisioning Settings 
 #-------------------------------------------
 
+[Provisioning]
+#mode = Warewulf
+
+[Warewulf]
+
+[Warewulf/bootstraps]
+
+
 [Kickstarts]
+
+# define kickstart files for use with Cobbler
 
 login    = /admin/losf/kickstarts/standard.2drive.raid0
 batch    = /admin/losf/kickstarts/standard.2drive.raid0

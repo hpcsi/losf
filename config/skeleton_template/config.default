@@ -1,4 +1,4 @@
-# -*-sh-*-
+# -*-ini-*-
 #---------------------------------------------------------------------
 # Configuration File Syncing
 #
@@ -25,6 +25,22 @@
 #---------------------------------------------------------------------
 
 [PartialConfigFiles]
+
+#---------------------------------------------------------------------
+# Variable Substitution
+#
+# Define any desired variables for substitution during the syncing
+# process for configuration files. Delimiters are used to callout
+# desired variables to replace. 
+#
+# variable = desired-value
+# 
+# With default delimiters, any presence of <<<variable>>> inside a 
+# template configuration file will be updated with desired-value.
+#---------------------------------------------------------------------
+
+[VarSub]
+
 
 #---------------------------------------------------------------------
 # Soft Link creation/maintenance
