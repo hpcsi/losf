@@ -368,5 +368,5 @@ should work with CentOS distributions is outlined in the following sections.
         update on all of them in parallel. Note that the "-q" option to update is enabled
         automatically when run remotely via koomie_cf.
 
-	$ koomie_cf -x login[1-4] <losf-install/update 
+	$ koomie_cf -x login[1-4] <losf-install>/update 
 
