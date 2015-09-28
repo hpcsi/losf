@@ -56,13 +56,13 @@
 #
 # variable = desired-value
 # 
-# With default delimiters, any presence of <<<variable>>> inside a 
+# With default delimiters, any presence of @variable@ inside a 
 # template configuration file will be updated with desired-value.
 #---------------------------------------------------------------------
 
 [VarSub/Controls]
-delimiter_begin = "<<<"
-delimiter_end   = ">>>"
+delimiter_begin = "@"
+delimiter_end   = "@"
 
 [VarSub]
 

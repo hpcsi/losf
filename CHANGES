@@ -1,7 +1,7 @@
 Version 0.53.0 (In Progress)
 
   * added new capability to allow for variable substitution during configuration file syncing.  Allows delimited
-    variables like <<<variable>>> to be replaced by a user-provided value during the sync process. See config.Bar for
+    variables like @variable@ to be replaced by a user-provided value during the sync process. See config.Bar for
     example configuration syntax
 
 Version 0.52.0 (13 July 2015)

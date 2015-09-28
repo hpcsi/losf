@@ -193,7 +193,7 @@ ok( (compare($const_file,"$tmpdir/const_files/test/master/.losf_testing_const") 
 # variable substitution
 
 open(OUT,">$tmpdir/const_files/test/master/.losf_testing_const2") || die "Cannot open const file .losf_testing_const2\n";
-print OUT "This world needs to be <<<avariable>>>\n";
+print OUT "This world needs to be \@avariable\@\n";
 close(OUT);
 
 ok($local_cfg->newval("ConfigFiles","/tmp/.losf_testing_const2","yes"),"Defining another sync file");
@@ -217,7 +217,7 @@ This world needs to be exterminated. Exterminate!
 EOF
 
 $igot=(`cat /tmp/.losf_testing_const2`);
-ok("$igot" eq "$ref_output","variable substitution for <<<avariable>>> correct");
+ok("$igot" eq "$ref_output","variable substitution for \@avariable\@ correct");
 
 # verify node-type substitution overrides default value
 
@@ -235,13 +235,13 @@ ok("$igot" eq "$ref_output","variable substitution override for node type correc
 
 # verify delimiters can be overridden by user
 
-ok($local_cfg->newval("VarSub/Controls","delimiter_begin","\@"),"Override begin delimiter");
-ok($local_cfg->newval("VarSub/Controls","delimiter_end","\@"),"Override end delimiter");
+ok($local_cfg->newval("VarSub/Controls","delimiter_begin","\"<<<\""),"Override begin delimiter");
+ok($local_cfg->newval("VarSub/Controls","delimiter_end","\">>>\""),"Override end delimiter");
 ok($local_cfg->RewriteConfig,"Rewriting config file");
 verify_change_required();
 
 open(OUT,">$tmpdir/const_files/test/master/.losf_testing_const2") || die "Cannot open const file .losf_testing_const2\n";
-print OUT "This world needs to be \@avariable\@\n";
+print OUT "This world needs to be <<<avariable>>>\n";
 close(OUT);
 
 verify_change_required();
