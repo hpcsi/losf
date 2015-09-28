@@ -275,10 +275,13 @@ sub expand_text_macros {
 
         @expand_text = <$TEMPLATE>;
 
-        # update text with any other supported macro's
+        # replace file location macro if included (@losf_synced_file_notice@)
+
+        my $file_relative = $file_in;
+        $file_relative    =~ s/$losf_config_dir/\$LOSF_CONFIG_DIR/g;
 
         foreach(@expand_text) {
-            s/\@losf_synced_file_location\@/$file_in/
+            s/\@losf_synced_file_location\@/$file_relative/
         }
         close($TEMPLATE);
     }
