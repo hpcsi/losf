@@ -1,3 +1,5 @@
+Version 0.54.0 (In Progress)
+
 Version 0.53.0 (28 September 2015)
 
   * added new capability to allow for variable substitution during configuration file syncing.  Allows delimited
