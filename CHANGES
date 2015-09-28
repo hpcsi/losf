@@ -3,6 +3,7 @@ Version 0.53.0 (In Progress)
   * added new capability to allow for variable substitution during configuration file syncing.  Allows delimited
     variables like @variable@ to be replaced by a user-provided value during the sync process. See config.Bar for
     example configuration syntax
+  * updated @losf_synced_file_location@ substitution macro to report path relative to $LOSF_CONFIG_DIR
 
 Version 0.52.0 (13 July 2015)
 
