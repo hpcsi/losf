@@ -265,8 +265,9 @@ sub expand_text_macros {
     my $params       = shift;
     my %replace_vars = %$params;    # hash of variables to replace
 
-    # @losf_synced_file_notice@ 
+    # cache text from file for @losf_synced_file_location@
 
+    my $notify_header_avail = 0;
     my $template = "$losf_custom_config_dir/const_files/$cluster/notify_header";
 
     if ( -s "$template" ) {
@@ -284,6 +285,7 @@ sub expand_text_macros {
             s/\@losf_synced_file_location\@/$file_relative/
         }
         close($TEMPLATE);
+        $notify_header_avail = 1;
     }
 
     open($IN,      "<$file_in")  || die "Cannot open $file_in\n";
@@ -303,8 +305,16 @@ sub expand_text_macros {
 
         # Apply special @losf_synced_file_notice@
 
-	if( $line =~ m/\@losf_synced_file_notice\@/ ) {
-	    DEBUG(   "--> found a text macro...\n");
+        my $search="$varSub_begin_delim"."losf_synced_file_notice"."$varSub_end_delim";
+
+	if( $line =~ m/$search/ ) {
+            if($notify_header_avail == 0) {
+                ERROR("\n[ERROR]: $search requested but notify header unavailable\n");
+                ERROR("[ERROR]: Please set desired replacment text in $template\n\n");
+                exit(1);
+            }
+
+	    DEBUG(   "--> found a $search match for replacement...\n");
 	    print $OUT @expand_text;
         } else {
             print $OUT $line;
