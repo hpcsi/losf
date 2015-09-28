@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 124;
+use Test::More tests => 127;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -106,6 +106,7 @@ ok(system("$losf_dir/initconfig test $redirect") == 0,"initconfig runs");
 ok(-s "$tmpdir/config.machines","config.machines exists");
 ok(-s "$tmpdir/config.test","config.test exists");
 ok(-s "$tmpdir/ips.test","ips.test exists");
+ok(-s "$tmpdir/const_files/test/notify_header","const_files/test/notify_header exists");
 ok(-d "$tmpdir/const_files/test/master","const_files/test/master exists");
 ok(-s "$tmpdir/os-packages/test/packages.config","os-packages/test/packages.config exists");
 ok(-s "$tmpdir/custom-packages/test/packages.config","custom-packages/test/packages.config exists");
@@ -153,7 +154,6 @@ ok($line =~ m/^\[LosF\] Config dir:      $tmpdir$/,"rpm_topdir -> correct config
 
 $line = <IN>; chomp($line);
 ok($line =~ m/^\[LosF\] RPM topdir:      $tmpdir\/test\/rpms$/,"rpm_topdir -> correct RPM topdir ");
-
 
 
 # -----------------------------------------------------------------------
@@ -233,6 +233,30 @@ EOF
 $igot=(`cat /tmp/.losf_testing_const2`);
 ok("$igot" eq "$ref_output","variable substitution override for node type correct");
 
+# verify @losf_synced_file_notice@ works
+
+open(OUT,">>$tmpdir/const_files/test/master/.losf_testing_const2") || die "Cannot open const file .losf_testing_const2\n";
+print OUT "# \@losf_synced_file_notice\@\n";
+close(OUT);
+
+verify_change_required();
+
+my $ref_output2 = << "EOF";
+This world needs to be removed for an intergalactic freeway
+#------------------------------------------------------------------------------
+# Note: this file is managed via LosF
+#
+# You should, in general, not edit this file directly as you will 
+# *lose* the contents during the next sync process. Instead, 
+# edit the template file in your local config directory:
+# 
+# \$LOSF_CONFIG_DIR/const_files/test/master/.losf_testing_const2
+#------------------------------------------------------------------------------
+EOF
+
+$igot=(`cat /tmp/.losf_testing_const2`);
+ok("$igot" eq "$ref_output2","\@losf_synced_file\@ text replacement works\n");
+
 # verify delimiters can be overridden by user
 
 ok($local_cfg->newval("VarSub/Controls","delimiter_begin","\"<<<\""),"Override begin delimiter");
@@ -248,6 +272,7 @@ verify_change_required();
 
 $igot=(`cat /tmp/.losf_testing_const2`);
 ok("$igot" eq "$ref_output","variable substitution with non-default delimiters works");
+
 
 # verify removal works
 
