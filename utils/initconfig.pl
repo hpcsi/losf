@@ -276,13 +276,20 @@ if ( ! -d "$config_dir/const_files/$newCluster" ) {
 	MYERROR("Unable to create path for const_files/$newCluster");
     INFO("--> creating $config_dir/const_files/$newCluster directory\n");
 
+	INFO("--> creating $config_dir/const_files/$newCluster/notify_header file\n");
+        copy("$template_dir/notify_header","$config_dir/const_files/$newCluster") || MYERROR("Unable to copy notify_header");
+
     if ( ! -d "$config_dir/const_files/$newCluster/master" ) {
 	mkpath("$config_dir/const_files/$newCluster/master") || 
 	    MYERROR("Unable to create path for const_files/$newCluster/master");
 	INFO("--> creating $config_dir/const_files/$newCluster/master directory\n");
+
+
     }
     $changedFlag = 1;
 }
+
+
 
 if ( $changedFlag == 0) {
     INFO("--> Basic config files for cluster \"$newCluster\" already present\n");
