@@ -249,6 +249,12 @@ if ( ! -e "$config_dir/os-packages/$newCluster/packages.config" ) {
 
     copy("$template","$config_dir/os-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config\n");
     $changedFlag = 1;
+
+    if ( ! -d "$config_dir/os-packages/$newCluster/previous_revisions" ) {
+        print "--> creating $config_dir/os-packages/$newCluster/previous_revisions directory\n";
+        mkpath("$config_dir/os-packages/$newCluster/previous_revisions") || 
+            die("[ERROR]: Unable to create path for os-packages/previous_revisions");
+    }
 }
 
 # Custom Packages config file
@@ -267,6 +273,12 @@ if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
 
     copy("$template","$config_dir/custom-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config");
     $changedFlag = 1;
+
+    if ( ! -d "$config_dir/custom-packages/$newCluster/previous_revisions" ) {
+        print "--> creating $config_dir/custom-packages/$newCluster/previous_revisions directory\n";
+        mkpath("$config_dir/custom-packages/$newCluster/previous_revisions") || 
+            die("[ERROR]: Unable to create path for custom-packages/previous_revisions");
+    }
 }
 
 # const_files directory
