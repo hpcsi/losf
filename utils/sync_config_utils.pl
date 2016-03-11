@@ -216,7 +216,7 @@ BEGIN {
 	while ( my ($key,$value) = each(%sync_services_custom) ) {
 	    TRACE("   --> $key => $value\n");
             if($systemdEnabled) {
-                sync_chkconfig_services_enabled($key,$value);
+                sync_chkconfig_services_systemd($key,$value);
             } else {
                 sync_chkconfig_services($key,$value);
             }
