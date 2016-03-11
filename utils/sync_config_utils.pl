@@ -199,6 +199,15 @@ BEGIN {
 
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 
+        # Check if local OS is using newer systemd services; use
+        # systemd if available, otherwise use chkconfig
+
+        my $systemdEnabled = 0;
+
+        if( -x "/usr/bin/systemctl" ) {
+            $systemdEnabled = 1;
+        }
+        
 	# Node type-specific settings: these take precedence over global
 	# settings; apply them first
 
@@ -206,7 +215,11 @@ BEGIN {
 
 	while ( my ($key,$value) = each(%sync_services_custom) ) {
 	    TRACE("   --> $key => $value\n");
-	    sync_chkconfig_services($key,$value);
+            if($systemdEnabled) {
+                sync_chkconfig_services_enabled($key,$value);
+            } else {
+                sync_chkconfig_services($key,$value);
+            }
 	}
 
 	# Global chkconfig settings: any node-specific settings
@@ -218,7 +231,11 @@ BEGIN {
 	    TRACE("   --> $key => $value\n");
 
 	    if ( ! exists $sync_services_custom{$key} ) {
-		sync_chkconfig_services($key,$value);
+                if($systemdEnabled) {
+                    sync_chkconfig_services_systemd($key,$value);
+                } else {
+                    sync_chkconfig_services($key,$value);
+                }
 	    }
 	}
 	
@@ -830,10 +847,11 @@ BEGIN {
 		`chroot $chroot /sbin/chkconfig $service off`;
 		if($chrootFlag == 0) {
 		    `chroot $chroot /etc/init.d/$service stop`;
-		    chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
-		    if ( $setting =~ m/3:on/ ) {
-			MYERROR("Unable to chkconfig $service off");
-		    }
+                }
+                # verify the change took
+                chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
+                if ( $setting =~ m/3:on/ ) {
+                    MYERROR("Unable to chkconfig $service off");
 		}
 	    }
 	} elsif ( $setting =~ m/3:off/ ) {
@@ -845,10 +863,108 @@ BEGIN {
 		`chroot $chroot /sbin/chkconfig $service on`;
 		if($chrootFlag == 0) {
 		    `chroot $chroot /etc/init.d/$service start`;
-		    chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
-		    if ( $setting =~ m/3:off/ ) {
-			MYERROR("Unable to chkconfig $service on");
-		    }
+                }
+                # verify the change took
+                chomp(my $setting=`chroot $chroot /sbin/chkconfig --list $service`);
+                if ( $setting =~ m/3:off/ ) {
+                    MYERROR("Unable to chkconfig $service on");
+                }
+	    } else {
+		print_info_in_green("OK");
+		INFO (": $service is OFF\n");
+	    }
+	}
+	
+    }
+
+    sub sync_chkconfig_services_systemd {
+
+	begin_routine();
+	
+	my $service = shift;
+	my $setting = shift;
+	my $logr    = get_logger();
+	my $found   = 0;
+
+	my $enable_service = 0;
+
+	my $cluster    = $main::node_cluster;
+	my $type       = $main::node_type;
+	my $chrootFlag = 0;
+
+	DEBUG("   --> Syncing run-level services for: $service\n");
+
+	if ( "$setting" eq "on" || "$setting" eq "ON" ) {
+	    $enable_service = 1;
+	} else {
+	    $enable_service = 0;
+	}
+
+	# Support for chroot (e.g. alternate provisioning mechanisms).
+
+	my $chroot = "/";
+
+	if($LosF_provision::losf_provisioner eq "Warewulf" && requires_chroot_environment() ) {
+	    $chroot     = query_warewulf_chroot($cluster,$type);
+	    $chrootFlag = 1;
+	    DEBUG("   --> using alternate chroot for type = $type, chroot = $chroot\n");
+	}
+	    
+	# NOOP if init.d script is not present
+	
+	if ( ! -s "$chroot/usr/lib/systemd/system//$service.service" ) {
+	    TRACE("   --> NOOP: $service not installed, ignoring sync request\n");
+	    return;
+	}
+	
+	$losf_services_total++;
+	
+	DEBUG("   --> Desired setting = $enable_service\n");
+	
+	my $setting = `chroot $chroot /usr/bin/systemctl is-enabled $service.service 2>&1`;
+	
+	# make sure chkconfig is setup - have to check stderr for this one....
+	
+	if ( $setting =~ m/service $service supports chkconfig, but is not referenced/ ) {
+	    `chroot $chroot /sbin/chkconfig --add $service`;
+	    $setting = `chroot $chroot /sbin/chkconfig --list $service 2>&1`;
+	}
+	
+	chomp($setting);
+	
+	if ( $setting =~ m/enabled/ ) {
+	    DEBUG("   --> $service is ON\n");
+	    if($enable_service) {
+		print_info_in_green("OK");
+		INFO( ": $service is ON\n");
+	    } else {
+		$losf_services_updated++;
+		print_error_in_red("UPDATING");
+		ERROR( ": disabling $service\n");
+		`chroot $chroot /usr/bin/systemctl -q disable $service.service`;
+		if($chrootFlag == 0) {
+		    `chroot $chroot /usr/bin/systemctl stop $service.service`;
+                }
+                # verify the change took
+                chomp(my $setting=`chroot $chroot /usr/bin/systemctl is-enabled $service.service`);
+                if ( $setting =~ m/enabled/ ) {
+                    MYERROR("Unable to disable $service under systemd");
+		}
+	    }
+	} elsif ( $setting =~ m/disabled/ ) {
+	    DEBUG("   --> $service is OFF\n");
+	    if($enable_service) {
+		$losf_services_updated++;
+		print_error_in_red("UPDATING");
+		ERROR(": enabling $service\n");
+		`chroot $chroot /usr/bin/systemctl -q enable $service.service`;
+		if($chrootFlag == 0) {
+		    `chroot $chroot /usr/bin/systemctl start $service.service`;
+                }
+                # verify the change took
+                chomp(my $setting=`chroot $chroot /usr/bin/systemctl is-enabled $service.service`);
+                if ( $setting =~ m/disabled/ ) {
+                    MYERROR("Unable to enable $service under systemd");
 		}
 	    } else {
 		print_info_in_green("OK");
