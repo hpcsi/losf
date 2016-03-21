@@ -28,7 +28,7 @@ use warnings;
 use strict;
 use File::Basename;
 use File::Path;
-use File::Copy;
+use File::Copy "cp";
 use Getopt::Long;
 use LosF_utils;
 
@@ -215,7 +215,7 @@ if ( ! -e "$config_dir/config.$newCluster" ) {
 	MYERROR("Missing template file -> $template");
     }
     
-    copy("$template","$config_dir/config.$newCluster") || print "ERROR: Unable to update config.$newCluster\n";
+    cp("$template","$config_dir/config.$newCluster") || print "ERROR: Unable to update config.$newCluster\n";
     $changedFlag = 1;
 }
 
@@ -229,7 +229,7 @@ if ( ! -e "$config_dir/ips.$newCluster" ) {
 	MYERROR("Missing template file -> $template");
     }
     
-    copy("$template","$config_dir/ips.$newCluster") || print "ERROR: Unable to update ips.$newCluster\n";
+    cp("$template","$config_dir/ips.$newCluster") || print "ERROR: Unable to update ips.$newCluster\n";
     $changedFlag = 1;
 }
 
@@ -247,7 +247,7 @@ if ( ! -e "$config_dir/os-packages/$newCluster/packages.config" ) {
 	MYERROR("Missing template file -> $template\n");
     }
 
-    copy("$template","$config_dir/os-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config\n");
+    cp("$template","$config_dir/os-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config\n");
     $changedFlag = 1;
 
     if ( ! -d "$config_dir/os-packages/$newCluster/previous_revisions" ) {
@@ -271,7 +271,7 @@ if ( ! -e "$config_dir/custom-packages/$newCluster/packages.config" ) {
 	MYERROR("Missing template file -> $template");
     }
 
-    copy("$template","$config_dir/custom-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config");
+    cp("$template","$config_dir/custom-packages/$newCluster/packages.config") || MYERROR("Unable to update packages.config");
     $changedFlag = 1;
 
     if ( ! -d "$config_dir/custom-packages/$newCluster/previous_revisions" ) {
@@ -289,7 +289,7 @@ if ( ! -d "$config_dir/const_files/$newCluster" ) {
     INFO("--> creating $config_dir/const_files/$newCluster directory\n");
 
 	INFO("--> creating $config_dir/const_files/$newCluster/notify_header file\n");
-        copy("$template_dir/notify_header","$config_dir/const_files/$newCluster") || MYERROR("Unable to copy notify_header");
+        cp("$template_dir/notify_header","$config_dir/const_files/$newCluster") || MYERROR("Unable to copy notify_header");
 
     if ( ! -d "$config_dir/const_files/$newCluster/master" ) {
 	mkpath("$config_dir/const_files/$newCluster/master") || 
@@ -301,6 +301,15 @@ if ( ! -d "$config_dir/const_files/$newCluster" ) {
     $changedFlag = 1;
 }
 
+# Include post-update script if present
+
+my $template = "$template_dir/update.default";
+
+if ( -s "$template" && ! -s "$config_dir/update.$newCluster" ) {
+    INFO("--> creating $config_dir/update.$newCluster file (post-update customization)\n");
+    cp("$template","$config_dir/update.$newCluster") || print "ERROR: Unable to update update.$newCluster\n";
+    $changedFlag = 1;
+}
 
 
 if ( $changedFlag == 0) {
@@ -339,10 +348,12 @@ if($nonDefaultTemplate) {
 		    MYERROR("Unable to create path for const_files/$newCluster/$dir");
 	    }
 
-	    copy("$_","$config_dir/const_files/$newCluster/$dir/") || MYERROR("Unable to copy file $_ ($dir)");
+	    cp("$_","$config_dir/const_files/$newCluster/$dir/") || MYERROR("Unable to copy file $_ ($dir)");
 	    return;
 	      },"$template_dir/const_files/default/$dir");
     }
+
+
 
 }
 
