@@ -344,14 +344,6 @@ if($nonDefaultTemplate) {
 	      },"$template_dir/const_files/default/$dir");
     }
 
-#    INFO("\nChecking for missing OS dependencies and caching RPMs locally\n");
-    
-#    my $pkg_manager = check_for_package_manager("updatepkg");
-#    init_local_os_config_file_parsing("$losf_custom_config_dir/os-packages/$newCluster/packages.config");
-#    my @os_rpms = query_cluster_config_os_packages($newCluster,$main::node_type);
-#    verify_rpms(@os_rpms);
-#    INFO("--> package manger = $pkg_manager\n");
-#    parse_and_sync_os_packages();
 }
 
 # Done with lock
