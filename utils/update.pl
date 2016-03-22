@@ -80,6 +80,9 @@ sub display_changes {
 # Only one LosF instance at a time
 losf_get_lock();
 
+# Signify update mode via env
+$ENV{'LOSF_UPDATE_MODE'} = '1';
+
 # Local node membership
 (my $node_cluster, my $node_type) = determine_node_membership();
 
@@ -225,6 +228,14 @@ my $custom_file = "$losf_config_dir/update.$node_cluster";
 
 if ( -x $custom_file ) {
     INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
+
+    # expose any variable substitution settings as environment variables
+
+    while( my($key,$value) = each %replace_vars) {
+        my $varname = "LOSF_VARSUB_$key";
+        DEBUG("--> exposing varsub env variable: $varname = $value\n");
+        $ENV{"$varname"} = "$value";
+    }
 
     TRACE("Running cmd $custom_file\n");
     system("$custom_file $node_type");
