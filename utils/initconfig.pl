@@ -288,8 +288,8 @@ if ( ! -d "$config_dir/const_files/$newCluster" ) {
 	MYERROR("Unable to create path for const_files/$newCluster");
     INFO("--> creating $config_dir/const_files/$newCluster directory\n");
 
-	INFO("--> creating $config_dir/const_files/$newCluster/notify_header file\n");
-        cp("$template_dir/notify_header","$config_dir/const_files/$newCluster") || MYERROR("Unable to copy notify_header");
+    INFO("--> creating $config_dir/const_files/$newCluster/notify_header file\n");
+    cp("$template_dir/notify_header","$config_dir/const_files/$newCluster") || MYERROR("Unable to copy notify_header");
 
     if ( ! -d "$config_dir/const_files/$newCluster/master" ) {
 	mkpath("$config_dir/const_files/$newCluster/master") || 
