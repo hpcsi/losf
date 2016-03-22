@@ -78,8 +78,8 @@ BEGIN {
 
 	my @sync_files    = query_cluster_config_const_sync_files  ($node_cluster,$node_type);
 	my @partial_files = query_cluster_config_partial_sync_files($node_cluster,$node_type);
-        my %replace_vars  = query_cluster_config_var_substitution  ($node_cluster,$node_type);
 	my %perm_files    = query_cluster_config_sync_permissions  ($node_cluster,$node_type);
+        %replace_vars     = query_cluster_config_var_substitution  ($node_cluster,$node_type);
 
 	# note: if the user supplies a partial config request for a
 	# particular appliance, this should override a const file

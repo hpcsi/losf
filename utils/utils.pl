@@ -37,6 +37,10 @@ use vars qw($losf_const_updated     $losf_const_total);
 use vars qw($losf_softlinks_updated $losf_softlinks_total);
 use vars qw($losf_services_updated  $losf_services_total);
 
+# Global hash for variable replacement
+
+use vars qw(%replace_vars);
+
 sub verify_sw_dependencies {
     verify_log4perl_availability();
 }
