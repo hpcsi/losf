@@ -236,10 +236,10 @@ sub begin_routine {
     my $routine  = (caller(1))[3];
     my $filename = (caller(1))[1];
 
-    DEBUG("\n");
-    DEBUG("--------------------- Routine START ---------------------\n");
-    DEBUG("$routine ($filename)\n");
-    DEBUG("\n");
+    TRACE("\n");
+    TRACE("--------------------- Routine START ---------------------\n");
+    TRACE("$routine ($filename)\n");
+    TRACE("\n");
 }
 
 
@@ -249,10 +249,10 @@ sub end_routine {
     my $routine  = (caller(1))[3];
     my $filename = (caller(1))[1];
 
-    DEBUG("\n");
-    DEBUG("$routine ($filename)\n");
-    DEBUG("---------------------- Routine END ----------------------\n");
-    DEBUG("\n");
+    TRACE("\n");
+    TRACE("$routine ($filename)\n");
+    TRACE("---------------------- Routine END ----------------------\n");
+    TRACE("\n");
 }
 
 sub expand_text_macros {
