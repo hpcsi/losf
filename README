@@ -16,6 +16,7 @@ capabilities and features provided by LosF on HPC clusters include:
 * kickstart provisioning files (for use with Cobbler)
 * host configuration files
 * runtime services
+* runtime service subscriptions
 * file permissions
 * soft links
 * OS packages from distros (RPM based)
