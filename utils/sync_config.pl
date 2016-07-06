@@ -86,6 +86,7 @@ foreach our $node_type (@update_types) {
     parse_and_sync_const_files();
     parse_and_sync_softlinks();
     parse_and_sync_services();
+    parse_and_sync_subscriptions();
     parse_and_sync_permissions();
 
     if($node_type ne $update_types[$#update_types]) {

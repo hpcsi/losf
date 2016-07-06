@@ -37,6 +37,7 @@ use File::Path;
 use File::stat;
 use File::Temp qw(tempfile);
 use Term::ANSIColor;
+use Time::Piece;
 
 use lib "$losf_utils_dir";
 
@@ -58,6 +59,7 @@ BEGIN {
     my $osf_sync_const_file             = 0;
     my $osf_sync_soft_links             = 0;
     my $osf_sync_services               = 0;
+    my $osf_sync_subscriptions          = 0;
     my $osf_sync_permissions            = 0;
     my $osf_sync_os_packages            = 0;
     my $osf_sync_os_packages_delete     = 0;
@@ -241,7 +243,64 @@ BEGIN {
 	
 	end_routine();
     }
+    
+    sub parse_and_sync_subscriptions {
 
+	verify_sw_dependencies();
+	begin_routine();
+
+	my $node_cluster = $main::node_cluster;
+	my $node_type    = $main::node_type;
+
+	INFO("** Syncing runlevel subscriptions ($node_cluster:$node_type)\n");
+
+	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
+
+        # Check if local OS is using newer systemd services; use
+        # systemd if available, otherwise use chkconfig
+
+        my $systemdEnabled = 0;
+
+        if( -x "/usr/bin/systemctl" ) {
+            $systemdEnabled = 1;
+        } else {
+            # NOTE: most testing was done on CentOS7 hosts and therefore this function is used at own risk.
+            INFO("     --> Warning: Subscriptions in CentOS6 are experimental and rely on using grep on the process list. Use at own risk\n");
+        }
+
+	# Node type-specific settings: these take precedence over global
+	# settings; apply them first
+	
+	my %sync_subscriptions_custom = query_cluster_config_subscriptions($node_cluster,$node_type);
+
+	while ( my ($key,$value) = each(%sync_subscriptions_custom) ) {
+		DEBUG("   --> List of services and files that they subscribe to: $key,$value\n");
+		TRACE("   --> $key => $value\n");
+		if($systemdEnabled) {
+			sync_subscribed_services_systemd($key,$value);
+		} else {
+                        # NOTE: most testing was done on CentOS7 hosts and therefore this function is used at own risk.
+			sync_subscribed_services($key,$value);
+		}
+	}
+	
+	my %sync_subscriptions = query_cluster_config_subscriptions($node_cluster,"LosF-GLOBAL-NODE-TYPE");
+
+	while ( my ($key,$value) = each(%sync_subscriptions) ) {
+		DEBUG("   --> List of services and files that they subscribe to: $key,$value\n");
+		TRACE("   --> $key => $value\n");
+		if ( ! exists $sync_subscriptions_custom{$key} ) {
+			if($systemdEnabled) {
+				sync_subscribed_services_systemd($key,$value);
+			} else {
+				sync_subscribed_services($key,$value);
+			}
+		}
+	}	
+	
+	end_routine();
+    }
+	
     sub sync_const_file {
 
 	begin_routine();
@@ -876,6 +935,52 @@ BEGIN {
 	}
 	
     }
+    
+    sub sync_subscribed_services {
+
+      begin_routine();
+      
+      my $service = shift;
+      my $subfile = shift;
+
+      my $logr    = get_logger();
+
+      # Support for chroot (e.g. alternate provisioning mechanisms).
+
+      my $chroot = "/";
+
+      # Collect Time Stamps
+      if ( -e $subfile || -d $subfile ) {
+        my $ftime = stat($subfile);
+	# The grep counter must be larger than 1 because grep will find itself so we need a minumum of 2 entries to try and identify the service
+        if ( `chroot $chroot /usr/bin/pgrep $service 2>&1` ) {
+            my $getproc = `chroot $chroot /usr/bin/pgrep $service 2>&1`;
+            $getproc = "/proc/".$getproc;
+            chomp($getproc);
+            my $stime = stat($getproc);
+            if ( $stime->mtime < $ftime->mtime ) {
+                `chroot $chroot /sbin/service $service restart`;
+                
+                # verify the change took
+                if ( `chroot $chroot /usr/bin/pgrep $service 2>&1` ) {
+                    print_error_in_red("UPDATING");
+                    INFO (": $service was restarted: ON\n");
+                } else {
+                    MYERROR("Subscribed restart of $service failed");
+                }
+            } else {
+                print_info_in_green("OK");
+                INFO (": $service was already current; leaving it: ON\n");
+            }
+        } else {
+            INFO("     --> Warning: $service is not detected as running. This could be because service names and process names are not always the same. If the service defintely is running then subscriptions cannot work with this service on CentOS6\n");
+        }
+    } else {
+        INFO("     --> Warning: $subfile does not exist therefore service $service could not subscribe to it\n");
+    }
+        
+    end_routine();
+    }
 
     sub sync_chkconfig_services_systemd {
 
@@ -972,6 +1077,48 @@ BEGIN {
 	    }
 	}
 	
+    }
+
+    sub sync_subscribed_services_systemd {
+
+      begin_routine();
+
+      my $service = shift;
+      my $subfile = shift;
+
+      my $logr    = get_logger();
+
+      # Support for chroot (e.g. alternate provisioning mechanisms).
+
+      my $chroot = "/";
+
+      # Collect Time Stamps
+      if ( -e $subfile || -d $subfile ) {
+        my $ftime = stat($subfile);
+        if ( `chroot $chroot /usr/bin/systemctl is-active $service.service 2>&1` =~ "active") {
+            my $timeobj = Time::Piece->strptime(`chroot $chroot /usr/bin/systemctl status $service.service | grep active | cut -d " " -f9,10`, '%Y-%m-%d %T ');
+            if ( $timeobj->epoch < $ftime->mtime ) {
+                `chroot $chroot /usr/bin/systemctl restart $service.service`;
+                
+                # verify the change took
+                if ( `chroot $chroot /usr/bin/systemctl is-active $service.service 2>&1` =~ "active") {
+                    print_error_in_red("UPDATING");
+                    INFO (": $service was restarted: ON\n");
+                } else {
+                    MYERROR("Subscribed restart of $service failed under systemd");
+                }
+            } else {
+                print_info_in_green("OK");
+                INFO (": $service was already current; leaving it: ON\n");
+            }
+        } else {
+            INFO("     --> Warning: $service is not running. Subscriptions should only restart services. Ignoring subscription.\n");
+        }
+    } else {
+        INFO("     --> Warning: $subfile does not exist therefore service $service could not subscribe to it\n");
+    }
+        
+    end_routine();
     }
 
     sub parse_and_uninstall_os_packages {

@@ -359,6 +359,6 @@ if($nonDefaultTemplate) {
 
 # Done with lock
 
-losf_get_lock();
+losf_release_lock();
 
 1;

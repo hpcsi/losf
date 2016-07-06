@@ -1,0 +1,33 @@
+# -*-sh-*-
+# -----------------------------------------------------------------------------
+#
+# IP mapping for the cluster.  This file is used to define all interfaces on
+# each host in the cluster.  This file is queried when you add machines via:
+#
+# losf add <hostname>
+#
+# The format for an interface definition looks as follows:
+#
+# hostname  ip-address  mac-address  interface  netmask
+#
+# Multiple interfaces can be defined for the same hostname.  Note that in this
+# case, the first interface defined will be the DNS ip if DNS support is
+# configured for the particular node type in question.
+# -----------------------------------------------------------------------------
+
+# Example Login nodes (often have multiple eth interfaces)
+
+login1  172.1.1.1     a1:a1:a1:a1:a1:a1 eth1  255.255.0.0   # DNS ip for login1
+login1   10.1.1.1     a1:a1:a1:a1:a1:a2 eth0  255.255.0.0   # additional interface
+
+login2  172.1.1.2     a1:a1:a1:a1:a1:a3 eth1  255.255.0.0
+login2   10.1.1.2     a1:a1:a1:a1:a1:a4 eth0  255.255.0.0
+
+# Example compute node (typically have a single eth interface)
+
+c100-101 172.10.1.1   a1:a1:a1:a1:a1:a5 eth0 255.255.0.0
+
+# Example management interface (e.g. for remote ipmi access)
+
+m100-101 10.10.1.1    a1:a1:a1:a1:a1:a6 eth0  255.255.0.0
+
