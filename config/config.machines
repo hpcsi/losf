@@ -10,7 +10,7 @@
 
 [Cluster-Names]
 
-clusters = trialcluster 
+clusters = Foo Bar
 
 #-----------------------------------------------
 # Node Types/Cluster Config
@@ -24,11 +24,11 @@ clusters = trialcluster
 # 
 #-----------------------------------------------
 
-[trialcluster]
+[Foo]
 
 # Define unique domainname for this cluster
 
-domainname = trialcluster.tacc.utexas.edu 
+domainname = foo|foo.yourdomain.org
 
 # Define unique node types via hostname regular expressions
 
@@ -38,10 +38,32 @@ admin      = admin1
 login      = login[1-4]
 oss        = oss[1-9]+
 mds        = mds[1-4]|mds51
-compute    = cVM-[0-4][0-9][0-9]
+compute    = c3[0-4][0-9]-[1-3][0-2][0-9]
 build      = build
 gridftp    = gridftp[1-2]
 
 # Define location to store RPM packages 
 
 rpm_dir = /work/build/rpms/RPMS
+
+# Example high-level cluster config for Bar
+
+[Bar]
+
+domainname      = bar|bar.yourdomain.com
+
+# Define unique node types via hostname regular expressions
+
+master          = master
+batch           = batch1
+login           = alogin|\blogin[1-8]
+mds             = mds[1-6]
+oss             = oss[1-9]+
+admin           = sm[1-2]
+compute         = c[4-5][0-9][0-9]-[0-9]0[0-9]|c400-11[0-6]
+
+# Define location of RPM package directory (note that you can override
+# the default value for a particular node type). 
+
+rpm_dir         = /admin/losf/rpms/RPMS
+rpm_dir_compute = /lustre/admin/losf/rpms/RPMS
