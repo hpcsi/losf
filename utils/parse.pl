@@ -453,6 +453,114 @@ BEGIN {
 	    MYERROR("No Input section found for cluster $cluster [OS Packages]\n");
 	}
 
+        # Check for [latest] (only during update mode)
+
+        if( $ENV{'LOSF_UPDATE_MODE'} ) {
+            my @types = $local_os_cfg->Parameters("OS Packages");
+            foreach my $type (@types) {
+                DEBUG("   --> Checking for presence of [latest] version in node type $type\n");
+
+                my @rpms_to_update = ();
+                my %rpms_to_udpate2 = {};
+
+                my @rpms_loc = $local_os_cfg->val("OS Packages",$type);
+                
+                
+                foreach my $rpm_loc (@rpms_loc) {
+                    
+                    my $needsUpdate = 0;
+                    
+                    if ($rpm_loc =~ m/version=\[latest\]/) {
+                        $needsUpdate++;
+                    }
+                    if ($rpm_loc =~ m/release=\[latest\]/) {
+                        $needsUpdate++;
+                    }
+                    
+                    if ($needsUpdate >= 2 ) {
+                        if($rpm_loc =~ m/arch=(\S+)/) {
+                            my @rpm_array  = split(/\s+/,$rpm_loc);
+                            push(@rpms_to_update,"$rpm_array[0].$1");
+                            $rpms_to_update2{"$rpm_array[0]"}[0] = $1;
+                            $rpms_to_update2{"$rpm_array[0]"}[1] = "latest";
+                            $rpms_to_update2{"$rpm_array[0]"}[2] = "latest";
+                        } else {
+                            MYERROR("Unable to ascertain OS arch when updating [latest] version string\n");
+                        }
+                    }
+                }
+                
+                if(%rpms_to_update2) {
+                    INFO("** Found OS packages requesting [latest] version string definitions (type=$type): querying local repo...\n");
+                    
+                    my @rpm_query = ();
+                    foreach my $key (keys %rpms_to_update2) {
+                        push(@rpm_query,"$key.$rpms_to_update2{$key}[0]");
+                    }
+                    
+                    $igot=`repoquery @rpm_query --qf='%{name},%{version},%{release}'`;
+                    
+                    my @results = split(/\s+/,$igot);
+                    
+                    foreach $val (@results) {
+                        my ($name,$version,$release) = split(/,/,$val);
+                        MYERROR("Unable to query rpm version from local repo for $name") unless ( "$version" ne "");
+                        MYERROR("Unable to query rpm release from local repo for $name") unless ( "$release" ne "");
+                        if ( exists $rpms_to_update2{$name} ) {
+                            $rpms_to_update2{$name}[1] = $version;
+                            $rpms_to_update2{$name}[2] = $release;
+                        }
+                    }
+                    
+                    # update config file with repo values
+                    
+                    $local_os_cfg->delval("OS Packages",$type);
+                    
+                    foreach my $rpm_loc (@rpms_loc) {
+                        my @rpm_array  = split(/\s+/,$rpm_loc);
+                        my $pname = $rpm_array[0];
+
+                        if ( exists $rpms_to_update2{$pname} ) {
+                            my $ver_latest = $rpms_to_update2{$pname}[1];
+                            my $rel_latest = $rpms_to_update2{$pname}[2];
+                            INFO("   --> Updating version/release: $pname -> $ver_latest/$rel_latest\n");
+                            
+                            if($local_os_cfg->exists("OS Packages","$type") ) {
+                                $local_os_cfg->push("OS Packages","$type","$pname version=$ver_latest release=$rel_latest " . 
+                                                    "arch=$rpms_to_update2{$pname}[0]"); 
+                            } else {
+                                $local_os_cfg->newval("OS Packages","$type","$pname version=$ver_latest release=$rel_latest " . 
+                                                      "arch=$rpms_to_update2{$pname}[0]"); 
+                            }
+                        } else {
+                            if($local_os_cfg->exists("OS Packages","$type"))  {
+                                $local_os_cfg->push("OS Packages",$type,"@rpm_array");
+                            } else {
+                                $local_os_cfg->newval("OS Packages",$type,"@rpm_array");
+                            }
+                        }
+                        
+                    }
+                } 
+            } # end loop over node types
+
+            if(%rpms_to_update2) {
+                my $new_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config.new";
+                my $ref_file  = "$losf_custom_config_dir/os-packages/$node_cluster/packages.config";
+                my $hist_dir  = "$losf_custom_config_dir/os-packages/$node_cluster/previous_revisions";
+                
+                $local_os_cfg->WriteConfig($new_file) || MYERROR("Unable to write file $new_file");
+                
+                my $timestamp=`date +%F:%H:%M`;
+                chomp($timestamp);
+                print "   --> Updating OS config file to replace [latest] with current version strings...\n";
+                rename($ref_file,$hist_dir."/packages.config.".$timestamp) || 
+                    MYERROR("Unable to save previous OS config file\n");
+                rename($new_file,$ref_file)                 || 
+                    MYERROR("Unaable to update OS config file\n");
+            }
+        } # end if(LOSF_UPDATE_MODE)
+            
 	if($local_os_cfg->exists("OS Packages",$node_type)) {
 	    DEBUG("   --> OS packages defined for node type = $node_type\n");
 	    @rpms_defined = $local_os_cfg->val("OS Packages",$node_type);
