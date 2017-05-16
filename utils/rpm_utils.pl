@@ -111,17 +111,28 @@ sub verify_rpms {
 	    $filename = "$rpm_topdir/$desired_arch/$full_rpm_name.rpm";
 	}
 
+        # Check if this OS pacakge wants [latest] version. If so, query repo and update the version/release strings
+
+        if ( $desired_version eq "[latest]" && $desired_release eq "[latest]" ) {
+	    INFO("   --> Latest OS package requested -> $full_rpm_name\n");
+#            $local_os_cfg->newval("OS Packages",$node_type,"abcd version=abcd release=defg arch=$arch");
+            
+#            @ver_latest = split(' ',`rpm -q $rpm_chroot --queryformat '%{NAME} %{VERSION} %{RELEASE} %{ARCH}\n' $packagename`);
+        }
+
 	# Pull down RPM if not cached locally
 
-	if ( ! -s "$filename") {
-	    my $cmd="yumdownloader -q --destdir=$rpm_topdir/$desired_arch $full_rpm_name";
-	    INFO("   --> Downloading OS rpm -> $full_rpm_name\n");
-	    system($cmd);
-	}
-
-	if ( ! -s "$filename" ) {
-	    MYERROR("Unable to locate local OS rpm-> $filename\n");
-	}
+        if($enableCaching_OS) {
+            if ( ! -s "$filename") {
+                my $cmd="yumdownloader -q --destdir=$rpm_topdir/$desired_arch $full_rpm_name";
+                INFO("   --> Downloading OS rpm -> $full_rpm_name\n");
+                system($cmd);
+            }
+            
+            if ( ! -s "$filename" ) {
+                MYERROR("Unable to locate local OS rpm-> $filename\n");
+            }
+        }
 
 	# 10/5/12 - give preferential treatment to cache directory. If
 	# the file is present in the cache, we try to use
@@ -134,37 +145,29 @@ sub verify_rpms {
 		$filename=$cache_file;
 	    }
 	}
-
+        
 	# return array format = (name,version,release,arch)
 
 	my @installed_rpm = is_os_rpm_installed("$rpm.$desired_arch");
-
-	if (@installed_rpm > 1) {
-	    if ($rpm eq "kernel" ) {
-		print "HACK - ignoring multiply installed kernel RPMs for the time being - need to fix OSSs\n";
-		next;
-	    } 
-	    if ($rpm eq "kernel-headers" ) {
-		print "HACK - ignoring multiply installed kernel-headers RPMs for the time being - need to fix OSSs\n";
-		next;
-	    } 
-	    if ($rpm eq "kernel-devel" ) {
-		print "HACK - ignoring multiply installed kernel-devel RPMs for the time being - need to fix OSSs\n";
-		next;
-	    } 
-	    MYERROR("Multiple OS package versions detected ($rpm). Invalid configuration.\n");
-	}
 
 	my @installed  = split(' ',$installed_rpm[0]);
 
 	if( @installed_rpm == 0 ) {
 	    DEBUG("   --> $rpm is not installed - registering for add...\n");
 	    SYSLOG("Registering previously uninstalled $full_rpm_name for update");
-	    push(@rpms_to_install,$filename);
+#            if($enableCaching_OS) {
+                push(@rpms_to_install,$filename);
+#            } else {
+#                print "need to install $rpm-$desired_version-$desired_release.$desired_arch\n";
+#            }
 	} elsif( "$desired_version-$desired_release" ne "$installed[1]-$installed[2]") {
 	    DEBUG("   --> version mismatch - registering for update...\n");
 	    SYSLOG("Registering locally installed OS package $full_rpm_name for update");
-	    push(@rpms_to_install,$filename);
+##            if($enableCaching_OS) {
+                push(@rpms_to_install,$filename); 
+###            } else {
+###                print "need to upgrade $rpm.$desired_arch\n";
+###            }
 	} else {
 	    DEBUG("   --> $desired_rpm[0] is already installed\n");
 	}
@@ -189,7 +192,8 @@ sub verify_rpms {
     # This is for OS packages, for which there can be only 1 version
     # installed; hence we always upgrade
 
-    my $rpm_root = "";
+    my $rpm_chroot  = "";
+    my $pmgr_chroot = "";
 
     # Add support for chroot install 
 
@@ -199,18 +203,42 @@ sub verify_rpms {
 	    MYERROR("Specified chroot directory is not available ($chroot) at __LINE__\n");
 	} else {
 	    INFO(" --> Using Warewulf chroot dir = $chroot\n");
-	    $rpm_chroot = "--root $chroot";
+	    $rpm_chroot  = "--root $chroot";
+            $pmgr_chroot = "--installroot $chroot";
 	}
     }
-    
-    my $cmd = "rpm -Uvh $rpm_chroot "."@rpms_to_install";
-    
-    system($cmd);
 
-    my $ret = $?;
+    if($enableCaching_OS) {
+        my $cmd = "rpm -Uvh $rpm_chroot "."@rpms_to_install";
+    
+        system($cmd);
 
-    if ( $ret != 0 ) {
-	MYERROR("Unable to install OS package RPMs (status = $ret)\n");
+        my $ret = $?;
+
+        if ( $ret != 0 ) {
+            MYERROR("Unable to install OS package RPMs (status = $ret)\n");
+        }
+    } else {
+        my @rpms_from_repo = ();
+
+        foreach my $filename (@rpms_to_install) {
+            my $package = basename($filename,".rpm");
+            push(@rpms_from_repo,$package);
+        }
+
+        my $pkg_manager = check_for_package_manager("addpkg");
+
+        if($pkg_manager eq "yum") {
+            $cmd = "yum -y install $pmgr_chroot "."@rpms_from_repo";
+        }
+
+        system($cmd);
+
+        my $ret = $?;
+
+        if ( $ret != 0 ) {
+            MYERROR("Unable to install OS package RPMs from repo (status = $ret)\n");
+        }
     }
 
     end_routine();
