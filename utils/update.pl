@@ -229,12 +229,26 @@ my $custom_file = "$losf_config_dir/update.$node_cluster";
 if ( -x $custom_file ) {
     INFO("\nRunning update.$node_cluster to perform local customizations for $node_type node type\n");
 
-    # expose any variable substitution settings as environment variables
+    # expose any variable substitution settings as environment variables (vars with multi entries exposed as bash array)
 
     while( my($key,$value) = each %replace_vars) {
         my $varname = "LOSF_VARSUB_$key";
-        DEBUG("--> exposing varsub env variable: $varname = $value\n");
-        $ENV{"$varname"} = "$value";
+
+###        my $val = $value;
+###        $val = $value =~ s/^"(.*)"$/$1/;
+        $value =~ s/^"(.*)"$/$1/;
+
+###        my @entries = split ' ', $val;
+###        my $num_entries = @entries;
+###        print "val = $val\n";
+###        if($num_entries > 1 ) {
+###            foreach (@entries) {
+###                print "found entry = $_\n";
+###            } 
+ #       } else {
+            DEBUG("--> exposing varsub env variable: $varname = $value\n");
+            $ENV{"$varname"} = $value;
+  #      }
     }
 
     TRACE("Running cmd $custom_file\n");

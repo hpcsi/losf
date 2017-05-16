@@ -122,6 +122,8 @@ sub verify_rpms {
 
 	# Pull down RPM if not cached locally
 
+        my $enableCaching_OS = 1;
+
         if($enableCaching_OS) {
             if ( ! -s "$filename") {
                 my $cmd="yumdownloader -q --destdir=$rpm_topdir/$desired_arch $full_rpm_name";

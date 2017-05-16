@@ -87,6 +87,7 @@ sub usage {
     print "\n";
     print "     OPTIONS:\n";
     print "        --yes                             assume \"yes\" for interactive additions\n";
+    print "        --template                        add package in template form (omitting versioning info)\n";
     print "        --type [name]                     add package to specific node type (for use with chroot provisioning)\n";
 
     print "\n";
@@ -872,7 +873,7 @@ sub update_distro_packages {
 	 "$node_cluster:$node_type nodes?\n\n");
 
     foreach $file (@newfiles) {
-	print "       $file\n";
+	INFO "       $file\n";
     }
 
     my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
@@ -1074,7 +1075,7 @@ sub add_distro_package {
 	     "$node_cluster:$node_type nodes?\n\n");
 
 	foreach $file (@newfiles) {
-	    print "       $file\n";
+	    INFO "       $file\n";
 	}
 
 	my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
@@ -1084,7 +1085,7 @@ sub add_distro_package {
 	    exit(-22);
 	} 
 
-	print "\n";
+	INFO("\n");
 
 	# (3) Read relevant configfile for OS packages
 
@@ -1117,7 +1118,13 @@ sub add_distro_package {
 	    my $rpm_arch    = $version_info[3];
 
 	    my $is_configured = 0;
-	    my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+            my $config_string = 0;
+
+            if($template) {
+                 $config_string = "$rpm_name version=[latest] release=[latest] arch=$version_info[3]";
+            } else {
+                $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+            }
 
 	    foreach $rpm (@os_rpms) {
 
@@ -1132,7 +1139,13 @@ sub add_distro_package {
 		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
 		INFO("       --> Adding $file ($node_type)\n");
 
-		my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+                my $config_string = "";
+
+                if($template) {
+                    $config_string = "$rpm_name version=[latest] release=[latest] arch=$version_info[3]";
+                } else {
+                    $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+                }
 
 		if($local_os_cfg->exists("OS Packages","$node_type")) {
 		    $local_os_cfg->push("OS Packages",$node_type,$config_string);
@@ -1249,7 +1262,7 @@ sub add_distro_group {
 	     "$node_cluster:$node_type nodes?\n\n");
 
 	foreach $file (@newfiles) {
-	    print "       $file\n";
+	    INFO "       $file\n";
 	}
 
 	my $response = ask_user_for_yes_no("Enter yes/no to confirm: ",1);
@@ -1259,7 +1272,7 @@ sub add_distro_group {
 	    exit(-22);
 	} 
 
-	print "\n";
+	INFO("\n");
 
 	# (3) Read relevant configfile for OS packages
 
@@ -1289,7 +1302,13 @@ sub add_distro_group {
 	    my $rpm_arch    = $version_info[3];
 
 	    my $is_configured = 0;
-	    my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+            my $config_string = "";
+
+            if($template) {
+                $config_string = "$rpm_name version=[latest] release=[latest] arch=$version_info[3]";
+            } else {
+                $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+            }
 
 	    foreach $rpm (@os_rpms) {
 
@@ -1304,7 +1323,13 @@ sub add_distro_group {
 		INFO("       --> $rpm_name not previously configured - Registering for addition\n"); 
 		INFO("       --> Adding $file ($node_type)\n");
 
-		my $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+                my $config_string="";
+
+                if($template) {
+                    $config_string = "$rpm_name version=[latest] release=[latest] arch=$version_info[3]";
+                } else {
+                    $config_string = "$rpm_name version=$version_info[1] release=$version_info[2] arch=$version_info[3]";
+                }
 
 		if($local_os_cfg->exists("OS Packages","$node_type")) {
 		    $local_os_cfg->push("OS Packages",$node_type,$config_string);
@@ -1876,6 +1901,7 @@ GetOptions("relocate=s{2}" => \@relocate_options,
 	   "install"       => \$install, 
 	   "alias=s"       => \$alias_option,
 	   "yes"           => \$assume_yes,
+	   "template"      => \$template,
 	   "noprovision"   => \$noprovision,
 	   "comment=s"     => \$comment,
 	   "date=s"        => \$datestring,
@@ -1958,6 +1984,9 @@ if ( "$output_mode" eq "INFO"  ||
 if($assume_yes) {
     $ENV{'LOSF_ALWAYS_ASSUME_YES'} = '1';
 }
+if($template) {
+    $ENV{'LOSF_PKG_TEMPLATES'} = '1';
+}
 
 # Verify that unsupported options are not provided to subcommands
 
@@ -1967,8 +1996,17 @@ if ($noprovision      && ($command ne "add")) {invalid_argument($command,"--nopr
 # --addpkg/addrpm suboptions
 
 if ($assume_yes){
-    if ($command ne "addrpm" && $command ne "addpkg") {
+#    if ($command ne "addrpm" && $command ne "addpkg") {
+    if ($command eq "addrpm" || $command eq "addpkg" || $command eq "addgroup") {
+        DEBUG("allowing --yes command for addrpm,addpkg,addgroup");
+    } else {
 	invalid_argument($command,"--yes"); 
+    }
+}
+
+if ($template){
+    if ($command ne "addgroup" && $command ne "addpkg") {
+	invalid_argument($command,"--template"); 
     }
 }
 
