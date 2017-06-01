@@ -189,6 +189,13 @@ EOF
 ok("$igot" eq "$ref_output","const file updated");
 ok( (compare($const_file,"$tmpdir/const_files/test/master/.losf_testing_const") == 0),"const file contents identical");
 
+# verify that we get the same behavior for update when running sync_config_files
+
+system("$losf_dir/sync_config_files $const_file $redirect"); $returnCode = $? >> 8;
+ok( $returnCode == 0, "sync_config_files binary ran and returned with no changes");
+unlink($const_file);
+system("$losf_dir/sync_config_files $const_file $redirect"); $returnCode = $? >> 8;
+ok( (compare($const_file,"$tmpdir/const_files/test/master/.losf_testing_const") == 0),"const file contents identical after sync_config_binary execution");
 
 # variable substitution
 
@@ -296,7 +303,6 @@ ok(! -e "/tmp/.losf_testing_const2","Confirm 2nd config file is removed");
 $local_cfg->delval("ConfigFiles","/tmp/.losf_testing_const");
 $local_cfg->delval("ConfigFiles","/tmp/.losf_testing_const2");
 
-
 # -----------------------------------------------------------------------------------------
 print "\nChecking permissions update capability using input file $tmpdir/config.test\n";
 # -----------------------------------------------------------------------------------------
@@ -382,7 +388,7 @@ ok($fileMode eq "755","b_test_dir has correct 755 permissions"); verify_no_chang
 system("rpm --root=$tmpdir2/images --initdb"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"initialized rpmdb in chroot -> $tmpdir2/images");
 
-system("rpm --root=$tmpdir2/images -i --nodeps --nosignature centos-release-6-6.el6.centos.12.2.x86_64.rpm $redirect"); $returnCode = $? >> 8;
+system("rpm --root=$tmpdir2/images -i --nodeps --nosignature centos-release-7-3.1611.el7.centos.x86_64.rpm $redirect"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"installed centos-release in chroot");
 
 system("$losf_dir/losf addpkg --yes --type=compute setup $redirect"); $returnCode = $? >> 8;
