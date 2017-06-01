@@ -461,6 +461,11 @@ sub check_for_package_manager {
 
     INFO("   --> Underlying package manager = $pkg_manager\n");
 
+    # return for chroot environments, package manager not required in chroot
+    if (requires_chroot_environment() ) {
+	return($pkg_manager);
+    }
+
     my @igot = is_rpm_installed($check_pkg);
 
     if ( @igot  eq 0 ) {
