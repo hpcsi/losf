@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 127;
+use Test::More tests => 129;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -41,9 +41,18 @@ print "LosF Regression Tests\n";
 print "---------------------\n";
 
 my $losf_dir=dirname(dirname(abs_path($0)));
-my $redirect = "1> /dev/null";
+
+my $debug=0;
+#my $redirect = "1> /dev/null";
+my $redirect = "&> /dev/null";
+my $cleanup_mode = 1;
+
+if ( $debug ) {
+    $redirect = "";
+    $cleanup_mode = 0;
+}
+	
 my $returnCode;
-#my $redirect="";
 
 # local hostname
 
@@ -96,7 +105,7 @@ ok ($version_update == "LosF: Version $loc_version","\"losf --version\" matches 
 #------------------------------------------------------
 
 print "\nInitializing test config ";
-my $tmpdir = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
+my $tmpdir = File::Temp::tempdir(CLEANUP => $cleanup_mode) || die("Unable to create temporary directory");
 print "--> tmpdir = $tmpdir\n";
 
 $ENV{'LOSF_CONFIG_DIR'} = "$tmpdir";
@@ -312,7 +321,7 @@ my $fileMode;
 
 ok($local_cfg->SectionExists("Permissions"),"[Permissions] section exists");
 
-my $tmpdir2 = File::Temp::tempdir(CLEANUP => 1) || die("Unable to create temporary directory");
+my $tmpdir2 = File::Temp::tempdir(CLEANUP => $cleanup_mode) || die("Unable to create temporary directory");
 my $testdir = "$tmpdir2/a_test_dir/";
 ok(! -d $testdir,"$testdir does not exist previously");
 ok($local_cfg->newval("Permissions",$testdir,"750"),"Setting dir perms to 750");
@@ -390,6 +399,8 @@ ok( $returnCode == 0,"initialized rpmdb in chroot -> $tmpdir2/images");
 
 system("rpm --root=$tmpdir2/images -i --nodeps --nosignature centos-release-7-3.1611.el7.centos.x86_64.rpm $redirect"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"installed centos-release in chroot");
+
+print "\nChecking losf addpkg within chroot environment\n";
 
 system("$losf_dir/losf addpkg --yes --type=compute setup $redirect"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"addpkg command to --type=compute completed ok");
