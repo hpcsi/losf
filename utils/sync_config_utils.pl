@@ -325,9 +325,14 @@ BEGIN {
 		print "\n"; 
 	    }
 
-	    # Save current copy. We save a copy for admin convenience in /tmp/losf. 
+	    # Save current copy. We save a copy for admin convenience in /tmp/losf. If the file being synced
+	    # is part of a chroot, we preface with the node type to avoid overwriting the original copy when 
+	    # multiple node types sync the same filename
 
 	    my $save_dir = "/tmp/losf";
+	    if ( requires_chroot_environment() ) {
+		$save_dir = "/tmp/losf/$type";
+	    }
 
 	    if ( ! -d $save_dir ) {
 		INFO("Creating $save_dir directory to store orig file during syncing\n");
