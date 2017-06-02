@@ -27,10 +27,11 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 130;
+use Test::More tests => 139;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
+use File::Copy;
 use Cwd 'abs_path';
 use LosF_test_utils;
 use Sys::Hostname;
@@ -240,7 +241,11 @@ ok("$igot" eq "$ref_output","variable substitution for \@avariable\@ correct");
 ok($local_cfg->newval("VarSub/master","avariable","removed for an intergalactic freeway"),"Defining var subs for node type");
 ok($local_cfg->RewriteConfig,"Rewriting config file");
 
+unlink("/tmp/losf/.losf_testing_const2.orig") if (-e "/tmp/losf/.losf_testing_const2.orig");
+
 verify_change_required();
+
+ok(-e "/tmp/losf/.losf_testing_const2.orig",".losf_testing_const2.orig present in /tmp/losf after update");
 
 $ref_output = << "EOF";
 This world needs to be removed for an intergalactic freeway
@@ -355,7 +360,7 @@ verify_change_required();
 $fileMode = sprintf("%o",(stat($testdir))[2] &07777);
 ok($fileMode eq "600","a_test_dir still has correct 600 permissions"); verify_no_changes_required();
 
-print "\nChecking use of sync_config_files to update permissions within chroot environment\n";
+
 
 my $global_cfg = new Config::IniFiles( -file => "$tmpdir/config.machines",-allowcontinue => 1,-nomultiline   => 1);
 
@@ -400,13 +405,33 @@ rmdir "$tmpdir2/images/b_test_dir";
 system("$losf_dir/sync_config_files $redirect"); $returnCode = $? >> 8;
 ok(-d "$tmpdir2/images/b_test_dir","$tmpdir2/images/b_test_dir/ directory recreated via sync_config_files");
 
+
+print "\nChecking use of sync_config_files to update files within chroot environment\n";
+ok($local_cfg->newval("ConfigFiles/compute","/.losf_testing_const","yes"),"Defining [compute] sync file");
+$local_cfg->RewriteConfig;
+
+ok(mkdir("$tmpdir/const_files/test/compute"),"creating const_files dir for [compute]");
+ok(copy("$tmpdir/const_files/test/master/.losf_testing_const","$tmpdir/const_files/test/compute/.losf_testing_const"),"copy const file for [compute] template");
+verify_change_required();
+ok( (compare("$tmpdir2/images/.losf_testing_const","$tmpdir/const_files/test/compute/.losf_testing_const") == 0),"chroot const file contents identical");
+# verify cached .orig file is created in node-type specific directory
+open(IN,'>>',"$tmpdir2/images/.losf_testing_const") || die "Cannot open .losf_testing_const file in chroot";
+print IN "brotato\n";
+close(IN);
+
+unlink("/tmp/losf/compute/.losf_testing_const2.orig") if (-e "/tmp/losf/compute/.losf_testing_const2.orig");
+verify_change_required();
+ok( (compare("$tmpdir2/images/.losf_testing_const","$tmpdir/const_files/test/compute/.losf_testing_const") == 0),"chroot const file contents identical");
+ok(-e "/tmp/losf/compute/.losf_testing_const.orig",".losf_testing_const.orig present in /tmp/losf/compute after update");
+
+
+print "\nChecking losf addpkg within chroot environment\n";
+
 system("rpm --root=$tmpdir2/images --initdb"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"initialized rpmdb in chroot -> $tmpdir2/images");
 
 system("rpm --root=$tmpdir2/images -i --nodeps --nosignature centos-release-7-3.1611.el7.centos.x86_64.rpm $redirect"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"installed centos-release in chroot");
-
-print "\nChecking losf addpkg within chroot environment\n";
 
 system("$losf_dir/losf addpkg --yes --type=compute setup $redirect"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"addpkg command to --type=compute completed ok");
