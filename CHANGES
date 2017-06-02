@@ -1,4 +1,9 @@
-Version 0.54.0 (In Progress)
+Version 0.54.0 (01 June 2017)
+
+  * add support for systemd-based service (#81)
+  * update cache location for original file contents being updated in chroot (#80)
+  * bug fix for koomie_cf when using -r option (#86)
+  * bug fix for sync_fonfig_files binary when supplying optional file option (#85)
 
 Version 0.53.0 (28 September 2015)
 
