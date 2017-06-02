@@ -27,7 +27,7 @@
 use strict;
 
 use Test::More;
-use Test::More tests => 129;
+use Test::More tests => 130;
 use File::Basename;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -271,8 +271,9 @@ This world needs to be removed for an intergalactic freeway
 EOF
 
 $igot=(`cat /tmp/.losf_testing_const2`);
-ok("$igot" eq "$ref_output2","\@losf_synced_file\@ text replacement works\n");
+ok("$igot" eq "$ref_output2","\@losf_synced_file\@ text replacement works");
 
+print "\nTesting delimiters\n";
 # verify delimiters can be overridden by user
 
 ok($local_cfg->newval("VarSub/Controls","delimiter_begin","\"<<<\""),"Override begin delimiter");
@@ -393,6 +394,11 @@ ok("$igot" eq "$ref_output","update applied to compute node type only");
 ok(-d "$tmpdir2/images/b_test_dir","$tmpdir2/images/b_test_dir/ directory created");
 $fileMode = sprintf("%o",(stat("$tmpdir2/images/b_test_dir"))[2] &07777);
 ok($fileMode eq "755","b_test_dir has correct 755 permissions"); verify_no_changes_required();
+
+# verify use of sync_config_files binary in chroot
+rmdir "$tmpdir2/images/b_test_dir";
+system("$losf_dir/sync_config_files $redirect"); $returnCode = $? >> 8;
+ok(-d "$tmpdir2/images/b_test_dir","$tmpdir2/images/b_test_dir/ directory recreated via sync_config_files");
 
 system("rpm --root=$tmpdir2/images --initdb"); $returnCode = $? >> 8;
 ok( $returnCode == 0,"initialized rpmdb in chroot -> $tmpdir2/images");
