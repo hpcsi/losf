@@ -329,6 +329,7 @@ sub add_node  {
 	$gateway     = query_cluster_config_network_gateway                 ($node_cluster,$node_type);
 	$chroot      = query_warewulf_chroot                                ($node_cluster,$node_type);
 	$bootstrap   = query_warewulf_bootstrap                             ($node_cluster,$node_type);
+	$arch        = query_warewulf_architectures                         ($node_cluster,$node_type);
 
         $kernel_options_post= query_cluster_config_kernel_boot_options_post ($node_cluster,$node_type);
 
@@ -350,6 +351,11 @@ sub add_node  {
 
 	$cmd="wwsh -y node new $host --netdev=$interface[0] --ipaddr=$ip[0] --hwaddr=$mac[0] $gw_option "
 	    ."--netmask=$netmask[0] --fqdn=$host.$domain_name";
+
+	if( $arch ne "" ) {
+	    INFO("   --> Setting node arch   = $arch\n");
+	    $cmd="$cmd --arch=$arch";
+	}
 
 	my $returnCode = system($cmd);
 	

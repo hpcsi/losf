@@ -1184,10 +1184,33 @@ BEGIN {
 	my $value     = "";
 	my $section   = "Warewulf/bootstraps";
 
-	DEBUG("   --> Looking for defined network gateway...($cluster->$host_type)\n");
+	DEBUG("   --> Looking for defined Warewulf bootstrap image(s)..($cluster->$host_type)\n");
 	    
 	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
 	    DEBUG("   --> Read bootstrap = $myval\n");
+	    $value = $myval;
+	}
+	
+	end_routine();
+	return($value);
+    }
+
+    sub query_warewulf_architectures {
+
+	begin_routine();
+
+	my $cluster   = shift;
+	my $host_type = shift;
+
+	my $logr      = get_logger();
+
+	my $value     = "";
+	my $section   = "Warewulf/arch";
+
+	DEBUG("   --> Looking for defined Warewulf architecture(s)...($cluster->$host_type)\n");
+	    
+	if ( defined ($myval = $local_cfg->val("$section",$host_type)) ) {
+	    DEBUG("   --> Read arch = $myval\n");
 	    $value = $myval;
 	}
 	
