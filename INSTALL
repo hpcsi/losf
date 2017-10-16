@@ -6,13 +6,13 @@ LosF: A Linux operating system Framework for managing HPC clusters
 
 This file outlines the steps for installing LosF and associated dependencies. Certain
 sections or steps or steps are optional and are identified as such. In particular, LosF
-is designed to optionally coordinate with Cobbler (http://www.cobblerd.org), which is
-used to perform bare-metal provisioning. If you want to use LosF to manage the Cobbler
-provisioning configuration, you will need to identify at least one master host on your
-cluster to serve as the provisioning server. If your master server has external network
-access, you can download the necessary packages to setup Cobbler from the EPEL repository
-(https://fedoraproject.org/wiki/EPEL). There are many resources available online
-regarding EPEL and Cobbler.
+is designed to optionally coordinate with Cobbler (http://www.cobblerd.org) or Warewulf
+(http://warewulf.lbl.gov/trac) for bare-metal provisioning.  If you want to use LosF to
+manage the Cobbler/Warewulf provisioning configuration, you will need to identify at
+least one master host on your cluster to serve as the provisioning server. If your master
+server has external network access, you can download the necessary packages to setup
+Cobbler from the EPEL repository (https://fedoraproject.org/wiki/EPEL). You can download
+Warewulf builds from the OpenHPC project (https://github.com/openhpc/ohpc). 
 
 A quickstart method for setting up LosF and optionally, Cobbler on a new cluster that
 should work with CentOS distributions is outlined in the following sections.
