@@ -1,3 +1,6 @@
+Version 0.56.0 (Feb 2019)
+  * add check to report OS packages that will be obsoleted for yum (#93)
+
 Version 0.55.0 (18 October 2017)
   * allow specification of node architecture with Warewulf (#92)
 
