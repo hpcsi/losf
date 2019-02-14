@@ -30,6 +30,7 @@ use Sys::Syslog;
 use Fcntl qw(:flock);
 use File::Find;
 use Sys::Hostname;
+use Term::ANSIColor;
 
 # Global vars to count any detected changes
 
@@ -529,8 +530,31 @@ sub download_os_package {
     my $mode          = shift;
 
     my $cmd="";
+    my @obsoleted = ();
 
     if($pkg_manager eq "yum") {
+	# first, check if any packages will be obsoleted
+	$cmd="yum check-update | grep -A 100000 'Obsoleting Packages'";
+	DEBUG("   --> Running yum command to look for obsoletes \"$cmd\"\n");
+
+	# example yum output with an obsoleted package is as follows. The obsoleted package
+        # is indented with space so that is what we look for.
+	#
+        # Obsoleting Packages
+        # python2-pyatspi.noarch                2.26.0-3.el7               base           
+        #     pyatspi.noarch                    2.20.3-1.el7               @base
+
+	my $results = `$cmd`;
+	my @lines   = split /\n/ => $results;
+
+	foreach my $line (@lines) {
+	    if ( $line =~ /$Obsoleting Packages/ ) {
+		next;
+	    } elsif ( $line =~ /^\s+(\S+)/ ) {
+		push @obsoleted, $1;
+	    }
+	}
+
 	$cmd="yum -y $chroot_option -q --downloadonly --downloaddir=$tmpdir $mode $package_name >& /dev/null";
 	DEBUG("   --> Running yum command \"$cmd\"\n");
     }
@@ -562,6 +586,25 @@ sub download_os_package {
 	       }, $tmpdir );
     } else {
 	MYERROR("Unknown package manager at ".__FILE__ . __LINE__ ."\n");
+    }
+
+    my $numObsoletes = @obsoleted;
+    if ( $numObsoletes > 0 ) {
+	print color 'yellow';
+	print("\nWarning bro: the following package(s) will be obsoleted during upgrade. If you have any\n");
+	print("of these packages under LosF management for the local node type, please update your\n");
+	print("OS config accordingly to avoid conflict by trying to reinstall them post-upgrade.\n");
+	print("\n");
+	foreach my $pkg (@obsoleted) {
+	    print(" --> $pkg\n");
+	}
+	print color 'reset';
+	my $response = ask_user_for_yes_no("Enter yes/no to continue and examine available packages for upgrade: ",1);
+	if( $response == 0 ) {
+	    INFO("   --> Did not add new OS packages to LosF to config, terminating....\n");
+	    exit(-22);
+	} 
+
     }
 
     return(@rpms_downloaded);
