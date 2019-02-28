@@ -811,6 +811,27 @@ BEGIN {
 	    }
 	}
 
+	# Allow delete files to be appliance-specific
+
+	DEBUG("   --> Looking for node-specific defined files to perform delete...($cluster->$host)\n");
+	if ( ! $local_cfg->SectionExists("ConfigFiles/$host") ) {
+	    DEBUG("No Input section found for cluster $cluster [ConfigFiles/$host]\n");
+	}
+	my @defined_files_override = $local_cfg->Parameters("ConfigFiles/$host");
+
+	foreach(@defined_files_override) {
+	    DEBUG("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val("ConfigFiles/$host",$_)) ) {
+		DEBUG("   --> Value = $myval\n");
+		if ( "$myval" eq "delete" ) {
+		    DEBUG("   -->  Delete defined for $_\n");
+		    push(@sync_deletes,$_);
+		}
+	    } else {
+		MYERROR("ConfigFile defined with no value ($_)");
+	    }
+	}
+
 	end_routine();
 
 	return(@sync_deletes);
