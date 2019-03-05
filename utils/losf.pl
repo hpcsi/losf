@@ -2113,7 +2113,7 @@ elsif ($command eq "addrpm" )  {
 	    MYERROR("losf: The --upgrade and --install options are mutually exclusive. Please choose only one.");
 	}
 	$ENV{'LOSF_REGISTER_MULTI'} = '1';
-	$options = $options . "INSTALL MULTI";
+	$options = $options . " INSTALL MULTI";
     }
     
     add_custom_rpm  ($argument,$nodetype,$options,$alias);
