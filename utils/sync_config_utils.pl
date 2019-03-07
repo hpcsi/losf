@@ -330,6 +330,12 @@ BEGIN {
 	    # multiple node types sync the same filename
 
 	    my $save_dir = "/tmp/losf";
+	    if ( ! -d $save_dir ) {
+		INFO("Creating top-level $save_dir directory to store orig file(s) during syncing\n");
+		mkdir($save_dir,0700)
+	    }
+
+	    # update save_dir if managing a chroot environment (since multiple chroots can live on same host)
 	    if ( requires_chroot_environment() ) {
 		$save_dir = "/tmp/losf/$type";
 	    }
