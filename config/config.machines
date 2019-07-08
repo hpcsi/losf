@@ -67,14 +67,3 @@ compute         = c[4-5][0-9][0-9]-[0-9]0[0-9]|c400-11[0-6]
 
 rpm_dir         = /admin/losf/rpms/RPMS
 rpm_dir_compute = /lustre/admin/losf/rpms/RPMS
-
-
-
-
-
-
-
-
-
-
-

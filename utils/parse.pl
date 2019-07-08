@@ -990,6 +990,63 @@ BEGIN {
 
 	return(%inputs);
     }
+    
+    sub query_cluster_config_subscriptions {
+
+	begin_routine();
+
+	my $cluster = shift;
+	my $host    = shift;
+	my $logr    = get_logger();
+
+	my %inputs  = ();
+
+	DEBUG("   --> Looking for subscription definitions...($cluster->$host)\n");
+
+	if ( ! $local_cfg->SectionExists("Subscriptions") ) {
+	    MYERROR("No Input section found for cluster $cluster [Subscriptions]\n");
+	}
+
+	my @defined_subscriptions = ();
+	my $section = ();
+
+	if( $host eq "LosF-GLOBAL-NODE-TYPE" ) {
+	    $section = "Subscriptions";
+
+	    if ( ! $local_cfg->SectionExists($section) ) {
+		MYERROR("No Input section found for cluster $cluster [Subscriptions]\n");
+	    }
+
+	    @defined_subscriptions = $local_cfg->Parameters($section);
+	} else {
+
+	    $section = "Subscriptions/$host";
+
+	    if ( ! $local_cfg->SectionExists($section) ) {
+		return(%inputs);
+	    }
+
+	    @defined_subscriptions = $local_cfg->Parameters($section);
+	}
+
+	my $num_entries = @defined_subscriptions;
+
+	DEBUG("   --> \# of subscriptions defined = $num_entries\n");
+
+	foreach(@defined_subscriptions) {
+	    TRACE("   --> Read value for $_\n");
+	    if (defined ($myval = $local_cfg->val($section,$_)) ) {
+		TRACE("   --> Value = $myval\n");
+		$inputs{$_} = $myval;
+	    } else {
+		MYERROR("Subscriptions defined with no value ($_)");
+	    }
+	}
+
+	end_routine();
+
+	return(%inputs);
+    }
 
     sub query_cluster_config_sync_permissions {
 

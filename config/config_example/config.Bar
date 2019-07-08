@@ -149,6 +149,29 @@ cgconfig       = off
 mcelogd        = on
 
 #---------------------------------------------------------------------
+# Runlevel Service Subscriptions
+#
+# Define configuration files that services subscribe to. If the config
+# file changes then LoSF will restart the service. 
+#
+# Subscriptions defined in the [Subscriptions] section are applied to all
+# defined node types by default.  However, node-specific
+# customizations can be defined in a [Subscriptions/<Node Type>] section
+# which take precedence over global settings.
+#---------------------------------------------------------------------
+
+[Subscriptions]
+
+named          = /etc/named.conf
+iptables       = /etc/sysconfig/ipconfig
+
+# Node-type specific service settings 
+
+[Subscriptions/login]
+
+sshd           = /etc/ssh/sshd_config
+ 
+#---------------------------------------------------------------------
 # Directory/File Permissions
 #
 # Provide and sync specific permissions across the cluster.

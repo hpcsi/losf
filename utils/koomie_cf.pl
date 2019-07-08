@@ -63,7 +63,7 @@ exit(1);
 
 GetOptions("h"    => \$help,
 	   "help" => \$help,
-	   "r=s"  => \$opt_r,
+	   "r=i"  => \$opt_r,
 	   "m=i"  => \$opt_m,
 	   "n=s"  => \$opt_n,
 	   "t=i"  => \$opt_t,

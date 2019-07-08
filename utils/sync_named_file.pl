@@ -90,6 +90,7 @@ BEGIN {
         my $file          = shift;
         my $node_cluster  = shift;
         my $node_type     = shift;
+        #my %replace_vars  = query_cluster_config_var_substitution ($node_cluster,$node_type);
 	
         INFO("** Syncing configuration files ($node_cluster:$node_type)\n");
 
@@ -98,7 +99,6 @@ BEGIN {
 	init_local_config_file_parsing("$losf_custom_config_dir/config."."$node_cluster");
 	my @sync_files         = query_cluster_config_const_sync_files($node_cluster,$node_type);
 	my @sync_files_partial = query_cluster_config_partial_sync_files($node_cluster,$node_type);
-        %replace_vars          = query_cluster_config_var_substitution  ($node_cluster,$node_type);
 
 	my $found=0;
 
@@ -124,7 +124,7 @@ BEGIN {
 
 	if (grep {$_ eq $file } @sync_files ) {
 	    $found=1;
-	    sync_const_file($chroot . $file,$node_cluster,$node_type,\%replace_vars);
+	    sync_const_file($chroot . $file,$node_cluster,$node_type);
 	    return;  
 	}
 
